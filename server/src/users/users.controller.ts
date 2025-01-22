@@ -40,6 +40,33 @@ export class UsersController {
     return this.usersService.login(email, password);
   }
 
+  @Post('reset-password-request')
+  async resetPasswordRequest(
+    @Body('email') email: string,
+  ): Promise<{ message: string }> {
+    await this.usersService.sendPasswordResetEmail(email);
+    return { message: 'Password reset email sent successfully.' };
+  }
+
+  @Post('reset-password/:token')
+  async resetPassword(
+    @Param('token') token: string,
+    @Body()
+    resetPasswordDto: {
+      oldPassword: string;
+      newPassword: string;
+      confirmPassword: string;
+    },
+  ): Promise<{ message: string }> {
+    await this.usersService.resetPassword(
+      token,
+      resetPasswordDto.oldPassword,
+      resetPasswordDto.newPassword,
+      resetPasswordDto.confirmPassword,
+    );
+    return { message: 'Password has been successfully reset.' };
+  }
+
   @Get()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();

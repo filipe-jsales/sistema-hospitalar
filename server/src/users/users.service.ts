@@ -33,7 +33,7 @@ export class UsersService {
 
     const savedUser = await this.usersRepository.save(user);
 
-    const activationLink = `http://localhost:3000/users/activate/${activationToken}`;
+    const activationLink = `http://localhost:8100/users/activate/${activationToken}`;
     const subject = 'Activate Your Account';
     const text = `Hello ${user.firstName},\n\nPlease activate your account using the link below:\n\n${activationLink}`;
     const html = `<p>Hello ${user.firstName},</p><p>Please activate your account using the link below:</p><a href="${activationLink}">Activate Account</a>`;
@@ -93,6 +93,69 @@ export class UsersService {
     );
 
     return { token };
+  }
+
+  async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new Error('No user found with the provided email');
+    }
+
+    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
+
+    const resetLink = `http://localhost:8100/users/reset-password/${resetToken}`;
+
+    const subject = 'Password Reset Request';
+    const text = `Hello ${user.firstName},\n\nPlease use the following link to reset your password:\n\n${resetLink}`;
+    const html = `<p>Hello ${user.firstName},</p><p>Please use the following link to reset your password:</p><a href="${resetLink}">Reset Password</a>`;
+
+    await this.mailerService.sendMail(email, subject, text, html);
+  }
+
+  async resetPassword(
+    token: string,
+    oldPassword: string,
+    newPassword: string,
+    confirmPassword: string,
+  ): Promise<void> {
+    try {
+      const payload = jwt.verify(token, process.env.JWT_SECRET) as {
+        email: string;
+      };
+
+      const user = await this.usersRepository.findOne({
+        where: { email: payload.email },
+      });
+
+      if (!user) {
+        throw new Error('Invalid reset token');
+      }
+
+      const isOldPasswordValid = await bcrypt.compare(
+        oldPassword,
+        user.password,
+      );
+      if (!isOldPasswordValid) {
+        throw new Error('Old password is incorrect');
+      }
+
+      if (newPassword !== confirmPassword) {
+        throw new Error('New password and confirmation do not match');
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
+
+      await this.usersRepository.save(user);
+    } catch (err) {
+      console.log(err);
+      throw new Error('Invalid or expired reset token');
+    }
   }
 
   async findAll(): Promise<User[]> {
