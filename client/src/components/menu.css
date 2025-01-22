@@ -1,0 +1,23 @@
+ion-menu ion-list {
+  padding: 20px 0;
+}
+
+ion-menu ion-list-header {
+  padding-left: 20px;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+ion-menu ion-item {
+  --padding-start: 20px;
+  --padding-end: 20px;
+  --min-height: 50px;
+}
+
+ion-menu ion-item.selected {
+  --background: rgba(var(--ion-color-primary-rgb), 0.14);
+}
+
+ion-menu ion-item.selected ion-icon {
+  color: var(--ion-color-primary);
+}
