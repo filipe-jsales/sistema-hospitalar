@@ -6,12 +6,11 @@ import {
   IonCardContent,
   IonInput,
   IonRouterLink,
-  IonText,
   IonButton,
   IonSpinner,
 } from '@ionic/react';
-import { Button } from 'react-bootstrap';
 import axios from 'axios';
+import { apiConfig } from '../config/apiConfig';
 
 const ResetPasswordRequest: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -32,7 +31,8 @@ const ResetPasswordRequest: React.FC = () => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:3000/users/reset-password-request', {
+      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/reset-password-request`
+      const response = await axios.post(endpointUrl, {
         email,
       });
       setSuccessMessage(response.data.message || 'Email enviado com sucesso!');

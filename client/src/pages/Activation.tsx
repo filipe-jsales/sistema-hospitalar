@@ -1,7 +1,8 @@
+import { IonPage, IonContent, IonCard, IonCardContent, IonSpinner } from '@ionic/react';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
-import { IonPage, IonContent, IonCard, IonCardContent, IonSpinner } from '@ionic/react';
+import { apiConfig } from '../config/apiConfig';
 
 interface ActivationParams {
   token: string;
@@ -16,8 +17,8 @@ const ActivateAccount: React.FC = () => {
   useEffect(() => {
     const activateAccount = async () => {
       try {
-        console.log(token)
-        const response = await axios.get(`http://localhost:3000/users/activate/${token}`);
+        const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/activate/${token}`;
+        const response = await axios.get(endpointUrl);
         if (response.status === 200) {
           setStatus('success');
           setMessage('Sua conta foi ativada com sucesso!');

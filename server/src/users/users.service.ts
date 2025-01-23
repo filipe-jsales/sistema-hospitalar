@@ -33,7 +33,7 @@ export class UsersService {
 
     const savedUser = await this.usersRepository.save(user);
 
-    const activationLink = `http://localhost:8100/users/activate/${activationToken}`;
+    const activationLink = `${process.env.FRONTEND_URL}/users/activate/${activationToken}`;
     const subject = 'Activate Your Account';
     const text = `Hello ${user.firstName},\n\nPlease activate your account using the link below:\n\n${activationLink}`;
     const html = `<p>Hello ${user.firstName},</p><p>Please activate your account using the link below:</p><a href="${activationLink}">Activate Account</a>`;
@@ -108,7 +108,7 @@ export class UsersService {
       expiresIn: '1h',
     });
 
-    const resetLink = `http://localhost:8100/users/reset-password/${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/users/reset-password/${resetToken}`;
 
     const subject = 'Password Reset Request';
     const text = `Hello ${user.firstName},\n\nPlease use the following link to reset your password:\n\n${resetLink}`;

@@ -8,9 +8,9 @@ import {
   IonButton,
   IonSpinner,
 } from '@ionic/react';
-import { Button } from 'react-bootstrap';
 import { useState } from 'react';
 import axios from 'axios';
+import { apiConfig } from '../config/apiConfig';
 
 const Register: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
@@ -52,7 +52,8 @@ const Register: React.FC = () => {
     setIsLoading(true); 
     if (validateInputs()) {
       try {
-        const response = await axios.post('http://localhost:3000/users/register', userInfos);
+        const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/register`
+        const response = await axios.post(endpointUrl, userInfos);
         setSuccessMessage('Registro feito com sucesso! Por favor verifique seu email para ativar sua conta.');
         setErrorMessage('');
         console.log('Response:', response.data);

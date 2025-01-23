@@ -2,6 +2,7 @@ import { IonContent, IonPage, IonCard, IonCardContent, IonInput, IonRouterLink, 
 import { Button } from 'react-bootstrap';
 import { useState } from 'react';
 import axios from 'axios';
+import { apiConfig } from '../config/apiConfig';
 
 const Login: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
@@ -17,7 +18,8 @@ const Login: React.FC = () => {
     setIsLoading(true); 
 
     try {
-      const response = await axios.post('http://localhost:3000/users/login', {
+      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/login`
+      const response = await axios.post(endpointUrl, {
         email: userInfos.email,
         password: userInfos.password,
       });

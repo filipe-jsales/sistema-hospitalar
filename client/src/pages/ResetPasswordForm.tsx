@@ -6,11 +6,11 @@ import {
   IonCardContent,
   IonInput,
   IonButton,
-  IonText,
   IonSpinner,
 } from '@ionic/react';
 import axios from 'axios';
 import { useParams, useHistory } from 'react-router-dom';
+import { apiConfig } from '../config/apiConfig';
 
 const ResetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();
@@ -39,8 +39,8 @@ const ResetPassword: React.FC = () => {
 
     try {
       setIsLoading(true); 
-      const response = await axios.post(
-        `http://localhost:3000/users/reset-password/${token}`,
+      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/reset-password/${token}`
+      const response = await axios.post(endpointUrl,
         { oldPassword, newPassword, confirmPassword }
       );
       setMessage(response.data.message);
