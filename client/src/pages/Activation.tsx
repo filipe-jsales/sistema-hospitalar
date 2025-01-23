@@ -1,4 +1,10 @@
-import { IonPage, IonContent, IonCard, IonCardContent, IonSpinner } from '@ionic/react';
+import {
+  IonPage,
+  IonContent,
+  IonCard,
+  IonCardContent,
+  IonSpinner
+} from '@ionic/react';
 import { useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -17,7 +23,7 @@ const ActivateAccount: React.FC = () => {
   useEffect(() => {
     const activateAccount = async () => {
       try {
-        const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/activate/${token}`;
+        const endpointUrl = `${apiConfig.BACKEND_URL}/users/activate/${token}`;
         const response = await axios.get(endpointUrl);
         if (response.status === 200) {
           setStatus('success');

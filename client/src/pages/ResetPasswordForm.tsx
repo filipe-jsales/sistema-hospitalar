@@ -39,7 +39,7 @@ const ResetPassword: React.FC = () => {
 
     try {
       setIsLoading(true); 
-      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/reset-password/${token}`
+      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password/${token}`;
       const response = await axios.post(endpointUrl,
         { oldPassword, newPassword, confirmPassword }
       );

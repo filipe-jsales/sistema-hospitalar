@@ -52,7 +52,7 @@ const Register: React.FC = () => {
     setIsLoading(true); 
     if (validateInputs()) {
       try {
-        const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/register`
+        const endpointUrl = `${apiConfig.BACKEND_URL}/users/register`;
         const response = await axios.post(endpointUrl, userInfos);
         setSuccessMessage('Registro feito com sucesso! Por favor verifique seu email para ativar sua conta.');
         setErrorMessage('');

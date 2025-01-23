@@ -31,7 +31,7 @@ const ResetPasswordRequest: React.FC = () => {
       return;
     }
     try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/reset-password-request`
+      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password-request`;
       const response = await axios.post(endpointUrl, {
         email,
       });

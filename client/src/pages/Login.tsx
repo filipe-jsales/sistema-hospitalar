@@ -1,5 +1,13 @@
-import { IonContent, IonPage, IonCard, IonCardContent, IonInput, IonRouterLink, IonButton, IonSpinner } from '@ionic/react';
-import { Button } from 'react-bootstrap';
+import { 
+  IonContent,
+  IonPage,
+  IonCard,
+  IonCardContent,
+  IonInput,
+  IonRouterLink,
+  IonButton,
+  IonSpinner
+} from '@ionic/react';
 import { useState } from 'react';
 import axios from 'axios';
 import { apiConfig } from '../config/apiConfig';
@@ -18,7 +26,7 @@ const Login: React.FC = () => {
     setIsLoading(true); 
 
     try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}:${apiConfig.BACKEND_PORT}/users/login`
+      const endpointUrl = `${apiConfig.BACKEND_URL}/users/login`;
       const response = await axios.post(endpointUrl, {
         email: userInfos.email,
         password: userInfos.password,
