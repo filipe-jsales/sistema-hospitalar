@@ -5,10 +5,10 @@ import {
   IonCardContent,
   IonSpinner
 } from '@ionic/react';
-import { useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import axios from 'axios';
-import { apiConfig } from '../config/apiConfig';
+import { useEffect } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { activateAccount, clearError, clearSuccessMessage } from '../store/slices/activationSlice';
 
 interface ActivationParams {
   token: string;
@@ -17,31 +17,21 @@ interface ActivationParams {
 const ActivateAccount: React.FC = () => {
   const { token } = useParams<ActivationParams>();
   const history = useHistory();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
+  const dispatch = useAppDispatch();
+  const { loading, error, successMessage } = useAppSelector((state) => state.activation);
 
   useEffect(() => {
-    const activateAccount = async () => {
-      try {
-        const endpointUrl = `${apiConfig.BACKEND_URL}/users/activate/${token}`;
-        const response = await axios.get(endpointUrl);
-        if (response.status === 200) {
-          setStatus('success');
-          setMessage('Sua conta foi ativada com sucesso!');
-          setTimeout(() => history.push('/login'), 3000);
-        } else {
-          setStatus('error');
-          setMessage('Ativação falhou. O link porde ser inválido ou expirou.');
-        }
-      } catch (error) {
-        console.log(error)
-        setStatus('error');
-        setMessage('Um erro ocorreu durante o registro. Por favor tente de novo..');
-      }
-    };
-
-    activateAccount();
-  }, [token, history]);
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
+    dispatch(activateAccount(token))
+      .unwrap()
+      .then(() => {
+        setTimeout(() => history.push('/login'), 3000);
+      })
+      .catch((error) => {
+        console.error('Activation failed:', error);
+      });
+  }, [token, history, dispatch]);
 
   return (
     <IonPage>
@@ -49,19 +39,19 @@ const ActivateAccount: React.FC = () => {
         <div className="m-2 row justify-content-center align-items-center">
           <IonCard style={{ width: '90%', maxWidth: '30rem', textAlign: 'center' }}>
             <IonCardContent>
-              {status === 'loading' && (
+              {loading && (
                 <>
                   <IonSpinner color="primary" />
                   <p>Ativando sua conta...</p>
                 </>
               )}
-              {status === 'success' && (
+              {successMessage && (
                 <>
-                  <p className="text-success">{message}</p>
+                  <p className="text-success">{successMessage}</p>
                   <p>Redirecionando para a página de login...</p>
                 </>
               )}
-              {status === 'error' && <p className="text-danger">{message}</p>}
+              {error && <p className="text-danger">{error}</p>}
             </IonCardContent>
           </IonCard>
         </div>
