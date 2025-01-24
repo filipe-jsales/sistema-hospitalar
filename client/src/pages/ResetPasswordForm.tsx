@@ -8,51 +8,46 @@ import {
   IonButton,
   IonSpinner,
 } from '@ionic/react';
-import axios from 'axios';
 import { useParams, useHistory } from 'react-router-dom';
-import { apiConfig } from '../config/apiConfig';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { resetPassword, clearError, clearSuccessMessage } from '../store/slices/passwordResetSlice';
 
 const ResetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();
   const history = useHistory();
+  const dispatch = useAppDispatch();
+  const { loading, error, successMessage } = useAppSelector((state) => state.passwordReset);
 
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleResetPassword = async () => {
-    setMessage('');
-    setError('');
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
 
     if (!oldPassword.trim() || !newPassword.trim() || !confirmPassword.trim()) {
-      setError('Por favor, preencha todos os campos.');
+      dispatch(clearError());
+      dispatch(clearSuccessMessage());
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('A nova senha e a confirmação não coincidem.');
+      dispatch(clearError());
+      dispatch(clearSuccessMessage());
       return;
     }
 
-    try {
-      setIsLoading(true); 
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password/${token}`;
-      const response = await axios.post(endpointUrl,
-        { oldPassword, newPassword, confirmPassword }
-      );
-      // TODO: fix data-message from server
-      setMessage(response.data.message || 'Senha redefinida com sucesso. Redirecionando...');
-      setTimeout(() => history.push('/login'), 3000);
-    } catch (error) {
-      setError('Ocorreu um erro ao redefinir sua senha.');
-    } finally {
-      setIsLoading(false);
-    }
+    dispatch(resetPassword({ token, oldPassword, newPassword, confirmPassword }))
+      .unwrap()
+      .then(() => {
+        setTimeout(() => history.push('/login'), 3000);
+      })
+      .catch((error) => {
+        console.error('Password reset failed:', error);
+      });
   };
-
+  
   return (
     <IonPage>
       <IonContent>
@@ -103,13 +98,13 @@ const ResetPassword: React.FC = () => {
                     color="primary"
                     className="custom-button"
                     onClick={handleResetPassword}
-                    disabled={isLoading}
+                    disabled={loading}
                   >
-                    {isLoading ? <IonSpinner name="crescent" /> : 'Resetar senha'}
+                    {loading ? <IonSpinner name="crescent" /> : 'Resetar senha'}
                   </IonButton>
                 </div>
-                {message && (
-                  <div className="alert alert-success col-12 text-center">{message}</div>
+                {successMessage && (
+                  <div className="alert alert-success col-12 text-center">{successMessage}</div>
                 )}
                 {error && (
                   <div className="alert alert-danger col-12 text-center">{error}</div>

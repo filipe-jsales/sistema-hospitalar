@@ -9,49 +9,34 @@ import {
   IonButton,
   IonSpinner,
 } from '@ionic/react';
-import axios from 'axios';
-import { apiConfig } from '../config/apiConfig';
-import ImageLogo from '../components/ImageLogo';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { requestPasswordReset, clearError, clearSuccessMessage } from '../store/slices/passwordResetSlice';
+import { useFormCleanup } from '../hooks/useFormCleanup';
 
 const ResetPasswordRequest: React.FC = () => {
-  
   const [email, setEmail] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { loading, error, successMessage } = useAppSelector((state) => state.passwordReset);
 
-  const validateEmail = (email: string) => {
-    return /^\S+@\S+\.\S+$/.test(email);
-  };
+  useFormCleanup({
+    dispatch,
+    clearError,
+    clearSuccessMessage,
+    resetFormState: () => setEmail(''),
+  });
 
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    if (!validateEmail(email)) {
-      setErrorMessage('Por favor, insira um email válido.');
-      setSuccessMessage('');
-      return;
-    }
-    try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password-request`;
-      const response = await axios.post(endpointUrl, {
-        email,
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
+    dispatch(requestPasswordReset(email))
+      .unwrap()
+      .then(() => {
+        setEmail('');
+      })
+      .catch((error) => {
+        console.error('Password reset request failed:', error);
       });
-      // TODO: fix data-message from server
-      setSuccessMessage(response.data.message || 'Email enviado com sucesso! Redirecionando...');
-      setErrorMessage('');
-      setEmail('');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 3000);
-    } catch (error: any) {
-      setErrorMessage(
-        error.response?.data?.message || 'Um erro ocorreu ao enviar o email. Por favor, tente novamente.'
-      );
-      setSuccessMessage('');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -85,9 +70,9 @@ const ResetPasswordRequest: React.FC = () => {
                     color="primary"
                     className="custom-button"
                     type="submit"
-                    disabled={isLoading}
+                    disabled={loading}
                   >
-                    {isLoading ? <IonSpinner name="crescent" /> : 'Enviar link para reset'}
+                    {loading ? <IonSpinner name="crescent" /> : 'Enviar link para reset'}
                   </IonButton>
                 </div>
                 <div className="col-12 p-1 text-center">
@@ -101,8 +86,8 @@ const ResetPasswordRequest: React.FC = () => {
             {successMessage && (
               <div className="alert alert-success col-12">{successMessage}</div>
               )}
-              {errorMessage && (
-                <div className="alert alert-danger col-12">{errorMessage}</div>
+              {error && (
+                <div className="alert alert-danger col-12">{error}</div>
             )}
             </IonCardContent>
           </IonCard>
