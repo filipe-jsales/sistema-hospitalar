@@ -7,6 +7,11 @@ import {
   IonRouterLink,
   IonButton,
   IonSpinner,
+  IonHeader,
+  IonToolbar,
+  IonButtons,
+  IonMenuButton,
+  IonTitle,
 } from '@ionic/react';
 import { useState } from 'react';
 import axios from 'axios';
@@ -80,9 +85,18 @@ const Register: React.FC = () => {
 
   return (
     <IonPage>
+      <IonHeader>
+        <IonToolbar>
+          <IonButtons slot="start">
+            <IonMenuButton /> 
+          </IonButtons>
+          <IonTitle>Sistema Hospitalar</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: '90%', maxWidth: '45rem' }}>
+          <h1 className='text-center text-uppercase fw-bold'>Cadastro de usuários</h1>
             <IonCardContent>
               <form
                 onSubmit={handleRegister}
@@ -179,16 +193,16 @@ const Register: React.FC = () => {
                     onClick={handleRegister}
                     disabled={isLoading}
                   >
-                    {isLoading ? <IonSpinner name="crescent" /> : 'Registrar'}
+                    {isLoading ? <IonSpinner name="crescent" /> : 'Cadastrar'}
                   </IonButton>
                 </div>
-                <div className="col-12 p-1 text-center">
+                {/*<div className="col-12 p-1 text-center">
                   <IonRouterLink routerLink="/login">
                     <span style={{ textDecoration: 'underline' }} className="text-primary">
                       Já possui uma conta? Login
                     </span>
                   </IonRouterLink>
-                </div>
+                </div>*/}
               </form>
             </IonCardContent>
             {successMessage && (

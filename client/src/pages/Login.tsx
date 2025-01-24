@@ -6,11 +6,12 @@ import {
   IonInput,
   IonRouterLink,
   IonButton,
-  IonSpinner
+  IonSpinner,
 } from '@ionic/react';
 import { useState } from 'react';
 import axios from 'axios';
 import { apiConfig } from '../config/apiConfig';
+import ImageLogo from '../components/ImageLogo';
 
 const Login: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
@@ -45,14 +46,20 @@ const Login: React.FC = () => {
   return (
     <IonPage>
       <IonContent>
-        <div className="m-2 row justify-content-center align-items-center mt-6">
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          }}
+        >
           <IonCard style={{ width: "90%", maxWidth: "25rem" }}>
             <IonCardContent>
               <form
                 onSubmit={handleLogin}
                 className="row justify-content-center align-items-center gap-3 p-2"
               >
-                {/*<ImageLogo />*/}
+                <ImageLogo />
                 <div className="col-12">
                   <IonInput
                     color={"dark"}
@@ -103,16 +110,6 @@ const Login: React.FC = () => {
                     {isLoading ? <IonSpinner name="crescent" /> : 'Login'}
                   </IonButton>
                 </div>
-                {/*<div className="col-8">
-                  <Button
-                    type="submit"
-                    size="lg"
-                    className="w-100 my-costum-primary-bnt"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </div>*/}
 
                 <div className="col-12 p-1 text-center">
                   <IonRouterLink routerLink={"/register"}>

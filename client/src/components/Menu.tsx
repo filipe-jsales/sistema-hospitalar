@@ -1,5 +1,6 @@
 import {
   IonContent,
+  IonHeader,
   IonIcon,
   IonItem,
   IonLabel,
@@ -7,10 +8,12 @@ import {
   IonListHeader,
   IonMenu,
   IonMenuToggle,
+  IonTitle,
+  IonToolbar,
 } from '@ionic/react';
 import { 
   homeOutline,
-  logInOutline,
+  logOutOutline,
   personAddOutline,
 } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
@@ -29,22 +32,27 @@ const appPages: AppPage[] = [
     icon: homeOutline
   },
   {
-    title: 'Login',
-    url: '/login',
-    icon: logInOutline
-  },
-  {
-    title: 'Register',
+    title: 'Cadastro de Usuário',
     url: '/register',
     icon: personAddOutline
+  },
+  {
+    title: 'Logout',
+    url: '/login',
+    icon: logOutOutline
   },
 ];
 
 const Menu: React.FC = () => {
   const location = useLocation();
-  
+
   return (
-    <IonMenu contentId="main" type="overlay">
+    <IonMenu side="start" contentId="main">
+      <IonHeader>
+        <IonToolbar>
+          <IonTitle>Menu</IonTitle>
+        </IonToolbar>
+      </IonHeader>
       <IonContent>
         <IonList id="inbox-list">
           <IonListHeader>Navigation</IonListHeader>

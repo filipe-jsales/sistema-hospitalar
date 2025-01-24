@@ -11,8 +11,10 @@ import {
 } from '@ionic/react';
 import axios from 'axios';
 import { apiConfig } from '../config/apiConfig';
+import ImageLogo from '../components/ImageLogo';
 
 const ResetPasswordRequest: React.FC = () => {
+  
   const [email, setEmail] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -35,9 +37,13 @@ const ResetPasswordRequest: React.FC = () => {
       const response = await axios.post(endpointUrl, {
         email,
       });
-      setSuccessMessage(response.data.message || 'Email enviado com sucesso!');
+      // TODO: fix data-message from server
+      setSuccessMessage(response.data.message || 'Email enviado com sucesso! Redirecionando...');
       setErrorMessage('');
       setEmail('');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 3000);
     } catch (error: any) {
       setErrorMessage(
         error.response?.data?.message || 'Um erro ocorreu ao enviar o email. Por favor, tente novamente.'
@@ -52,8 +58,9 @@ const ResetPasswordRequest: React.FC = () => {
     <IonPage>
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
-          <IonCard style={{ width: '90%', maxWidth: '40rem' }}>
+          <IonCard style={{ width: '90%', maxWidth: '30rem' }}>
             <IonCardContent>
+              <h2 className='text-center'>Entre com o email da sua conta</h2>
               <form
                 onSubmit={handleRequestReset}
                 className="row justify-content-center align-items-center gap-3 p-2"

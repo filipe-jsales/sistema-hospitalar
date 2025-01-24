@@ -28,7 +28,7 @@ import '@ionic/react/css/display.css';
 
 /* import '@ionic/react/css/palettes/dark.always.css'; */
 /* import '@ionic/react/css/palettes/dark.class.css'; */
-import '@ionic/react/css/palettes/dark.system.css';
+// import '@ionic/react/css/palettes/dark.system.css';
 
 /* Theme variables */
 import './theme/variables.css';
@@ -44,30 +44,18 @@ setupIonicReact();
 const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
-      <IonSplitPane contentId="main">
         <Menu />
         <IonRouterOutlet id="main">
-          <Route exact path="/home">
-            <Home />
-          </Route>
           <Route exact path="/">
-            <Redirect to="/home" />
+            <Redirect to="/login" />
           </Route>
-          <Route exact path="/login">
-            <Login />
-          </Route>
-          <Route exact path="/register">
-            <Register />
-          </Route>
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/home" component={Home} />
+          <Route exact path="/register" component={Register} />
           <Route path="/users/activate/:token" component={ActivateAccount} />
-          <Route exact path="/redefinition">
-            <ResetPasswordRequest />
-          </Route>
-          <Route exact path="/users/reset-password/:token">
-            <ResetPassword />
-          </Route>
+          <Route exact path="/redefinition" component={ResetPasswordRequest} />
+          <Route exact path="/users/reset-password/:token" component={ResetPassword} />
         </IonRouterOutlet>
-      </IonSplitPane>
     </IonReactRouter>
   </IonApp>
 );

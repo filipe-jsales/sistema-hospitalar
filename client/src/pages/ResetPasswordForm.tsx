@@ -43,7 +43,8 @@ const ResetPassword: React.FC = () => {
       const response = await axios.post(endpointUrl,
         { oldPassword, newPassword, confirmPassword }
       );
-      setMessage(response.data.message);
+      // TODO: fix data-message from server
+      setMessage(response.data.message || 'Senha redefinida com sucesso. Redirecionando...');
       setTimeout(() => history.push('/login'), 3000);
     } catch (error) {
       setError('Ocorreu um erro ao redefinir sua senha.');
@@ -56,9 +57,9 @@ const ResetPassword: React.FC = () => {
     <IonPage>
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
-          <IonCard style={{ width: '90%', maxWidth: '40rem' }}>
+          <IonCard style={{ width: '90%', maxWidth: '25rem' }}>
             <IonCardContent>
-              <h2>Resete sua senha</h2>
+              <h2 className='text-center'>Resete sua senha</h2>
               <form className="row gap-3 p-2">
                 <div className="col-12">
                   <IonInput

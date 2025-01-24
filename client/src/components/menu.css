@@ -21,3 +21,5 @@ ion-menu ion-item.selected {
 ion-menu ion-item.selected ion-icon {
   color: var(--ion-color-primary);
 }
+
+
