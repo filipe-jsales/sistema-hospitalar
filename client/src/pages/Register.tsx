@@ -4,7 +4,6 @@ import {
   IonCard,
   IonCardContent,
   IonInput,
-  IonRouterLink,
   IonButton,
   IonSpinner,
   IonHeader,
@@ -14,8 +13,10 @@ import {
   IonTitle,
 } from '@ionic/react';
 import { useState } from 'react';
-import axios from 'axios';
-import { apiConfig } from '../config/apiConfig';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { registerUser, clearError, clearSuccessMessage } from '../store/slices/userSlice';
+import { useHistory } from 'react-router-dom';
+import { useFormCleanup } from '../hooks/useFormCleanup';
 
 const Register: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
@@ -34,9 +35,33 @@ const Register: React.FC = () => {
     phoneNumber: '',
   });
 
-  const [successMessage, setSuccessMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const history = useHistory();
+  const { loading, error, successMessage } = useAppSelector((state) => state.user);
+
+  useFormCleanup({
+    dispatch,
+    clearError,
+    clearSuccessMessage,
+    resetFormState: () => {
+      setUserInfos({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        phoneNumber: '',
+      });
+    },
+    resetFormErrors: () => {
+      setErrors({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        phoneNumber: '',
+      });
+    },
+  });
 
   const validateInputs = () => {
     const newErrors: any = {};
@@ -54,32 +79,24 @@ const Register: React.FC = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); 
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
+
     if (validateInputs()) {
-      try {
-        const endpointUrl = `${apiConfig.BACKEND_URL}/users/register`;
-        const response = await axios.post(endpointUrl, userInfos);
-        setSuccessMessage('Registro feito com sucesso! Por favor verifique seu email para ativar sua conta.');
-        setErrorMessage('');
-        console.log('Response:', response.data);
-        setUserInfos({
-          firstName: '',
-          lastName: '',
-          email: '',
-          password: '',
-          phoneNumber: '',
+      dispatch(registerUser(userInfos))
+        .unwrap()
+        .then(() => {
+          setUserInfos({
+            firstName: '',
+            lastName: '',
+            email: '',
+            password: '',
+            phoneNumber: '',
+          });
+        })
+        .catch((error) => {
+          console.error('Registration failed:', error);
         });
-      } catch (error: any) {
-        setErrorMessage(
-          error.response?.data?.message || 'Um erro ocorreu durante o registro. Por favor tente de novo.'
-        );
-        setSuccessMessage('');
-        console.error('Registration Error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(false)
     }
   };
 
@@ -96,7 +113,7 @@ const Register: React.FC = () => {
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: '90%', maxWidth: '45rem' }}>
-          <h1 className='text-center text-uppercase fw-bold'>Cadastro de usuários</h1>
+            <h1 className='text-center text-uppercase fw-bold'>Cadastro de usuários</h1>
             <IonCardContent>
               <form
                 onSubmit={handleRegister}
@@ -111,9 +128,10 @@ const Register: React.FC = () => {
                     labelPlacement="floating"
                     mode="md"
                     value={userInfos.firstName}
-                    onIonInput={(e) =>
-                      setUserInfos({ ...userInfos, firstName: String(e.target.value) })
-                    }
+                    onIonInput={(e) => {
+                      setUserInfos({ ...userInfos, firstName: String(e.target.value) });
+                      if (errors.firstName) setErrors({ ...errors, firstName: '' });
+                    }}
                   />
                   {errors.firstName && <span className="text-danger">{errors.firstName}</span>}
                 </div>
@@ -127,9 +145,10 @@ const Register: React.FC = () => {
                     labelPlacement="floating"
                     mode="md"
                     value={userInfos.lastName}
-                    onIonInput={(e) =>
-                      setUserInfos({ ...userInfos, lastName: String(e.target.value) })
-                    }
+                    onIonInput={(e) => {
+                      setUserInfos({ ...userInfos, lastName: String(e.target.value) });
+                      if (errors.lastName) setErrors({ ...errors, lastName: '' });
+                    }}
                   />
                   {errors.lastName && <span className="text-danger">{errors.lastName}</span>}
                 </div>
@@ -144,9 +163,10 @@ const Register: React.FC = () => {
                     labelPlacement="floating"
                     mode="md"
                     value={userInfos.email}
-                    onIonInput={(e) =>
-                      setUserInfos({ ...userInfos, email: String(e.target.value) })
-                    }
+                    onIonInput={(e) => {
+                      setUserInfos({ ...userInfos, email: String(e.target.value) });
+                      if (errors.email) setErrors({ ...errors, email: '' });
+                    }}
                   />
                   {errors.email && <span className="text-danger">{errors.email}</span>}
                 </div>
@@ -161,9 +181,10 @@ const Register: React.FC = () => {
                     labelPlacement="floating"
                     mode="md"
                     value={userInfos.password}
-                    onIonInput={(e) =>
-                      setUserInfos({ ...userInfos, password: String(e.target.value) })
-                    }
+                    onIonInput={(e) => {
+                      setUserInfos({ ...userInfos, password: String(e.target.value) });
+                      if (errors.password) setErrors({ ...errors, password: '' });
+                    }}
                   />
                   {errors.password && <span className="text-danger">{errors.password}</span>}
                 </div>
@@ -178,9 +199,10 @@ const Register: React.FC = () => {
                     labelPlacement="floating"
                     mode="md"
                     value={userInfos.phoneNumber}
-                    onIonInput={(e) =>
-                      setUserInfos({ ...userInfos, phoneNumber: String(e.target.value) })
-                    }
+                    onIonInput={(e) => {
+                      setUserInfos({ ...userInfos, phoneNumber: String(e.target.value) });
+                      if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: '' });
+                    }}
                   />
                   {errors.phoneNumber && <span className="text-danger">{errors.phoneNumber}</span>}
                 </div>
@@ -191,26 +213,21 @@ const Register: React.FC = () => {
                     color="primary"
                     className="custom-button"
                     onClick={handleRegister}
-                    disabled={isLoading}
+                    disabled={loading}
                   >
-                    {isLoading ? <IonSpinner name="crescent" /> : 'Cadastrar'}
+                    {loading ? <IonSpinner name="crescent" /> : 'Cadastrar'}
                   </IonButton>
                 </div>
-                {/*<div className="col-12 p-1 text-center">
-                  <IonRouterLink routerLink="/login">
-                    <span style={{ textDecoration: 'underline' }} className="text-primary">
-                      Já possui uma conta? Login
-                    </span>
-                  </IonRouterLink>
-                </div>*/}
+
+                {successMessage && (
+                  <div className="alert alert-success col-12 text-center">{successMessage}</div>
+                )}
+
+                {error && (
+                  <div className="alert alert-danger col-12 text-center">{error}</div>
+                )}
               </form>
             </IonCardContent>
-            {successMessage && (
-              <div className="alert alert-success col-12">{successMessage}</div>
-            )}
-            {errorMessage && (
-              <div className="alert alert-danger col-12">{errorMessage}</div>
-            )}
           </IonCard>
         </div>
       </IonContent>
