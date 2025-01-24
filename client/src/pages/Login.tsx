@@ -9,38 +9,33 @@ import {
   IonSpinner,
 } from '@ionic/react';
 import { useState } from 'react';
-import axios from 'axios';
-import { apiConfig } from '../config/apiConfig';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { login } from '../store/slices/authSlice';
+import { useHistory } from 'react-router-dom';
 import ImageLogo from '../components/ImageLogo';
 
 const Login: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { loading, error } = useAppSelector((state) => state.auth);
+  const history = useHistory();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true); 
-
-    try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/login`;
-      const response = await axios.post(endpointUrl, {
-        email: userInfos.email,
-        password: userInfos.password,
+    console.log('Dispatching login action with credentials:', userInfos);
+    dispatch(login(userInfos))
+      .unwrap()
+      .then((token) => {
+        console.log('Login successful, token:', token);
+        history.push('/home');
+      })
+      .catch((error) => {
+        console.error('Login failed:', error);
       });
-
-      localStorage.setItem('auth_token', response.data.token);
-
-      window.location.href = '/home';
-    } catch (error: any) {
-      setErrorMessage(error.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -105,26 +100,17 @@ const Login: React.FC = () => {
                     type="submit"
                     color="primary"
                     className="custom-button"
-                    disabled={isLoading}
+                    disabled={loading}
                   >
-                    {isLoading ? <IonSpinner name="crescent" /> : 'Login'}
+                    {loading ? <IonSpinner name="crescent" /> : 'Login'}
                   </IonButton>
                 </div>
-
-                <div className="col-12 p-1 text-center">
-                  <IonRouterLink routerLink={"/register"}>
-                    <span
-                      style={{
-                        textDecoration: "underline",
-                      }}
-                      className="text-primary"
-                    >
-                      Criar uma nova conta
-                    </span>
-                  </IonRouterLink>
-                  <div className="p-2">
-                    <span className="black-text">OU</span>
+                {error && (
+                  <div className="col-12 text-center" style={{ color: 'red', marginTop: '10px' }}>
+                    {error}
                   </div>
+                )}
+                <div className="col-12 text-center">
                   <IonRouterLink routerLink={"/redefinition"}>
                     <span
                       style={{
