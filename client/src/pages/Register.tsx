@@ -36,6 +36,7 @@ const Register: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
+  const { isAuthenticated, user, token } = useAppSelector((state) => state.auth);
   const history = useHistory();
   const { loading, error, successMessage } = useAppSelector((state) => state.user);
 
@@ -83,20 +84,29 @@ const Register: React.FC = () => {
     dispatch(clearSuccessMessage());
 
     if (validateInputs()) {
-      dispatch(registerUser(userInfos))
-        .unwrap()
-        .then(() => {
-          setUserInfos({
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            phoneNumber: '',
+      console.log(isAuthenticated)
+      console.log(user?.id)
+      console.log(token)
+      if (user?.id && user.email && user.role) {
+          const payload = {
+          userInfos: { ...userInfos },
+          user: { ...user },
+        };
+        dispatch(registerUser(payload))
+          .unwrap()
+          .then(() => {
+            setUserInfos({
+              firstName: '',
+              lastName: '',
+              email: '',
+              password: '',
+              phoneNumber: '',
+            });
+          })
+          .catch((error) => {
+            console.error('Registration failed:', error);
           });
-        })
-        .catch((error) => {
-          console.error('Registration failed:', error);
-        });
+      }
     }
   };
 

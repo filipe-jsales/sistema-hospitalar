@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiConfig } from '../../config/apiConfig';
+import { User } from './authSlice';
+
 
 interface UserState {
   loading: boolean;
@@ -16,16 +18,19 @@ const initialState: UserState = {
 
 export const registerUser = createAsyncThunk(
   'user/register',
-  async (userData: {
-    firstName: string;
-    lastName: string;
-    email: string;
-    password: string;
-    phoneNumber: string;
+  async (data: {
+    userInfos: {
+      firstName: string;
+      lastName: string;
+      email: string;
+      password: string;
+      phoneNumber: string;
+    };
+    user: User;
   }, { rejectWithValue }) => {
     try {
       const endpointUrl = `${apiConfig.BACKEND_URL}/users/register`;
-      const response = await axios.post(endpointUrl, userData);
+      const response = await axios.post(endpointUrl, data);
       return response.data.message;
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Cadastro de usuário falhou.');
