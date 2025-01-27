@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/createUserDto';
+import { UpdateUserDto } from './dto/updateUserDto';
 import { MailerService } from '../mailer/mailer.service';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
@@ -18,6 +24,13 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { password, email } = createUserDto;
+
+    const existingUser = await this.usersRepository.findOne({
+      where: { email },
+    });
+    if (existingUser) {
+      throw new ConflictException('Email já cadastrado.');
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -54,45 +67,66 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new Error('Invalid activation token');
+        throw new NotFoundException('Token de ativação inválido');
       }
 
       user.isActive = true;
       await this.usersRepository.save(user);
     } catch (err) {
-      console.log(err);
-      throw new Error('Invalid or expired activation token');
+      console.error('Activation error:', err);
+      if (err instanceof jwt.JsonWebTokenError) {
+        throw new BadRequestException(
+          'Token de ativação inválido ou expirado.',
+        );
+      } else if (err instanceof NotFoundException) {
+        throw err;
+      } else {
+        throw new BadRequestException('Um erro ocorreu durante a ativação');
+      }
     }
   }
 
-  async login(email: string, password: string): Promise<{ token: string }> {
+  async login(
+    email: string,
+    password: string,
+  ): Promise<{
+    token: string;
+    user: { id: number; email: string; role: string };
+  }> {
     const user = await this.usersRepository.findOne({ where: { email } });
 
     if (!user) {
-      throw new Error('Invalid email or password');
+      throw new Error('Email ou senha inválidos');
     }
 
     if (!user.isActive) {
-      throw new Error('Account is not activated');
+      throw new Error('Sua conta não foi ativada');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       user.failedLoginAttempts += 1;
       await this.usersRepository.save(user);
-      throw new Error('Invalid email or password');
+      throw new UnauthorizedException('Email ou senha inválidos');
     }
 
     user.lastLogin = new Date();
     await this.usersRepository.save(user);
-
+    //console.log(user);
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' },
     );
 
-    return { token };
+    return {
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+    };
   }
 
   async sendPasswordResetEmail(email: string): Promise<void> {
@@ -101,7 +135,9 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new Error('No user found with the provided email');
+      throw new NotFoundException(
+        'Não foi encontrado usuário com o email fornecido.',
+      );
     }
 
     const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, {
@@ -133,7 +169,7 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new Error('Invalid reset token');
+        throw new NotFoundException('Token de reset inválido');
       }
 
       const isOldPasswordValid = await bcrypt.compare(
@@ -141,11 +177,13 @@ export class UsersService {
         user.password,
       );
       if (!isOldPasswordValid) {
-        throw new Error('Old password is incorrect');
+        throw new UnauthorizedException('Senha antiga está incorreta');
       }
 
       if (newPassword !== confirmPassword) {
-        throw new Error('New password and confirmation do not match');
+        throw new BadRequestException(
+          'Nova senha e confirmação não são iguais',
+        );
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -153,8 +191,8 @@ export class UsersService {
 
       await this.usersRepository.save(user);
     } catch (err) {
-      console.log(err);
-      throw new Error('Invalid or expired reset token');
+      console.error('Reset Password error:', err);
+      throw new BadRequestException('Token de reset inválido ou expirado');
     }
   }
 
@@ -163,16 +201,27 @@ export class UsersService {
   }
 
   async findOne(id: number): Promise<User> {
-    return this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.usersRepository.update(id, updateUserDto);
-    return this.usersRepository.findOne({ where: { id } });
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
+    return user;
   }
 
   async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
+    const result = await this.usersRepository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+    }
   }
 
   async findByEmail(email: string): Promise<User> {

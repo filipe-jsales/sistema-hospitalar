@@ -6,14 +6,22 @@ import {
   Param,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { CreateUserDto, CreateUserRequestDto } from './dto/createUserDto';
+import { UpdateUserDto } from './dto/updateUserDto';
+import { LoginUserDto } from './dto/loginUserDto';
 import { User } from './entities/user.entity';
+import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
+import {
+  CheckPolicies,
+  Public,
+} from '../casl/casl-ability.factory/policies.decorator';
+import { Action } from '../casl/casl-ability.factory/action.enum';
 
 @Controller('users')
+@UseGuards(PoliciesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -24,31 +32,45 @@ export class UsersController {
   }
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  @CheckPolicies((ability) => ability.can(Action.Create, User))
+  async register(
+    @Body() createUserRequestDto: CreateUserRequestDto,
+  ): Promise<{ message: string }> {
+    const { userInfos, user } = createUserRequestDto;
+    console.log('USER', user);
+    console.log('USER IINFO', userInfos);
+    await this.usersService.create(userInfos);
+    return { message: 'Usuário cadastrado com sucesso.' };
   }
 
   @Get('activate/:token')
+  @Public()
   async activate(@Param('token') token: string): Promise<{ message: string }> {
     await this.usersService.activateAccount(token);
-    return { message: 'Account successfully activated' };
+    return { message: 'Sua conta foi ativada com sucesso.' };
   }
 
   @Post('login')
-  async login(@Body() loginUserDto: LoginUserDto): Promise<{ token: string }> {
+  @Public()
+  async login(@Body() loginUserDto: LoginUserDto): Promise<{
+    token: string;
+    user: { id: number; email: string; role: string };
+  }> {
     const { email, password } = loginUserDto;
     return this.usersService.login(email, password);
   }
 
   @Post('reset-password-request')
+  @Public()
   async resetPasswordRequest(
     @Body('email') email: string,
   ): Promise<{ message: string }> {
     await this.usersService.sendPasswordResetEmail(email);
-    return { message: 'Password reset email sent successfully.' };
+    return { message: 'Email de reset enviado com sucesso. Redirecionando...' };
   }
 
   @Post('reset-password/:token')
+  @Public()
   async resetPassword(
     @Param('token') token: string,
     @Body()
@@ -64,7 +86,7 @@ export class UsersController {
       resetPasswordDto.newPassword,
       resetPasswordDto.confirmPassword,
     );
-    return { message: 'Password has been successfully reset.' };
+    return { message: 'Senha resetada com sucesso. Redirecionando...' };
   }
 
   @Get()

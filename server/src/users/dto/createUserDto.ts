@@ -1,10 +1,24 @@
+import { Type } from 'class-transformer';
 import {
   IsString,
   IsEmail,
   IsOptional,
   IsBoolean,
   IsInt,
+  ValidateNested,
 } from 'class-validator';
+
+export class UserForRequest {
+  @IsOptional()
+  id?: number;
+
+  @IsEmail()
+  @IsString()
+  email: string;
+
+  @IsString()
+  role: string;
+}
 
 export class CreateUserDto {
   @IsString()
@@ -34,4 +48,14 @@ export class CreateUserDto {
   @IsInt()
   @IsOptional()
   failedLoginAttempts?: number;
+}
+
+export class CreateUserRequestDto {
+  @ValidateNested()
+  @Type(() => CreateUserDto)
+  userInfos: CreateUserDto;
+
+  @ValidateNested()
+  @Type(() => UserForRequest)
+  user: UserForRequest;
 }
