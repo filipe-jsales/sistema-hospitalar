@@ -14,11 +14,11 @@ import {
 } from '@ionic/react';
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { registerUser, clearError, clearSuccessMessage } from '../store/slices/userSlice';
-import { useHistory } from 'react-router-dom';
+import { createUser, clearError, clearSuccessMessage } from '../store/slices/createUserSlice';
+// import { useHistory } from 'react-router-dom';
 import { useFormCleanup } from '../hooks/useFormCleanup';
 
-const Register: React.FC = () => {
+const CreateUser: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
     firstName: '',
     lastName: '',
@@ -36,8 +36,9 @@ const Register: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
-  const history = useHistory();
-  const { loading, error, successMessage } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user, token } = useAppSelector((state) => state.auth);
+  // const history = useHistory();
+  const { loading, error, successMessage } = useAppSelector((state) => state.createUser);
 
   useFormCleanup({
     dispatch,
@@ -64,6 +65,7 @@ const Register: React.FC = () => {
   });
 
   const validateInputs = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newErrors: any = {};
     if (!userInfos.firstName.trim()) newErrors.firstName = 'Campo obrigatório.';
     if (!userInfos.lastName.trim()) newErrors.lastName = 'Campo obrigatório.';
@@ -83,20 +85,30 @@ const Register: React.FC = () => {
     dispatch(clearSuccessMessage());
 
     if (validateInputs()) {
-      dispatch(registerUser(userInfos))
-        .unwrap()
-        .then(() => {
-          setUserInfos({
-            firstName: '',
-            lastName: '',
-            email: '',
-            password: '',
-            phoneNumber: '',
+      console.log(isAuthenticated)
+      console.log(user?.id)
+      console.log(token)
+      if (user?.id && user.email && user.roles) {
+          const payload = {
+          userInfos: { ...userInfos },
+          user: { ...user },
+        };
+        console.log(payload);
+        dispatch(createUser(payload))
+          .unwrap()
+          .then(() => {
+            setUserInfos({
+              firstName: '',
+              lastName: '',
+              email: '',
+              password: '',
+              phoneNumber: '',
+            });
+          })
+          .catch((error) => {
+            console.error('Registration failed:', error);
           });
-        })
-        .catch((error) => {
-          console.error('Registration failed:', error);
-        });
+      }
     }
   };
 
@@ -235,4 +247,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register;
+export default CreateUser;

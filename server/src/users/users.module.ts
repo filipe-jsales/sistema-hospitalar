@@ -5,11 +5,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { MailerModule } from '../mailer/mailer.module';
 import { EmailTemplatesModule } from 'src/email-templates/email-templates.module';
+import { CaslModule } from '../casl/casl.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User]),
-    MailerModule,
+    MailerModule, CaslModule,
     EmailTemplatesModule,
   ],
   controllers: [UsersController],

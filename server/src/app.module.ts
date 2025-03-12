@@ -5,6 +5,11 @@ import { DataSource } from 'typeorm';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { EmailTemplatesModule } from './email-templates/email-templates.module';
+import { CaslModule } from './casl/casl.module';
+import { RolesModule } from './roles/roles.module';
+import { Role } from './roles/entities/role.entity';
+import { PermissionsModule } from './permissions/permissions.module';
+import { Permission } from './permissions/entities/permission.entity';
 
 @Module({
   imports: [
@@ -21,12 +26,15 @@ import { EmailTemplatesModule } from './email-templates/email-templates.module';
         username: configService.get<string>('MYSQL_ROOT_USER'),
         password: configService.get<string>('MYSQL_ROOT_PASSWORD'),
         database: configService.get<string>('MYSQL_DATABASE'),
-        entities: [User],
+        entities: [User, Role, Permission],
         synchronize: true,
       }),
     }),
     UsersModule,
     EmailTemplatesModule,
+    CaslModule,
+    RolesModule,
+    PermissionsModule,
   ],
 })
 export class AppModule {

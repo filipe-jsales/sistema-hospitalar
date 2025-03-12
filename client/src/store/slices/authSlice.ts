@@ -1,9 +1,29 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiConfig } from '../../config/apiConfig';
 
+export interface Permission {
+  id: number;
+  action: string;
+  subject: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  permissions: Permission[];
+}
+
+export interface User {
+  id: number;
+  email: string;
+  roles: Role[];
+}
+
 interface AuthState {
   token: string | null;
+  user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   error: string | null;
@@ -11,6 +31,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   token: null,
+  user: null,
   isAuthenticated: false,
   loading: false,
   error: null,
@@ -24,7 +45,7 @@ export const login = createAsyncThunk(
       const endpointUrl = `${apiConfig.BACKEND_URL}/users/login`;
       const response = await axios.post(endpointUrl, credentials);
       console.log('Login API response:', response.data);
-      return response.data.token;
+      return response.data;
     } catch (error: any) {
       console.error('Login API error:', error);
       return rejectWithValue(error.response?.data?.message || 'Login falhou.');
@@ -38,6 +59,7 @@ const authSlice = createSlice({
   reducers: {
     logout(state) {
       state.token = null;
+      state.user = null;
       state.isAuthenticated = false;
     },
   },
@@ -48,7 +70,11 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.token = action.payload;
+        state.token = action.payload.token;
+        state.user = {
+          ...action.payload.user,
+          roles: action.payload.user.roles,
+        };
         state.isAuthenticated = true;
         state.loading = false;
       })

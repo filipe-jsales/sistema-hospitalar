@@ -1,5 +1,5 @@
 import { Redirect, Route } from 'react-router-dom';
-import { IonApp, IonRouterOutlet, IonSplitPane, setupIonicReact } from '@ionic/react';
+import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
 
@@ -33,11 +33,11 @@ import '@ionic/react/css/display.css';
 /* Theme variables */
 import './theme/variables.css';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import CreateUser from './pages/CreateUser';
 import ActivateAccount from './pages/Activation';
 import ResetPasswordRequest from './pages/ResetPassword';
 import ResetPassword from './pages/ResetPasswordForm';
-import Menu from './components/Menu';
+import Menu from './components/Menu/Menu';
 
 setupIonicReact();
 
@@ -51,7 +51,7 @@ const App: React.FC = () => (
           </Route>
           <Route exact path="/login" component={Login} />
           <Route exact path="/home" component={Home} />
-          <Route exact path="/register" component={Register} />
+          <Route exact path="/users/create-user" component={CreateUser} />
           <Route path="/users/activate/:token" component={ActivateAccount} />
           <Route exact path="/redefinition" component={ResetPasswordRequest} />
           <Route exact path="/users/reset-password/:token" component={ResetPassword} />

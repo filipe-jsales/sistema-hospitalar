@@ -33,7 +33,7 @@ const appPages: AppPage[] = [
   },
   {
     title: 'Cadastro de Usuário',
-    url: '/register',
+    url: '/users/create-user',
     icon: personAddOutline
   },
   {
