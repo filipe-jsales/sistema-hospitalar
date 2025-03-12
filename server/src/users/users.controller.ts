@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './entities/user.entity';
 
@@ -80,7 +79,7 @@ export class UsersController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: Partial<CreateUserDto>,
   ): Promise<User> {
     return this.usersService.update(id, updateUserDto);
   }
