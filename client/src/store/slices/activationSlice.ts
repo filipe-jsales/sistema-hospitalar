@@ -21,6 +21,7 @@ export const activateAccount = createAsyncThunk(
       const endpointUrl = `${apiConfig.BACKEND_URL}/users/activate/${token}`;
       const response = await axios.get(endpointUrl);
       return response.data.message;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Ativamento de conta falhou.');
     }

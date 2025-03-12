@@ -8,17 +8,19 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/createUserDto';
-import { UpdateUserDto } from './dto/updateUserDto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { MailerService } from '../mailer/mailer.service';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { Role } from '../roles/entities/role.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>,
+
     private mailerService: MailerService,
   ) {}
 
@@ -67,7 +69,7 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new NotFoundException('Token de ativação inválido');
+        throw new NotFoundException('Token de ativação inválido.');
       }
 
       user.isActive = true;
@@ -81,7 +83,7 @@ export class UsersService {
       } else if (err instanceof NotFoundException) {
         throw err;
       } else {
-        throw new BadRequestException('Um erro ocorreu durante a ativação');
+        throw new BadRequestException('Um erro ocorreu durante a ativação.');
       }
     }
   }
@@ -91,30 +93,33 @@ export class UsersService {
     password: string,
   ): Promise<{
     token: string;
-    user: { id: number; email: string; role: string };
+    user: { id: number; email: string; roles: Role[] };
   }> {
-    const user = await this.usersRepository.findOne({ where: { email } });
+    const user = await this.usersRepository.findOne({
+      where: { email },
+      relations: ['roles', 'roles.permissions'],
+    });
 
     if (!user) {
-      throw new Error('Email ou senha inválidos');
+      throw new Error('Email ou senha inválidos.');
     }
 
     if (!user.isActive) {
-      throw new Error('Sua conta não foi ativada');
+      throw new Error('Sua conta não foi ativada.');
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       user.failedLoginAttempts += 1;
       await this.usersRepository.save(user);
-      throw new UnauthorizedException('Email ou senha inválidos');
+      throw new UnauthorizedException('Email ou senha inválidos.');
     }
 
     user.lastLogin = new Date();
     await this.usersRepository.save(user);
-    //console.log(user);
+    console.log(user);
     const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
+      { id: user.id, email: user.email, role: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: '1h' },
     );
@@ -124,7 +129,7 @@ export class UsersService {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role,
+        roles: user.roles,
       },
     };
   }
@@ -169,7 +174,7 @@ export class UsersService {
       });
 
       if (!user) {
-        throw new NotFoundException('Token de reset inválido');
+        throw new NotFoundException('Token de reset inválido.');
       }
 
       const isOldPasswordValid = await bcrypt.compare(
@@ -177,7 +182,7 @@ export class UsersService {
         user.password,
       );
       if (!isOldPasswordValid) {
-        throw new UnauthorizedException('Senha antiga está incorreta');
+        throw new UnauthorizedException('Senha antiga está incorreta.');
       }
 
       if (newPassword !== confirmPassword) {
@@ -197,13 +202,15 @@ export class UsersService {
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return this.usersRepository.find({
+      relations: ['roles', 'roles.permissions'],
+    });
   }
 
   async findOne(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
     }
     return user;
   }
@@ -212,16 +219,17 @@ export class UsersService {
     await this.usersRepository.update(id, updateUserDto);
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
     }
     return user;
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number): Promise<{ message: string }> {
     const result = await this.usersRepository.delete(id);
     if (result.affected === 0) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado`);
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
     }
+    return { message: `Usuário com o id ${id} foi removido com sucesso.` };
   }
 
   async findByEmail(email: string): Promise<User> {

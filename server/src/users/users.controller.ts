@@ -9,9 +9,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto, CreateUserRequestDto } from './dto/createUserDto';
-import { UpdateUserDto } from './dto/updateUserDto';
-import { LoginUserDto } from './dto/loginUserDto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserRequestDto } from './dto/info-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthUserDto } from './dto/auth-user.dto';
 import { User } from './entities/user.entity';
 import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
 import {
@@ -19,26 +20,26 @@ import {
   Public,
 } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
+import { Role } from '../roles/entities/role.entity';
 
 @Controller('users')
 @UseGuards(PoliciesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // TODO: need to remove after fully tested register/activate/login user
   @Post()
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.create(createUserDto);
   }
 
-  @Post('register')
+  @Post('create-user')
   @CheckPolicies((ability) => ability.can(Action.Create, User))
   async register(
     @Body() createUserRequestDto: CreateUserRequestDto,
   ): Promise<{ message: string }> {
     const { userInfos, user } = createUserRequestDto;
     console.log('USER', user);
-    console.log('USER IINFO', userInfos);
+    console.log('USER INFO FOR CREATION', userInfos);
     await this.usersService.create(userInfos);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
@@ -52,11 +53,11 @@ export class UsersController {
 
   @Post('login')
   @Public()
-  async login(@Body() loginUserDto: LoginUserDto): Promise<{
+  async login(@Body() authUserDto: AuthUserDto): Promise<{
     token: string;
-    user: { id: number; email: string; role: string };
+    user: { id: number; email: string; roles: Role[] };
   }> {
-    const { email, password } = loginUserDto;
+    const { email, password } = authUserDto;
     return this.usersService.login(email, password);
   }
 
@@ -90,6 +91,7 @@ export class UsersController {
   }
 
   @Get()
+  @Public()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
@@ -108,7 +110,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<void> {
+  async remove(@Param('id') id: number): Promise<{ message: string }> {
     return this.usersService.remove(id);
   }
 }

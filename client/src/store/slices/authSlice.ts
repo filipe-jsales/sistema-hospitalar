@@ -1,11 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiConfig } from '../../config/apiConfig';
 
+export interface Permission {
+  id: number;
+  action: string;
+  subject: string;
+}
+
+export interface Role {
+  id: number;
+  name: string;
+  permissions: Permission[];
+}
+
 export interface User {
   id: number;
   email: string;
-  role: string;
+  roles: Role[];
 }
 
 interface AuthState {
@@ -58,7 +71,10 @@ const authSlice = createSlice({
       })
       .addCase(login.fulfilled, (state, action) => {
         state.token = action.payload.token;
-        state.user = action.payload.user;
+        state.user = {
+          ...action.payload.user,
+          roles: action.payload.user.roles,
+        };
         state.isAuthenticated = true;
         state.loading = false;
       })

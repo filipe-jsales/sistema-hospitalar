@@ -34,7 +34,7 @@ export class PoliciesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.body.user;
-    //console.log(request.body.user);
+    console.log(request.body.user);
     if (!user) {
       throw new ForbiddenException('User not authenticated');
     }

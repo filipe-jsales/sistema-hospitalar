@@ -7,6 +7,10 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { User } from './users/entities/user.entity';
 import { CaslModule } from './casl/casl.module';
+import { RolesModule } from './roles/roles.module';
+import { Role } from './roles/entities/role.entity';
+import { PermissionsModule } from './permissions/permissions.module';
+import { Permission } from './permissions/entities/permission.entity';
 
 @Module({
   imports: [
@@ -21,11 +25,13 @@ import { CaslModule } from './casl/casl.module';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_NAME,
-      entities: [User],
+      entities: [User, Role, Permission],
       synchronize: true,
     }),
     UsersModule,
     CaslModule,
+    RolesModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
