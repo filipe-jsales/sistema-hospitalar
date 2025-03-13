@@ -3,13 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { UsersModule } from './users/users.module';
-import { User } from './users/entities/user.entity';
 import { EmailTemplatesModule } from './email-templates/email-templates.module';
 import { CaslModule } from './casl/casl.module';
 import { RolesModule } from './roles/roles.module';
-import { Role } from './roles/entities/role.entity';
 import { PermissionsModule } from './permissions/permissions.module';
-import { Permission } from './permissions/entities/permission.entity';
+import { HospitalsModule } from './hospitals/hospitals.module';
 
 @Module({
   imports: [
@@ -26,7 +24,7 @@ import { Permission } from './permissions/entities/permission.entity';
         username: configService.get<string>('MYSQL_ROOT_USER'),
         password: configService.get<string>('MYSQL_ROOT_PASSWORD'),
         database: configService.get<string>('MYSQL_DATABASE'),
-        entities: [User, Role, Permission],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
       }),
     }),
@@ -35,6 +33,7 @@ import { Permission } from './permissions/entities/permission.entity';
     CaslModule,
     RolesModule,
     PermissionsModule,
+    HospitalsModule,
   ],
 })
 export class AppModule {

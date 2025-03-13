@@ -7,8 +7,10 @@ import {
   DeleteDateColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 @Entity('users')
 export class User {
@@ -57,4 +59,7 @@ export class User {
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles: Role[];
+
+  @ManyToOne(() => Hospital, hospital => hospital.users, { eager: true })
+  hospital: Hospital;
 }

@@ -10,6 +10,7 @@ import { Action } from './action.enum';
 import { User } from '../../users/entities/user.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Permission } from '../../permissions/entities/permission.entity';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 const subjectMapping: Record<string, any> = {
   User: User,
@@ -18,7 +19,7 @@ const subjectMapping: Record<string, any> = {
 };
 
 type Subjects = InferSubjects<
-  typeof User | typeof Role | typeof Permission | 'all'
+  typeof User | typeof Role | typeof Permission | typeof Hospital | 'all'
 >;
 export type AppAbility = MongoAbility<[Action, Subjects]>;
 @Injectable()
@@ -28,13 +29,7 @@ export class CaslAbilityFactory {
       MongoAbility<[Action, Subjects]>
     >(createMongoAbility);
 
-    /*if (user.role === 'super-admin') {
-      can(Action.Manage, 'all');
-    } else if (user.role === 'admin') {
-      can(Action.Manage, User);
-    } else {
-      can(Action.Read, User, { id: user.id });
-    }*/
+    can(Action.Read, Hospital, { id: user.hospital.id });
     user.roles?.forEach((role: Role) => {
       console.log('Role Permissions:', role.permissions);
       role.permissions?.forEach((permission: Permission) => {

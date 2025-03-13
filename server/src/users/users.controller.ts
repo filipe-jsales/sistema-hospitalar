@@ -109,7 +109,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<{ message: string }> {
+  async remove(@Param('id') id: number): Promise<void> {
     return this.usersService.remove(id);
   }
 }
