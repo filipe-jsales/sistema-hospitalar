@@ -11,7 +11,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { CreateUserRequestDto } from './dto/info-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthUserDto } from './dto/auth-user.dto';
 import { User } from './entities/user.entity';
 import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
@@ -104,13 +103,13 @@ export class UsersController {
   @Put(':id')
   async update(
     @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: Partial<CreateUserDto>,
   ): Promise<User> {
     return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<{ message: string }> {
+  async remove(@Param('id') id: number): Promise<void> {
     return this.usersService.remove(id);
   }
 }

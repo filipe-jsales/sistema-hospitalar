@@ -9,10 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { MailerService } from '../mailer/mailer.service';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
+import { EmailTemplatesService } from 'src/email-templates/email-templates.service';
 import { Role } from '../roles/entities/role.entity';
 
 @Injectable()
@@ -22,6 +22,7 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
 
     private mailerService: MailerService,
+    private emailTemplatesService: EmailTemplatesService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -51,7 +52,7 @@ export class UsersService {
     const activationLink = `${process.env.FRONTEND_URL}/users/activate/${activationToken}`;
     const subject = 'Activate Your Account';
     const text = `Hello ${user.firstName},\n\nPlease activate your account using the link below:\n\n${activationLink}`;
-    const html = `<p>Hello ${user.firstName},</p><p>Please activate your account using the link below:</p><a href="${activationLink}">Activate Account</a>`;
+    const html = this.emailTemplatesService.getActivationEmail(user.firstName, activationLink);
 
     await this.mailerService.sendMail(email, subject, text, html);
 
@@ -150,7 +151,7 @@ export class UsersService {
     });
 
     const resetLink = `${process.env.FRONTEND_URL}/users/reset-password/${resetToken}`;
-
+    // TODO: refactor to use a template mailer to remove the template html from the service
     const subject = 'Password Reset Request';
     const text = `Hello ${user.firstName},\n\nPlease use the following link to reset your password:\n\n${resetLink}`;
     const html = `<p>Hello ${user.firstName},</p><p>Please use the following link to reset your password:</p><a href="${resetLink}">Reset Password</a>`;
@@ -215,7 +216,7 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserDto: Partial<CreateUserDto>): Promise<User> {
     await this.usersRepository.update(id, updateUserDto);
     const user = await this.usersRepository.findOne({ where: { id } });
     if (!user) {
@@ -224,12 +225,9 @@ export class UsersService {
     return user;
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const result = await this.usersRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
-    }
-    return { message: `Usuário com o id ${id} foi removido com sucesso.` };
+  async remove(id: number): Promise<void> {
+    const userData = await this.findOne(id);
+    await this.usersRepository.softRemove(userData);
   }
 
   async findByEmail(email: string): Promise<User> {
