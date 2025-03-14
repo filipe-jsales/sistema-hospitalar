@@ -8,6 +8,10 @@ import { CaslModule } from './casl/casl.module';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { HospitalsModule } from './hospitals/hospitals.module';
+import { AuthModule } from './auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/auth.guard';
+import { PoliciesGuard } from './casl/casl-ability.factory/policies.guard';
 
 @Module({
   imports: [
@@ -34,6 +38,17 @@ import { HospitalsModule } from './hospitals/hospitals.module';
     RolesModule,
     PermissionsModule,
     HospitalsModule,
+    AuthModule,
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PoliciesGuard,
+    },
   ],
 })
 export class AppModule {

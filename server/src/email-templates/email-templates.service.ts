@@ -19,4 +19,8 @@ export class EmailTemplatesService {
   public getActivationEmail(firstName: string, activationLink: string): string {
     return this.compile('activation', { firstName, activationLink, year: new Date().getFullYear() });
   }
+
+  public getPasswordResetEmail(firstName: string, resetLink: string): string {
+    return this.compile('password-reset', { firstName, resetLink, year: new Date().getFullYear() });
+  }
 }

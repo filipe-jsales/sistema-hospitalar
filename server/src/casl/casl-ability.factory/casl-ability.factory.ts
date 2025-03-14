@@ -29,7 +29,7 @@ export class CaslAbilityFactory {
       MongoAbility<[Action, Subjects]>
     >(createMongoAbility);
 
-    can(Action.Read, Hospital, { id: user.hospital.id });
+    // can(Action.Read, Hospital, { id: user.hospital.id });
     user.roles?.forEach((role: Role) => {
       console.log('Role Permissions:', role.permissions);
       role.permissions?.forEach((permission: Permission) => {
