@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
+  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
@@ -11,6 +12,7 @@ import { User } from '../users/entities/user.entity';
 import { IJwtPayload } from './interfaces/jwt-payload.interface';
 import { MailerService } from '../mailer/mailer.service';
 import { EmailTemplatesService } from 'src/email-templates/email-templates.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -65,26 +67,27 @@ export class AuthService {
     };
   }
 
-  // async register(createUserDto: CreateUserDto): Promise<User> {
-  //   const { password, email } = createUserDto;
+  async register(createUserDto: CreateUserDto): Promise<User> {
+    const { password, email } = createUserDto;
 
-  //   // Hash da senha
-  //   const hashedPassword = await bcrypt.hash(password, 10);
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException('Email já cadastrado.');
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const activationToken = await this.createActivationToken(email);
+    const userData = {
+      ...createUserDto,
+      password: hashedPassword,
+      isActive: false,
+    };
+    
+    const user = await this.usersService.create(userData);
 
-  //   // Criar token de ativação
-  //   const activationToken = await this.createActivationToken(email);
+    await this.sendActivationEmail(user, activationToken);
 
-  //   // Criar usuário através do UsersService
-  //   const user = await this.usersService.createInactive({
-  //     ...createUserDto,
-  //     password: hashedPassword,
-  //   });
-
-  //   // Enviar email de ativação
-  //   await this.sendActivationEmail(user, activationToken);
-
-  //   return user;
-  // }
+    return user;
+  }
 
   async createActivationToken(email: string): Promise<string> {
     return this.jwtService.signAsync({ email }, { expiresIn: '1d' });

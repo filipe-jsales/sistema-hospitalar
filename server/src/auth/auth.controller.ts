@@ -22,15 +22,15 @@ export class AuthController {
     private readonly authService: AuthService,
   ) {}
 
-  // @Public()
-  // @Post('register')
-  // async register(@Body() createUserDto: CreateUserDto) {
-  //   await this.authService.register(createUserDto);
-  //   return {
-  //     message:
-  //       'Usuário cadastrado com sucesso. Por favor, verifique seu email para ativar sua conta.',
-  //   };
-  // }
+  @Public()
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    await this.authService.register(createUserDto);
+    return {
+      message:
+        'Usuário cadastrado com sucesso. Por favor, verifique seu email para ativar sua conta.',
+    };
+  }
 
   @Public()
   @Post('login')

@@ -1,16 +1,15 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Param,
   Put,
   Delete,
   UseGuards,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserRequestDto } from './dto/info-user.dto';
 import { User } from './entities/user.entity';
 import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
 import {
@@ -19,12 +18,15 @@ import {
 } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
 import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from '../auth/auth.service';
+import { CreateUserRequestDto } from './dto/info-user.dto';
 
 @Controller('users')
 @UseGuards(PoliciesGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly authService: AuthService,
   ) {}
 
   @UseGuards(AuthGuard('jwt'))
@@ -34,14 +36,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  // TODO: ao criar um usuário automaticamente popular a tabela de user roles roles com a role que for criada
   @Post('create-user')
   @CheckPolicies((ability) => ability.can(Action.Create, User))
-  async register(
+  async createUser(
     @Body() createUserRequestDto: CreateUserRequestDto,
   ): Promise<{ message: string }> {
     const { userInfos } = createUserRequestDto;
-    await this.usersService.register(userInfos);
+    await this.authService.register(userInfos);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
 
