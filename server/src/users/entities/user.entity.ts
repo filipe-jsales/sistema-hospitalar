@@ -44,9 +44,6 @@ export class User {
   @Column({ nullable: true })
   lastLogin: Date;
 
-  @Column({ default: 'user' })
-  role: string;
-
   @Column({ nullable: true })
   phoneNumber: string;
 

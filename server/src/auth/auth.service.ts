@@ -51,21 +51,23 @@ export class AuthService {
   }
 
   async login(user: User) {
-    const payload: IJwtPayload = {
-      sub: user.id,
-      email: user.email,
-      roles: user.roles.map((role) => role.name),
-    };
+  const userWithRoles = await this.usersService.findOne(user.id);
+  
+  const payload: IJwtPayload = {
+    sub: userWithRoles.id,
+    email: userWithRoles.email,
+    roles: userWithRoles.roles.map((role) => role.name),
+  };
 
-    return {
-      token: await this.jwtService.signAsync(payload),
-      user: {
-        id: user.id,
-        email: user.email,
-        roles: user.roles,
-      },
-    };
-  }
+  return {
+    token: await this.jwtService.signAsync(payload),
+    user: {
+      id: userWithRoles.id,
+      email: userWithRoles.email,
+      roles: userWithRoles.roles,
+    },
+  };
+}
 
   async register(createUserDto: CreateUserDto): Promise<User> {
     const { password, email } = createUserDto;
