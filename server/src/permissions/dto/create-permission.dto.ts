@@ -7,9 +7,6 @@ import {
 } from 'class-validator';
 
 export class CreatePermissionDto {
-  @IsInt()
-  id: number;
-
   @IsString()
   name: string;
 
@@ -27,7 +24,7 @@ export class CreatePermissionDto {
 
   @IsArray()
   @IsOptional()
-  @IsInt({ each: true })
   @ArrayNotEmpty()
+  @IsInt({ each: true })
   roles?: number[];
 }

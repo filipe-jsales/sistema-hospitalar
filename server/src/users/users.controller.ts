@@ -8,6 +8,8 @@ import {
   UseGuards,
   Post,
   ParseIntPipe,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -23,16 +25,14 @@ import { AuthService } from '../auth/auth.service';
 import { CreateUserRequestDto } from './dto/info-user.dto';
 
 @Controller('users')
-@UseGuards(PoliciesGuard)
+@UseGuards(AuthGuard('jwt'), PoliciesGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
   @Get()
-  @Public()
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
@@ -53,10 +53,23 @@ export class UsersController {
   }
 
   @Put(':id')
+  @CheckPolicies((ability) => ability.can(Action.Update, User))
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: Partial<CreateUserDto>,
+    @Request() req,
   ): Promise<User> {
+    const isOwnProfile = req.user.id === id;
+    const isSuperAdmin = req.user.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+    //TODO: check better ways to (modularize) owner and superadmin checks also if we need to enumerate/interface this
+    if (!isOwnProfile && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar este perfil.',
+      );
+    }
+
     return this.usersService.update(id, updateUserDto);
   }
 

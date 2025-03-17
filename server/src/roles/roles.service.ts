@@ -58,6 +58,15 @@ export class RolesService {
     return role;
   }
 
+  async findByName(name: string): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: { name },
+      relations: ['permissions'],
+    });
+
+    return role;
+  }
+
   async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
     const { name, users, permissions } = updateRoleDto;
     console.log(name, users, permissions);
