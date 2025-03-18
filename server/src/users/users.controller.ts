@@ -73,13 +73,43 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
-  @Public()
   @Post(':userId/roles/:roleId')
   async addRoleToUser(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('roleId', ParseIntPipe) roleId: number,
   ): Promise<User> {
     return this.usersService.addRoleToUser(userId, roleId);
+  }
+
+  @Post(':userId/hospital/:hospitalId')
+  @CheckPolicies((ability) => ability.can(Action.Update, User))
+  async assignHospitalToUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('hospitalId', ParseIntPipe) hospitalId: number,
+    @Request() req,
+  ): Promise<User> {
+    const currentUser = req.user;
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+
+    if (
+      !isSuperAdmin &&
+      !(
+        currentUser.hospital?.id === hospitalId &&
+        currentUser.roles?.some((role) => role.name === 'admin')
+      )
+    ) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atribuir usuários a este hospital.',
+      );
+    }
+
+    return this.usersService.assignHospitalToUser(
+      userId,
+      hospitalId,
+      currentUser,
+    );
   }
 
   @Delete(':id')

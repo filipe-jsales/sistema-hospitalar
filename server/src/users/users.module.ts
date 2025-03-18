@@ -6,12 +6,14 @@ import { User } from './entities/user.entity';
 import { CaslModule } from '../casl/casl.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { Role } from 'src/roles/entities/role.entity';
+import { HospitalsModule } from 'src/hospitals/hospitals.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Role]),
     CaslModule,
     forwardRef(() => AuthModule),
+    forwardRef(() => HospitalsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],

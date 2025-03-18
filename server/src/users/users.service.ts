@@ -1,9 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '../roles/entities/role.entity';
+import { HospitalsService } from 'src/hospitals/hospitals.service';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +13,8 @@ export class UsersService {
     private readonly usersRepository: Repository<User>,
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
+    @Inject(forwardRef(() => HospitalsService))
+    private readonly hospitalsService: HospitalsService,
   ) {}
 
   async create(userData: Partial<User>): Promise<User> {
@@ -80,15 +83,23 @@ export class UsersService {
     return user;
   }
 
-  async remove(id: number): Promise<void> {
-    const userData = await this.findOne(id);
-    await this.usersRepository.softRemove(userData);
-  }
-
   async findByEmail(email: string): Promise<User> {
     return this.usersRepository.findOne({
       where: { email },
       relations: ['roles', 'roles.permissions'],
     });
+  }
+
+  async assignHospitalToUser(userId: number, hospitalId: number, currentUser: User): Promise<User> {
+    const user = await this.findOne(userId);
+    const hospital = await this.hospitalsService.findOne(hospitalId, currentUser);
+    
+    user.hospital = hospital;
+    return this.usersRepository.save(user);
+  }
+
+  async remove(id: number): Promise<void> {
+    const userData = await this.findOne(id);
+    await this.usersRepository.softRemove(userData);
   }
 }

@@ -51,23 +51,23 @@ export class AuthService {
   }
 
   async login(user: User) {
-  const userWithRoles = await this.usersService.findOne(user.id);
-  
-  const payload: IJwtPayload = {
-    sub: userWithRoles.id,
-    email: userWithRoles.email,
-    roles: userWithRoles.roles.map((role) => role.name),
-  };
+    const userWithRoles = await this.usersService.findOne(user.id);
 
-  return {
-    token: await this.jwtService.signAsync(payload),
-    user: {
-      id: userWithRoles.id,
+    const payload: IJwtPayload = {
+      sub: userWithRoles.id,
       email: userWithRoles.email,
-      roles: userWithRoles.roles,
-    },
-  };
-}
+      roles: userWithRoles.roles.map((role) => role.name),
+    };
+
+    return {
+      token: await this.jwtService.signAsync(payload),
+      user: {
+        id: userWithRoles.id,
+        email: userWithRoles.email,
+        roles: userWithRoles.roles,
+      },
+    };
+  }
 
   async register(createUserDto: CreateUserDto): Promise<User> {
     const { password, email } = createUserDto;
@@ -83,7 +83,7 @@ export class AuthService {
       password: hashedPassword,
       isActive: false,
     };
-    
+
     const user = await this.usersService.create(userData);
 
     await this.sendActivationEmail(user, activationToken);
@@ -99,7 +99,10 @@ export class AuthService {
     const activationLink = `${process.env.FRONTEND_URL}/users/activate/${token}`;
     const subject = 'Activate Your Account';
     const text = `Hello ${user.firstName},\n\nPlease activate your account using the link below:\n\n${activationLink}`;
-    const html = this.emailTemplatesService.getActivationEmail(user.firstName, activationLink);
+    const html = this.emailTemplatesService.getActivationEmail(
+      user.firstName,
+      activationLink,
+    );
 
     await this.mailerService.sendMail(user.email, subject, text, html);
   }
@@ -118,7 +121,10 @@ export class AuthService {
       await this.usersService.update(user.id, { isActive: true });
     } catch (err) {
       console.error('Activation error:', err);
-      if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      if (
+        err.name === 'JsonWebTokenError' ||
+        err.name === 'TokenExpiredError'
+      ) {
         throw new BadRequestException(
           'Token de ativação inválido ou expirado.',
         );
@@ -148,7 +154,10 @@ export class AuthService {
     const resetLink = `${process.env.FRONTEND_URL}/users/reset-password/${resetToken}`;
     const subject = 'Password Reset Request';
     const text = `Hello ${user.firstName},\n\nPlease use the following link to reset your password:\n\n${resetLink}`;
-    const html = this.emailTemplatesService.getPasswordResetEmail(user.firstName, resetLink);
+    const html = this.emailTemplatesService.getPasswordResetEmail(
+      user.firstName,
+      resetLink,
+    );
 
     await this.mailerService.sendMail(email, subject, text, html);
   }
@@ -187,7 +196,10 @@ export class AuthService {
       await this.usersService.update(user.id, { password: hashedPassword });
     } catch (err) {
       console.error('Reset Password error:', err);
-      if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      if (
+        err.name === 'JsonWebTokenError' ||
+        err.name === 'TokenExpiredError'
+      ) {
         throw new BadRequestException('Token de reset inválido ou expirado');
       }
       throw err;

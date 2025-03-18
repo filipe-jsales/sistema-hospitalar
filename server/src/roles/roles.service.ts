@@ -22,7 +22,6 @@ export class RolesService {
 
   async create(createRoleDto: RoleDto): Promise<Role> {
     const { name, permissions } = createRoleDto;
-    console.log(name, permissions);
 
     const permissionsEntities = permissions
       ? await this.permissionRepository.findBy({ id: In(permissions) })
