@@ -48,8 +48,60 @@ export class UsersService {
     );
   }
 
-  //TODO: admin só pode criar um usuário para o mesmo hospital que está associado
-  async create(userData: Partial<User>): Promise<User> {
+  async create(userData: Partial<User> & { hospitalId?: number }, currentUser: User): Promise<User> {
+    console.log('currentUser', currentUser);
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+  
+    if (!isAdmin && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Você não tem permissão para criar usuários.',
+      );
+    }
+  
+    let hospital = null;
+    
+    if (userData.hospitalId) {
+      hospital = await this.hospitalsService.findOne(userData.hospitalId, currentUser);
+      if (!hospital) {
+        throw new NotFoundException(`Hospital com ID ${userData.hospitalId} não encontrado.`);
+      }
+    }
+    if (isAdmin && !isSuperAdmin) {
+      if (hospital && hospital.id !== currentUser.hospital?.id) {
+        throw new ForbiddenException(
+          'Você só pode criar usuários para o seu próprio hospital.',
+        );
+      }
+  
+      hospital = currentUser.hospital;
+    }
+    
+    const { hospitalId, ...userDataWithoutHospitalId } = userData;
+    const defaultRole = await this.rolesRepository.findOne({
+      where: { name: 'user' },
+    });
+  
+    if (!defaultRole) {
+      console.warn('Role "user" não encontrada. Criando role padrão...');
+      const newRole = this.rolesRepository.create({ name: 'user' });
+      await this.rolesRepository.save(newRole);
+    }
+  
+    if (!userData.roles || userData.roles.length === 0) {
+      userDataWithoutHospitalId.roles = [defaultRole];
+    }
+    const user = this.usersRepository.create({
+      ...userDataWithoutHospitalId,
+      hospital: hospital,
+    });
+    
+    return this.usersRepository.save(user);
+  }
+
+  async signup(userData: Partial<User>): Promise<User> {
     const defaultRole = await this.rolesRepository.findOne({
       where: { name: 'user' },
     });
@@ -116,6 +168,9 @@ export class UsersService {
     );
   }
 
+  //testar também se usuario admin ou normal ta conseguindo dar update de outros hospitais
+  //TODO superadmin pode dar update em tudo
+  // admin só pode dar update no proprio hospital
   async update(
     id: number,
     updateUserDto: Partial<CreateUserDto>,
@@ -156,7 +211,7 @@ export class UsersService {
     });
   }
 
-  //somente superadmin pode dar assign 
+  //somente superadmin pode dar assign
   async assignHospitalToUser(
     userId: number,
     hospitalId: number,
@@ -172,6 +227,8 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
+  //somente superadmin pode excluir
+  //testar também se usuario admin ou normal ta conseguindo excluir de outros hospitais
   async remove(id: number, currentUser: User): Promise<void> {
     const userData = await this.findOne(id, currentUser);
     await this.usersRepository.softRemove(userData);

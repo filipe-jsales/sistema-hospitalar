@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, MinLength, IsOptional, IsNumber, IsDate } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  IsOptional,
+  IsNumber,
+  IsDate,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsString()
@@ -31,4 +38,7 @@ export class CreateUserDto {
   @IsOptional()
   isActive?: boolean;
 
+  @IsOptional()
+  @IsNumber()
+  hospitalId: number;
 }

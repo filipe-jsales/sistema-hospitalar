@@ -18,14 +18,13 @@ import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    await this.authService.register(createUserDto);
+  async register(@Body() createUserDto: CreateUserDto, @Request() req) {
+    const currentUser = req.user;
+    await this.authService.register(createUserDto, currentUser);
     return {
       message:
         'Usuário cadastrado com sucesso. Por favor, verifique seu email para ativar sua conta.',

@@ -69,7 +69,7 @@ export class AuthService {
     };
   }
 
-  async register(createUserDto: CreateUserDto): Promise<User> {
+  async register(createUserDto: CreateUserDto, currentUser: User): Promise<User> {
     const { password, email } = createUserDto;
 
     const existingUser = await this.usersService.findByEmail(email);
@@ -84,7 +84,28 @@ export class AuthService {
       isActive: false,
     };
 
-    const user = await this.usersService.create(userData);
+    const user = await this.usersService.create(userData, currentUser);
+
+    await this.sendActivationEmail(user, activationToken);
+
+    return user;
+  }
+
+  async signup(createUserDto: CreateUserDto): Promise<User> {
+    const { password, email } = createUserDto;
+
+    const existingUser = await this.usersService.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictException('Email já cadastrado.');
+    }
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const activationToken = await this.createActivationToken(email);
+    const userData = {
+      ...createUserDto,
+      password: hashedPassword,
+      isActive: false,
+    };
+    const user = await this.usersService.signup(userData);
 
     await this.sendActivationEmail(user, activationToken);
 

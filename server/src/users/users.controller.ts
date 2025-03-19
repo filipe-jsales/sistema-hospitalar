@@ -42,9 +42,11 @@ export class UsersController {
   @CheckPolicies((ability) => ability.can(Action.Create, User))
   async createUser(
     @Body() createUserRequestDto: CreateUserRequestDto,
+    @Request() req,
   ): Promise<{ message: string }> {
+    const currentUser = req.user;
     const { userInfos } = createUserRequestDto;
-    await this.authService.register(userInfos);
+    await this.authService.register(userInfos, currentUser);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
 
