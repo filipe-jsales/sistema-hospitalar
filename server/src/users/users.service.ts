@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -17,6 +23,32 @@ export class UsersService {
     private readonly hospitalsService: HospitalsService,
   ) {}
 
+  private buildUserQueryOptions(currentUser: User) {
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+
+    const queryOptions: any = {
+      relations: ['roles', 'roles.permissions', 'hospital'],
+    };
+
+    if (isSuperAdmin) {
+      return queryOptions;
+    }
+    if (isAdmin && currentUser.hospital) {
+      queryOptions.where = {
+        hospital: { id: currentUser.hospital.id },
+      };
+      return queryOptions;
+    }
+    throw new ForbiddenException(
+      'Você não tem permissão para realizar esta ação.',
+    );
+  }
+
+  //TODO: admin só pode criar um usuário para o mesmo hospital que está associado
   async create(userData: Partial<User>): Promise<User> {
     const defaultRole = await this.rolesRepository.findOne({
       where: { name: 'user' },
@@ -36,16 +68,15 @@ export class UsersService {
     return this.usersRepository.save(user);
   }
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['roles', 'roles.permissions'],
-    });
+  async findAll(currentUser: User): Promise<User[]> {
+    const queryOptions = this.buildUserQueryOptions(currentUser);
+    return this.usersRepository.find(queryOptions);
   }
 
-  async findOne(id: number): Promise<User> {
+  async findOneUnauthenticated(id: number): Promise<User> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['roles', 'roles.permissions'],
+      relations: ['roles', 'roles.permissions', 'hospital'],
     });
 
     if (!user) {
@@ -55,17 +86,52 @@ export class UsersService {
     return user;
   }
 
+  async findOne(id: number, currentUser: User): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles', 'roles.permissions', 'hospital'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+    }
+
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+    if (isSuperAdmin) {
+      return user;
+    }
+    if (isAdmin && currentUser.hospital?.id === user.hospital?.id) {
+      return user;
+    }
+    if (currentUser.id === user.id) {
+      return user;
+    }
+
+    throw new ForbiddenException(
+      'Você não tem permissão para realizar esta ação neste usuário.',
+    );
+  }
+
   async update(
     id: number,
     updateUserDto: Partial<CreateUserDto>,
+    currentUser: User,
   ): Promise<User> {
     await this.usersRepository.update(id, updateUserDto);
-    const user = await this.findOne(id);
+    const user = await this.findOne(id, currentUser);
     return user;
   }
 
-  async addRoleToUser(userId: number, roleId: number): Promise<User> {
-    const user = await this.findOne(userId);
+  async addRoleToUser(
+    userId: number,
+    roleId: number,
+    currentUser: User,
+  ): Promise<User> {
+    const user = await this.findOne(userId, currentUser);
     const role = await this.rolesRepository.findOne({
       where: { id: roleId },
     });
@@ -90,16 +156,24 @@ export class UsersService {
     });
   }
 
-  async assignHospitalToUser(userId: number, hospitalId: number, currentUser: User): Promise<User> {
-    const user = await this.findOne(userId);
-    const hospital = await this.hospitalsService.findOne(hospitalId, currentUser);
-    
+  //somente superadmin pode dar assign 
+  async assignHospitalToUser(
+    userId: number,
+    hospitalId: number,
+    currentUser: User,
+  ): Promise<User> {
+    const user = await this.findOne(userId, currentUser);
+    const hospital = await this.hospitalsService.findOne(
+      hospitalId,
+      currentUser,
+    );
+
     user.hospital = hospital;
     return this.usersRepository.save(user);
   }
 
-  async remove(id: number): Promise<void> {
-    const userData = await this.findOne(id);
+  async remove(id: number, currentUser: User): Promise<void> {
+    const userData = await this.findOne(id, currentUser);
     await this.usersRepository.softRemove(userData);
   }
 }

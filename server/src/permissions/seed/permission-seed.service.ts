@@ -19,12 +19,8 @@ export class PermissionSeedService implements OnModuleInit {
 
   async createDefaultPermissions() {
     const userRole = await this.rolesService.findByName('user');
+    const adminRole = await this.rolesService.findByName('admin');
     
-    if (!userRole) {
-      console.error('Papel "user" não encontrado. As permissões não foram criadas.');
-      return;
-    }
-
     const defaultPermissions = [
       {
         name: 'read:profile',
@@ -49,6 +45,38 @@ export class PermissionSeedService implements OnModuleInit {
         action: Action.Read,
         subject: 'Hospital',
         roles: [userRole.id],
+      },
+      {
+        name: 'create:user',
+        description: 'Permite ao admin criar novos usuários no hospital vinculado',
+        userDescription: 'Criar usuários',
+        action: Action.Create,
+        subject: 'User',
+        roles: [adminRole.id],
+      },
+      {
+        name: 'read:user',
+        description: 'Permite ao admin visualizar usuários do seu hospital',
+        userDescription: 'Visualizar usuários',
+        action: Action.Read,
+        subject: 'User',
+        roles: [adminRole.id],
+      },
+      {
+        name: 'update:user',
+        description: 'Permite ao admin atualizar usuários do seu hospital',
+        userDescription: 'Atualizar usuários',
+        action: Action.Update,
+        subject: 'User',
+        roles: [adminRole.id],
+      },
+      {
+        name: 'manage:hospital',
+        description: 'Permite ao admin gerenciar o hospital ao qual está vinculado',
+        userDescription: 'Gerenciar hospital',
+        action: Action.Manage,
+        subject: 'Hospital',
+        roles: [adminRole.id],
       },
     ];
 

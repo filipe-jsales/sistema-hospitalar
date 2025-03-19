@@ -33,8 +33,9 @@ export class UsersController {
   ) {}
 
   @Get()
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
+  async findAll(@Request() req): Promise<User[]> {
+    const currentUser = req.user;
+    return this.usersService.findAll(currentUser);
   }
 
   @Post('create-user')
@@ -48,8 +49,12 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<User> {
-    return this.usersService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ): Promise<User> {
+    const currentUser = req.user;
+    return this.usersService.findOne(id, currentUser);
   }
 
   @Put(':id')
@@ -63,6 +68,7 @@ export class UsersController {
     const isSuperAdmin = req.user.roles?.some(
       (role) => role.name === 'superadmin',
     );
+    const currentUser = req.user;
     //TODO: check better ways to (modularize) owner and superadmin checks also if we need to enumerate/interface this
     if (!isOwnProfile && !isSuperAdmin) {
       throw new ForbiddenException(
@@ -70,15 +76,17 @@ export class UsersController {
       );
     }
 
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.update(id, updateUserDto, currentUser);
   }
 
   @Post(':userId/roles/:roleId')
   async addRoleToUser(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('roleId', ParseIntPipe) roleId: number,
+    @Request() req,
   ): Promise<User> {
-    return this.usersService.addRoleToUser(userId, roleId);
+    const currentUser = req.user;
+    return this.usersService.addRoleToUser(userId, roleId, currentUser);
   }
 
   @Post(':userId/hospital/:hospitalId')
@@ -113,7 +121,11 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.usersService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ): Promise<void> {
+    const currentUser = req.user;
+    return this.usersService.remove(id, currentUser);
   }
 }

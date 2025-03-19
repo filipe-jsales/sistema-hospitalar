@@ -40,18 +40,18 @@ export class AuthService {
       user.failedLoginAttempts += 1;
       await this.usersService.update(user.id, {
         failedLoginAttempts: user.failedLoginAttempts,
-      });
+      }, user);
       return null;
     }
 
-    await this.usersService.update(user.id, { lastLogin: new Date() });
+    await this.usersService.update(user.id, { lastLogin: new Date() }, user);
 
     const { password: _, ...result } = user;
     return result;
   }
 
   async login(user: User) {
-    const userWithRoles = await this.usersService.findOne(user.id);
+    const userWithRoles = await this.usersService.findOne(user.id, user);
 
     const payload: IJwtPayload = {
       sub: userWithRoles.id,
@@ -118,7 +118,7 @@ export class AuthService {
         throw new NotFoundException('Token de ativação inválido.');
       }
 
-      await this.usersService.update(user.id, { isActive: true });
+      await this.usersService.update(user.id, { isActive: true }, user);
     } catch (err) {
       console.error('Activation error:', err);
       if (
@@ -193,7 +193,7 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.usersService.update(user.id, { password: hashedPassword });
+      await this.usersService.update(user.id, { password: hashedPassword }, user);
     } catch (err) {
       console.error('Reset Password error:', err);
       if (

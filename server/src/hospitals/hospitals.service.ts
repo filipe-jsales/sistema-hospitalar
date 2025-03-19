@@ -72,7 +72,7 @@ export class HospitalsService {
         (user.hospital && user.hospital.id === hospital.id)) {
       return hospital;
     }
-
+// trocar o casl
     throw new ForbiddenException(
       'Você não tem permissão para ver este hospital',
     );
