@@ -1,242 +1,236 @@
 import {
-  BadRequestException,
-  ConflictException,
+  ForbiddenException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { MailerService } from '../mailer/mailer.service';
-import * as bcrypt from 'bcrypt';
-import * as jwt from 'jsonwebtoken';
 import { Role } from '../roles/entities/role.entity';
+import { HospitalsService } from 'src/hospitals/hospitals.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
-
-    private mailerService: MailerService,
+    @InjectRepository(Role)
+    private readonly rolesRepository: Repository<Role>,
+    @Inject(forwardRef(() => HospitalsService))
+    private readonly hospitalsService: HospitalsService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const { password, email } = createUserDto;
-
-    const existingUser = await this.usersRepository.findOne({
-      where: { email },
-    });
-    if (existingUser) {
-      throw new ConflictException('Email já cadastrado.');
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const activationToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
-    });
-
-    const user = this.usersRepository.create({
-      ...createUserDto,
-      password: hashedPassword,
-      isActive: false,
-    });
-
-    const savedUser = await this.usersRepository.save(user);
-
-    const activationLink = `${process.env.FRONTEND_URL}/users/activate/${activationToken}`;
-    const subject = 'Activate Your Account';
-    const text = `Hello ${user.firstName},\n\nPlease activate your account using the link below:\n\n${activationLink}`;
-    const html = `<p>Hello ${user.firstName},</p><p>Please activate your account using the link below:</p><a href="${activationLink}">Activate Account</a>`;
-
-    await this.mailerService.sendMail(email, subject, text, html);
-
-    return savedUser;
-  }
-
-  async activateAccount(token: string): Promise<void> {
-    try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET) as {
-        email: string;
-      };
-
-      const user = await this.usersRepository.findOne({
-        where: { email: payload.email },
-      });
-
-      if (!user) {
-        throw new NotFoundException('Token de ativação inválido.');
-      }
-
-      user.isActive = true;
-      await this.usersRepository.save(user);
-    } catch (err) {
-      console.error('Activation error:', err);
-      if (err instanceof jwt.JsonWebTokenError) {
-        throw new BadRequestException(
-          'Token de ativação inválido ou expirado.',
-        );
-      } else if (err instanceof NotFoundException) {
-        throw err;
-      } else {
-        throw new BadRequestException('Um erro ocorreu durante a ativação.');
-      }
-    }
-  }
-
-  async login(
-    email: string,
-    password: string,
-  ): Promise<{
-    token: string;
-    user: { id: number; email: string; roles: Role[] };
-  }> {
-    const user = await this.usersRepository.findOne({
-      where: { email },
-      relations: ['roles', 'roles.permissions'],
-    });
-
-    if (!user) {
-      throw new Error('Email ou senha inválidos.');
-    }
-
-    if (!user.isActive) {
-      throw new Error('Sua conta não foi ativada.');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      user.failedLoginAttempts += 1;
-      await this.usersRepository.save(user);
-      throw new UnauthorizedException('Email ou senha inválidos.');
-    }
-
-    user.lastLogin = new Date();
-    await this.usersRepository.save(user);
-    console.log(user);
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.roles },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' },
+  private buildUserQueryOptions(currentUser: User) {
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
     );
 
-    return {
-      token,
-      user: {
-        id: user.id,
-        email: user.email,
-        roles: user.roles,
-      },
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+
+    const queryOptions: any = {
+      relations: ['roles', 'roles.permissions', 'hospital'],
     };
+
+    if (isSuperAdmin) {
+      return queryOptions;
+    }
+    if (isAdmin && currentUser.hospital) {
+      queryOptions.where = {
+        hospital: { id: currentUser.hospital.id },
+      };
+      return queryOptions;
+    }
+    throw new ForbiddenException(
+      'Você não tem permissão para realizar esta ação.',
+    );
   }
 
-  async sendPasswordResetEmail(email: string): Promise<void> {
-    const user = await this.usersRepository.findOne({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new NotFoundException(
-        'Não foi encontrado usuário com o email fornecido.',
+  async create(userData: Partial<User> & { hospitalId?: number }, currentUser: User): Promise<User> {
+    console.log('currentUser', currentUser);
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+  
+    if (!isAdmin && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Você não tem permissão para criar usuários.',
       );
     }
-
-    const resetToken = jwt.sign({ email }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    const resetLink = `${process.env.FRONTEND_URL}/users/reset-password/${resetToken}`;
-
-    const subject = 'Password Reset Request';
-    const text = `Hello ${user.firstName},\n\nPlease use the following link to reset your password:\n\n${resetLink}`;
-    const html = `<p>Hello ${user.firstName},</p><p>Please use the following link to reset your password:</p><a href="${resetLink}">Reset Password</a>`;
-
-    await this.mailerService.sendMail(email, subject, text, html);
-  }
-
-  async resetPassword(
-    token: string,
-    oldPassword: string,
-    newPassword: string,
-    confirmPassword: string,
-  ): Promise<void> {
-    try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET) as {
-        email: string;
-      };
-
-      const user = await this.usersRepository.findOne({
-        where: { email: payload.email },
-      });
-
-      if (!user) {
-        throw new NotFoundException('Token de reset inválido.');
+  
+    let hospital = null;
+    
+    if (userData.hospitalId) {
+      hospital = await this.hospitalsService.findOne(userData.hospitalId, currentUser);
+      if (!hospital) {
+        throw new NotFoundException(`Hospital com ID ${userData.hospitalId} não encontrado.`);
       }
-
-      const isOldPasswordValid = await bcrypt.compare(
-        oldPassword,
-        user.password,
-      );
-      if (!isOldPasswordValid) {
-        throw new UnauthorizedException('Senha antiga está incorreta.');
-      }
-
-      if (newPassword !== confirmPassword) {
-        throw new BadRequestException(
-          'Nova senha e confirmação não são iguais',
+    }
+    if (isAdmin && !isSuperAdmin) {
+      if (hospital && hospital.id !== currentUser.hospital?.id) {
+        throw new ForbiddenException(
+          'Você só pode criar usuários para o seu próprio hospital.',
         );
       }
-
-      const hashedPassword = await bcrypt.hash(newPassword, 10);
-      user.password = hashedPassword;
-
-      await this.usersRepository.save(user);
-    } catch (err) {
-      console.error('Reset Password error:', err);
-      throw new BadRequestException('Token de reset inválido ou expirado');
+  
+      hospital = currentUser.hospital;
     }
-  }
-
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['roles', 'roles.permissions'],
+    
+    const { hospitalId, ...userDataWithoutHospitalId } = userData;
+    const defaultRole = await this.rolesRepository.findOne({
+      where: { name: 'user' },
     });
+  
+    if (!defaultRole) {
+      console.warn('Role "user" não encontrada. Criando role padrão...');
+      const newRole = this.rolesRepository.create({ name: 'user' });
+      await this.rolesRepository.save(newRole);
+    }
+  
+    if (!userData.roles || userData.roles.length === 0) {
+      userDataWithoutHospitalId.roles = [defaultRole];
+    }
+    const user = this.usersRepository.create({
+      ...userDataWithoutHospitalId,
+      hospital: hospital,
+    });
+    
+    return this.usersRepository.save(user);
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.usersRepository.findOne({ where: { id } });
+  async signup(userData: Partial<User>): Promise<User> {
+    const defaultRole = await this.rolesRepository.findOne({
+      where: { name: 'user' },
+    });
+
+    if (!defaultRole) {
+      console.warn('Role "user" não encontrada. Criando role padrão...');
+      const newRole = this.rolesRepository.create({ name: 'user' });
+      await this.rolesRepository.save(newRole);
+    }
+
+    const user = this.usersRepository.create({
+      ...userData,
+      roles: [defaultRole],
+    });
+
+    return this.usersRepository.save(user);
+  }
+
+  async findAll(currentUser: User): Promise<User[]> {
+    const queryOptions = this.buildUserQueryOptions(currentUser);
+    return this.usersRepository.find(queryOptions);
+  }
+
+  async findOneUnauthenticated(id: number): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles', 'roles.permissions', 'hospital'],
+    });
+
     if (!user) {
       throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
     }
+
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async findOne(id: number, currentUser: User): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles', 'roles.permissions', 'hospital'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+    }
+
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+
+    const isAdmin = currentUser.roles?.some((role) => role.name === 'admin');
+    if (isSuperAdmin) {
+      return user;
+    }
+    if (isAdmin && currentUser.hospital?.id === user.hospital?.id) {
+      return user;
+    }
+    if (currentUser.id === user.id) {
+      return user;
+    }
+
+    throw new ForbiddenException(
+      'Você não tem permissão para realizar esta ação neste usuário.',
+    );
+  }
+
+  //testar também se usuario admin ou normal ta conseguindo dar update de outros hospitais
+  //TODO superadmin pode dar update em tudo
+  // admin só pode dar update no proprio hospital
+  async update(
+    id: number,
+    updateUserDto: Partial<CreateUserDto>,
+    currentUser: User,
+  ): Promise<User> {
     await this.usersRepository.update(id, updateUserDto);
-    const user = await this.usersRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
-    }
+    const user = await this.findOne(id, currentUser);
     return user;
   }
 
-  async remove(id: number): Promise<{ message: string }> {
-    const result = await this.usersRepository.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException(`Usuário com ID ${id} não encontrado.`);
+  async addRoleToUser(
+    userId: number,
+    roleId: number,
+    currentUser: User,
+  ): Promise<User> {
+    const user = await this.findOne(userId, currentUser);
+    const role = await this.rolesRepository.findOne({
+      where: { id: roleId },
+    });
+
+    if (!role) {
+      throw new NotFoundException(`Role com ID ${roleId} não encontrada.`);
     }
-    return { message: `Usuário com o id ${id} foi removido com sucesso.` };
+    const hasRole = user.roles.some((r) => r.id === role.id);
+
+    if (!hasRole) {
+      user.roles.push(role);
+      await this.usersRepository.save(user);
+    }
+
+    return user;
   }
 
   async findByEmail(email: string): Promise<User> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({
+      where: { email },
+      relations: ['roles', 'roles.permissions'],
+    });
   }
 
-  async validatePassword(user: User, password: string): Promise<boolean> {
-    return bcrypt.compare(password, user.password);
+  //somente superadmin pode dar assign
+  async assignHospitalToUser(
+    userId: number,
+    hospitalId: number,
+    currentUser: User,
+  ): Promise<User> {
+    const user = await this.findOne(userId, currentUser);
+    const hospital = await this.hospitalsService.findOne(
+      hospitalId,
+      currentUser,
+    );
+
+    user.hospital = hospital;
+    return this.usersRepository.save(user);
+  }
+
+  //somente superadmin pode excluir
+  //testar também se usuario admin ou normal ta conseguindo excluir de outros hospitais
+  async remove(id: number, currentUser: User): Promise<void> {
+    const userData = await this.findOne(id, currentUser);
+    await this.usersRepository.softRemove(userData);
   }
 }

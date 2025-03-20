@@ -1,18 +1,18 @@
 import {
   Controller,
   Get,
-  Post,
   Body,
   Param,
   Put,
   Delete,
   UseGuards,
+  Post,
+  ParseIntPipe,
+  Request,
+  ForbiddenException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateUserRequestDto } from './dto/info-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthUserDto } from './dto/auth-user.dto';
 import { User } from './entities/user.entity';
 import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
 import {
@@ -20,97 +20,114 @@ import {
   Public,
 } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
-import { Role } from '../roles/entities/role.entity';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthService } from '../auth/auth.service';
+import { CreateUserRequestDto } from './dto/info-user.dto';
 
 @Controller('users')
-@UseGuards(PoliciesGuard)
+@UseGuards(AuthGuard('jwt'), PoliciesGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
 
-  @Post()
-  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createUserDto);
+  @Get()
+  async findAll(@Request() req): Promise<User[]> {
+    const currentUser = req.user;
+    return this.usersService.findAll(currentUser);
   }
 
   @Post('create-user')
   @CheckPolicies((ability) => ability.can(Action.Create, User))
-  async register(
+  async createUser(
     @Body() createUserRequestDto: CreateUserRequestDto,
+    @Request() req,
   ): Promise<{ message: string }> {
-    const { userInfos, user } = createUserRequestDto;
-    console.log('USER', user);
-    console.log('USER INFO FOR CREATION', userInfos);
-    await this.usersService.create(userInfos);
+    const currentUser = req.user;
+    const { userInfos } = createUserRequestDto;
+    await this.authService.register(userInfos, currentUser);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
 
-  @Get('activate/:token')
-  @Public()
-  async activate(@Param('token') token: string): Promise<{ message: string }> {
-    await this.usersService.activateAccount(token);
-    return { message: 'Sua conta foi ativada com sucesso.' };
-  }
-
-  @Post('login')
-  @Public()
-  async login(@Body() authUserDto: AuthUserDto): Promise<{
-    token: string;
-    user: { id: number; email: string; roles: Role[] };
-  }> {
-    const { email, password } = authUserDto;
-    return this.usersService.login(email, password);
-  }
-
-  @Post('reset-password-request')
-  @Public()
-  async resetPasswordRequest(
-    @Body('email') email: string,
-  ): Promise<{ message: string }> {
-    await this.usersService.sendPasswordResetEmail(email);
-    return { message: 'Email de reset enviado com sucesso. Redirecionando...' };
-  }
-
-  @Post('reset-password/:token')
-  @Public()
-  async resetPassword(
-    @Param('token') token: string,
-    @Body()
-    resetPasswordDto: {
-      oldPassword: string;
-      newPassword: string;
-      confirmPassword: string;
-    },
-  ): Promise<{ message: string }> {
-    await this.usersService.resetPassword(
-      token,
-      resetPasswordDto.oldPassword,
-      resetPasswordDto.newPassword,
-      resetPasswordDto.confirmPassword,
-    );
-    return { message: 'Senha resetada com sucesso. Redirecionando...' };
-  }
-
-  @Get()
-  @Public()
-  async findAll(): Promise<User[]> {
-    return this.usersService.findAll();
-  }
-
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<User> {
-    return this.usersService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ): Promise<User> {
+    const currentUser = req.user;
+    return this.usersService.findOne(id, currentUser);
   }
 
   @Put(':id')
+  @CheckPolicies((ability) => ability.can(Action.Update, User))
   async update(
-    @Param('id') id: number,
-    @Body() updateUserDto: UpdateUserDto,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: Partial<CreateUserDto>,
+    @Request() req,
   ): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+    const isOwnProfile = req.user.id === id;
+    const isSuperAdmin = req.user.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+    const currentUser = req.user;
+    //TODO: check better ways to (modularize) owner and superadmin checks also if we need to enumerate/interface this
+    if (!isOwnProfile && !isSuperAdmin) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atualizar este perfil.',
+      );
+    }
+
+    return this.usersService.update(id, updateUserDto, currentUser);
+  }
+
+  @Post(':userId/roles/:roleId')
+  async addRoleToUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('roleId', ParseIntPipe) roleId: number,
+    @Request() req,
+  ): Promise<User> {
+    const currentUser = req.user;
+    return this.usersService.addRoleToUser(userId, roleId, currentUser);
+  }
+
+  @Post(':userId/hospital/:hospitalId')
+  @CheckPolicies((ability) => ability.can(Action.Update, User))
+  async assignHospitalToUser(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('hospitalId', ParseIntPipe) hospitalId: number,
+    @Request() req,
+  ): Promise<User> {
+    const currentUser = req.user;
+    const isSuperAdmin = currentUser.roles?.some(
+      (role) => role.name === 'superadmin',
+    );
+
+    if (
+      !isSuperAdmin &&
+      !(
+        currentUser.hospital?.id === hospitalId &&
+        currentUser.roles?.some((role) => role.name === 'admin')
+      )
+    ) {
+      throw new ForbiddenException(
+        'Você não tem permissão para atribuir usuários a este hospital.',
+      );
+    }
+
+    return this.usersService.assignHospitalToUser(
+      userId,
+      hospitalId,
+      currentUser,
+    );
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: number): Promise<{ message: string }> {
-    return this.usersService.remove(id);
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Request() req,
+  ): Promise<void> {
+    const currentUser = req.user;
+    return this.usersService.remove(id, currentUser);
   }
 }

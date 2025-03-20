@@ -22,7 +22,6 @@ export class RolesService {
 
   async create(createRoleDto: RoleDto): Promise<Role> {
     const { name, permissions } = createRoleDto;
-    console.log(name, permissions);
 
     const permissionsEntities = permissions
       ? await this.permissionRepository.findBy({ id: In(permissions) })
@@ -55,6 +54,15 @@ export class RolesService {
     if (!role) {
       throw new NotFoundException(`Role com o id ${id} não foi encontrado.`);
     }
+    return role;
+  }
+
+  async findByName(name: string): Promise<Role> {
+    const role = await this.roleRepository.findOne({
+      where: { name },
+      relations: ['permissions'],
+    });
+
     return role;
   }
 

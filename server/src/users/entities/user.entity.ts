@@ -4,10 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
   ManyToMany,
   JoinTable,
+  ManyToOne,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 @Entity('users')
 export class User {
@@ -35,11 +38,11 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
+  @DeleteDateColumn()
+  deletedAt: Date;
+
   @Column({ nullable: true })
   lastLogin: Date;
-
-  @Column({ default: 'user' })
-  role: string;
 
   @Column({ nullable: true })
   phoneNumber: string;
@@ -53,4 +56,7 @@ export class User {
   @ManyToMany(() => Role, (role) => role.users)
   @JoinTable()
   roles: Role[];
+
+  @ManyToOne(() => Hospital, hospital => hospital.users, { eager: true })
+  hospital: Hospital;
 }

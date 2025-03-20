@@ -10,15 +10,17 @@ import { Action } from './action.enum';
 import { User } from '../../users/entities/user.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Permission } from '../../permissions/entities/permission.entity';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 const subjectMapping: Record<string, any> = {
   User: User,
   Role: Role,
   Permission: Permission,
+  Hospital: Hospital,
 };
 
 type Subjects = InferSubjects<
-  typeof User | typeof Role | typeof Permission | 'all'
+  typeof User | typeof Role | typeof Permission | typeof Hospital | 'all'
 >;
 export type AppAbility = MongoAbility<[Action, Subjects]>;
 @Injectable()
@@ -28,29 +30,24 @@ export class CaslAbilityFactory {
       MongoAbility<[Action, Subjects]>
     >(createMongoAbility);
 
-    /*if (user.role === 'super-admin') {
+    const isSuperAdmin = user.roles?.some(role => role.name === 'superadmin');
+    if (isSuperAdmin) {
       can(Action.Manage, 'all');
-    } else if (user.role === 'admin') {
-      can(Action.Manage, User);
-    } else {
-      can(Action.Read, User, { id: user.id });
-    }*/
+    } 
+    else if (user.hospital) {
+      can(Action.Read, Hospital, { id: user.hospital.id });
+    }
     user.roles?.forEach((role: Role) => {
-      console.log('Role Permissions:', role.permissions);
       role.permissions?.forEach((permission: Permission) => {
-        console.log('Permission:', permission);
         const action = permission.action as Action;
         const subject = subjectMapping[permission.subject];
 
-        console.log(`Checking permission: ${action} on ${permission.subject}`);
-
         if (action && subject) {
-          console.log(
-            `Granting permission: can(${action}, ${subject.name || subject})`,
-          );
-          can(action, subject);
-        } else {
-          console.log(`No valid action or subject found for permission.`);
+          if (!isSuperAdmin && subject === Hospital && user.hospital) {
+            can(action, subject, { id: user.hospital.id });
+          } else {
+            can(action, subject);
+          }
         }
       });
     });
