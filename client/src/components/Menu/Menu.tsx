@@ -14,6 +14,7 @@ import {
 import { 
   homeOutline,
   logOutOutline,
+  peopleCircleOutline,
   personAddOutline,
 } from 'ionicons/icons';
 import { useLocation } from 'react-router-dom';
@@ -35,6 +36,11 @@ const appPages: AppPage[] = [
     title: 'Cadastro de Usuário',
     url: '/users/create-user',
     icon: personAddOutline
+  },
+  {
+    title: 'Listar Usuários',
+    url: '/users',
+    icon: peopleCircleOutline
   },
   {
     title: 'Logout',
