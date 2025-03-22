@@ -1,6 +1,3 @@
-// 1. Primeiro, vamos criar um serviço de inicialização para configurar permissões padrão
-// Crie um arquivo: src/permissions/permission-seed.service.ts
-
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PermissionsService } from '../permissions.service';
 import { RolesService } from 'src/roles/roles.service';
@@ -14,7 +11,7 @@ export class PermissionSeedService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.createDefaultPermissions();
+    // await this.createDefaultPermissions();
   }
 
   async createDefaultPermissions() {

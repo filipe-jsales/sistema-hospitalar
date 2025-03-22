@@ -19,7 +19,7 @@ export const requestPasswordReset = createAsyncThunk(
   'passwordReset/requestPasswordReset',
   async (email: string, { rejectWithValue }) => {
     try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password-request`;
+      const endpointUrl = `${apiConfig.BACKEND_URL}/auth/reset-password-request`;
       const response = await axios.post(endpointUrl, { email });
       return response.data.message;
     } catch (error: any) {
@@ -40,7 +40,7 @@ export const resetPassword = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/reset-password/${token}`;
+      const endpointUrl = `${apiConfig.BACKEND_URL}/auth/reset-password/${token}`;
       const response = await axios.post(endpointUrl, { oldPassword, newPassword, confirmPassword });
       return response.data.message;
     } catch (error: any) {

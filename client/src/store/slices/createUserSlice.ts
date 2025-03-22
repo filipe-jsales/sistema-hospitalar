@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { apiConfig } from '../../config/apiConfig';
 import { User } from './authSlice';
+import apiService from '../../utils/apiService';
 
 interface UserState {
   loading: boolean;
@@ -32,9 +31,7 @@ export const createUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/create-user`;
-      const response = await axios.post(endpointUrl, data);
-      console.log(response.data);
+      const response = await apiService.post('/users/create-user', data.userInfos);
       return response.data.message;
     } catch (error: any) {
       return rejectWithValue(

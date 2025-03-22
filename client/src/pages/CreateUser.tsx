@@ -15,7 +15,6 @@ import {
 import { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { createUser, clearError, clearSuccessMessage } from '../store/slices/createUserSlice';
-// import { useHistory } from 'react-router-dom';
 import { useFormCleanup } from '../hooks/useFormCleanup';
 
 const CreateUser: React.FC = () => {
@@ -37,7 +36,6 @@ const CreateUser: React.FC = () => {
 
   const dispatch = useAppDispatch();
   const { isAuthenticated, user, token } = useAppSelector((state) => state.auth);
-  // const history = useHistory();
   const { loading, error, successMessage } = useAppSelector((state) => state.createUser);
 
   useFormCleanup({
@@ -85,15 +83,11 @@ const CreateUser: React.FC = () => {
     dispatch(clearSuccessMessage());
 
     if (validateInputs()) {
-      console.log(isAuthenticated)
-      console.log(user?.id)
-      console.log(token)
       if (user?.id && user.email && user.roles) {
           const payload = {
           userInfos: { ...userInfos },
           user: { ...user },
         };
-        console.log(payload);
         dispatch(createUser(payload))
           .unwrap()
           .then(() => {
