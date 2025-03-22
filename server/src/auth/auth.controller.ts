@@ -32,6 +32,16 @@ export class AuthController {
   }
 
   @Public()
+  @Post('signup')
+  async signup(@Body() createUserDto: CreateUserDto) {
+    await this.authService.signup(createUserDto);
+    return {
+      message:
+        'Usuário cadastrado com sucesso. Por favor, verifique seu email para ativar sua conta.',
+    };
+  }
+
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() authUserDto: AuthUserDto) {

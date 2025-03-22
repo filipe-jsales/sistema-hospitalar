@@ -15,10 +15,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './entities/user.entity';
 import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
-import {
-  CheckPolicies,
-  Public,
-} from '../casl/casl-ability.factory/policies.decorator';
+import { CheckPolicies } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
@@ -33,6 +30,7 @@ export class UsersController {
   ) {}
 
   @Get()
+  @CheckPolicies((ability) => ability.can(Action.Read, User))
   async findAll(@Request() req): Promise<User[]> {
     const currentUser = req.user;
     return this.usersService.findAll(currentUser);
@@ -41,16 +39,16 @@ export class UsersController {
   @Post('create-user')
   @CheckPolicies((ability) => ability.can(Action.Create, User))
   async createUser(
-    @Body() createUserRequestDto: CreateUserRequestDto,
+    @Body() createUserRequestDto: CreateUserDto,
     @Request() req,
   ): Promise<{ message: string }> {
     const currentUser = req.user;
-    const { userInfos } = createUserRequestDto;
-    await this.authService.register(userInfos, currentUser);
+    await this.authService.register(createUserRequestDto, currentUser);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
 
   @Get(':id')
+  @CheckPolicies((ability) => ability.can(Action.Read, User))
   async findOne(
     @Param('id', ParseIntPipe) id: number,
     @Request() req,
@@ -82,6 +80,7 @@ export class UsersController {
   }
 
   @Post(':userId/roles/:roleId')
+  @CheckPolicies((ability) => ability.can(Action.Update, User))
   async addRoleToUser(
     @Param('userId', ParseIntPipe) userId: number,
     @Param('roleId', ParseIntPipe) roleId: number,
@@ -123,6 +122,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @CheckPolicies((ability) => ability.can(Action.Delete, User))
   async remove(
     @Param('id', ParseIntPipe) id: number,
     @Request() req,

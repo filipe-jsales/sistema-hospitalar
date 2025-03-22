@@ -21,14 +21,7 @@ export class HospitalsService {
   ) {}
 
   create(createHospitalDto: CreateHospitalDto, user: User) {
-    const ability = this.caslAbilityFactory.createForUser(user);
-
-    if (ability.can(Action.Create, Hospital)) {
-      const newHospital = this.hospitalsRepository.create(createHospitalDto);
-      return this.hospitalsRepository.save(newHospital);
-    }
-
-    throw new ForbiddenException('Você não tem permissão para criar hospitais');
+    return this.hospitalsRepository.create(createHospitalDto);
   }
 
   async findAll(user: User) {
@@ -68,11 +61,12 @@ export class HospitalsService {
 
     const ability = this.caslAbilityFactory.createForUser(user);
 
-    if (ability.can(Action.Manage, Hospital) || 
-        (user.hospital && user.hospital.id === hospital.id)) {
+    if (
+      ability.can(Action.Manage, Hospital) ||
+      (user.hospital && user.hospital.id === hospital.id)
+    ) {
       return hospital;
     }
-// trocar o casl
     throw new ForbiddenException(
       'Você não tem permissão para ver este hospital',
     );
@@ -89,8 +83,12 @@ export class HospitalsService {
 
     const ability = this.caslAbilityFactory.createForUser(user);
 
-    if (ability.can(Action.Manage, Hospital) || 
-        (user.hospital && user.hospital.id === hospital.id && ability.can(Action.Update, hospital))) {
+    if (
+      ability.can(Action.Manage, Hospital) ||
+      (user.hospital &&
+        user.hospital.id === hospital.id &&
+        ability.can(Action.Update, hospital))
+    ) {
       Object.assign(hospital, updateHospitalDto);
       return this.hospitalsRepository.save(hospital);
     }
