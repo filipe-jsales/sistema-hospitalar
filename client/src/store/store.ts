@@ -3,6 +3,7 @@ import activationReducer from './slices/activationSlice';
 import authReducer from './slices/authSlice';
 import passwordResetReducer from './slices/passwordResetSlice';
 import createUserReducer from './slices/createUserSlice';
+import fetchUsersReducer from './slices/user/fetchUsersSlice';
 
 const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ const store = configureStore({
     activation: activationReducer,
     passwordReset: passwordResetReducer,
     createUser: createUserReducer,
+    users: fetchUsersReducer,
   },
 });
 

@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
-import { apiConfig } from '../../config/apiConfig';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import apiService, { setAuthToken } from "../../utils/apiService";
 
 export interface Permission {
   id: number;
@@ -30,37 +28,43 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  token: null,
-  user: null,
-  isAuthenticated: false,
+  token: localStorage.getItem("token") || null,
+  user: JSON.parse(localStorage.getItem("user") || "null"),
+  isAuthenticated: !!localStorage.getItem("token"),
   loading: false,
   error: null,
 };
 
 export const login = createAsyncThunk(
-  'auth/login',
-  async (credentials: { email: string; password: string }, { rejectWithValue }) => {
+  "auth/login",
+  async (
+    credentials: { email: string; password: string },
+    { rejectWithValue }
+  ) => {
     try {
-      console.log('Making login API call with credentials:', credentials); 
-      const endpointUrl = `${apiConfig.BACKEND_URL}/users/login`;
-      const response = await axios.post(endpointUrl, credentials);
-      console.log('Login API response:', response.data);
+      const response = await apiService.post("/auth/login", credentials);
+      setAuthToken(response.data.token);
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+
       return response.data;
     } catch (error: any) {
-      console.error('Login API error:', error);
-      return rejectWithValue(error.response?.data?.message || 'Login falhou.');
+      console.error("Login API error:", error);
+      return rejectWithValue(error.response?.data?.message || "Login falhou.");
     }
   }
 );
 
 const authSlice = createSlice({
-  name: 'auth',
+  name: "auth",
   initialState,
   reducers: {
     logout(state) {
       state.token = null;
       state.user = null;
       state.isAuthenticated = false;
+
+      setAuthToken(null);
+      localStorage.removeItem("user");
     },
   },
   extraReducers: (builder) => {
