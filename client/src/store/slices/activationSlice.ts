@@ -2,6 +2,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { apiConfig } from '../../config/apiConfig';
 
+//TODO: move to the folder slices/auth
+
 interface ActivationState {
   loading: boolean;
   error: string | null;

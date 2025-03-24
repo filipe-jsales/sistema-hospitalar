@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService, { setAuthToken } from "../../utils/apiService";
 
+//TODO: change this to loginSlice and move to the folder slices/auth
+
 export interface Permission {
   id: number;
   action: string;

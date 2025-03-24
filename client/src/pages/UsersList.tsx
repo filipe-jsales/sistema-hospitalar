@@ -19,6 +19,7 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonAlert,
+  IonToast,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -36,13 +37,24 @@ import {
   fetchUsers,
   UserData,
 } from "../store/slices/user/fetchUsersSlice";
+import { useHistory } from "react-router";
+import { deleteUser, resetDeleteStatus } from "../store/slices/user/deleteUserSlice";
 
 const UsersList: React.FC = () => {
   const dispatch = useAppDispatch();
+  const history = useHistory();
   const { users, loading, error } = useAppSelector((state) => state.users);
+  const {
+    loading: deleteLoading,
+    error: deleteError,
+    success: deleteSuccess,
+  } = useAppSelector((state) => state.deleteUser);
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+
 
   useEffect(() => {
     loadUsers();
@@ -50,8 +62,23 @@ const UsersList: React.FC = () => {
     return () => {
       dispatch(clearUsers());
       dispatch(clearUserError());
+      dispatch(resetDeleteStatus());
     };
   }, [dispatch]);
+
+  useEffect(() => {
+    if (deleteSuccess) {
+      setToastMessage("Usuário excluído com sucesso!");
+      setShowToast(true);
+      loadUsers(); // Reload the users list after successful deletion
+      dispatch(resetDeleteStatus());
+    }
+
+    if (deleteError) {
+      setToastMessage(deleteError);
+      setShowToast(true);
+    }
+  }, [deleteSuccess, deleteError, dispatch]);
 
   const loadUsers = () => {
     dispatch(fetchUsers())
@@ -70,9 +97,7 @@ const UsersList: React.FC = () => {
   };
 
   const handleEdit = (user: UserData) => {
-    //TODO: implementar a navegação para a página de edição
-    console.log("Editar usuário:", user);
-    // Exemplo: history.push(`/users/edit/${user.id}`);
+    history.push(`/users/edit/${user.id}`);
   };
 
   const handleDelete = (user: UserData) => {
@@ -82,9 +107,7 @@ const UsersList: React.FC = () => {
 
   const confirmDelete = () => {
     if (selectedUser) {
-      //TODO: implementar a lógica de deleção
-      console.log("Deletar usuário:", selectedUser);
-      // Exemplo: dispatch(deleteUser(selectedUser.id))
+      dispatch(deleteUser(selectedUser.id));
       setShowAlert(false);
       setSelectedUser(null);
     }
@@ -227,6 +250,14 @@ const UsersList: React.FC = () => {
               handler: confirmDelete,
             },
           ]}
+        />
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={3000}
+          position="bottom"
+          color={deleteSuccess ? "success" : "danger"}
         />
       </IonContent>
     </IonPage>

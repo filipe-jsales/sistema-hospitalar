@@ -52,8 +52,6 @@ export class CaslAbilityFactory {
       });
     });
 
-    cannot(Action.Delete, User).because('Deletion is restricted.');
-
     return build({
       detectSubjectType: (item) =>
         item.constructor as ExtractSubjectType<Subjects>,

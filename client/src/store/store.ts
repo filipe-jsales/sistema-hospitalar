@@ -4,6 +4,8 @@ import authReducer from './slices/authSlice';
 import passwordResetReducer from './slices/passwordResetSlice';
 import createUserReducer from './slices/createUserSlice';
 import fetchUsersReducer from './slices/user/fetchUsersSlice';
+import fetchUserByIdReducer from './slices/user/fetchUserByIdSlice';
+import deleteUserReducer from './slices/user/deleteUserSlice';
 
 const store = configureStore({
   reducer: {
@@ -12,6 +14,8 @@ const store = configureStore({
     passwordReset: passwordResetReducer,
     createUser: createUserReducer,
     users: fetchUsersReducer,
+    userDetails: fetchUserByIdReducer,
+    deleteUser: deleteUserReducer,
   },
 });
 

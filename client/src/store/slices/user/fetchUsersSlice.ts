@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { User } from "../authSlice";
 import apiService from "../../../utils/apiService";
-import { clearError } from "../activationSlice";
 
 export interface UserData {
   id: number;

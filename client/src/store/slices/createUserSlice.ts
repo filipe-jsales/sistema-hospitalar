@@ -3,6 +3,8 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { User } from './authSlice';
 import apiService from '../../utils/apiService';
 
+//TODO: move to the folder slices/user
+
 interface UserState {
   loading: boolean;
   error: string | null;
