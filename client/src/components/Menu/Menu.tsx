@@ -14,6 +14,7 @@ import {
 import { 
   homeOutline,
   logOutOutline,
+  medicalOutline,
   peopleCircleOutline,
   personAddOutline,
 } from 'ionicons/icons';
@@ -41,6 +42,11 @@ const appPages: AppPage[] = [
     title: 'Listar Usuários',
     url: '/users',
     icon: peopleCircleOutline
+  },
+  {
+    title: 'Listar Hospitais',
+    url: '/hospitals',
+    icon: medicalOutline
   },
   {
     title: 'Logout',

@@ -99,23 +99,15 @@ export class HospitalsService {
   }
 
   async remove(id: number, user: User) {
-    const hospital = await this.hospitalsRepository.findOne({
-      where: { id },
-    });
-
+    const hospital = await this.findOne(id, user);
+    const isSuperAdmin = user.roles?.some((role) => role.name === 'superadmin');
     if (!hospital) {
-      throw new NotFoundException(`Hospital with ID ${id} not found`);
+      throw new NotFoundException(`Hospital com ID ${id} não encontrado`);
     }
-
-    const ability = this.caslAbilityFactory.createForUser(user);
-
-    if (ability.can(Action.Manage, Hospital)) {
-      await this.hospitalsRepository.remove(hospital);
-      return { message: `Hospital com ID ${id} foi removido com sucesso` };
+    if (!isSuperAdmin) {
+      throw new ForbiddenException('Você não tem permissão para esta ação.');
     }
-
-    throw new ForbiddenException(
-      'Você não tem permissão para remover este hospital',
-    );
+    await this.hospitalsRepository.softRemove(hospital);
+    return { message: `Hospital com ID ${id} foi removido com sucesso` };
   }
 }

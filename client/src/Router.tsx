@@ -8,8 +8,10 @@ import CreateUser from "./pages/CreateUser";
 import ActivateAccount from "./pages/Activation";
 import ResetPasswordRequest from "./pages/ResetPassword";
 import ResetPassword from "./pages/ResetPasswordForm";
-import Users from "./pages/UsersList";
 import EditUser from "./pages/users/EditUser";
+import HospitalsList from "./pages/hospitals/HospitalsList";
+import UsersList from "./pages/UsersList";
+import EditHospital from "./pages/hospitals/EditHospital";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -20,10 +22,12 @@ const Router: React.FC = () => (
       </Route>
       <Route exact path="/login" component={Login} />
       <Route exact path="/home" component={Home} />
-      <Route exact path="/users" component={Users} />
+      <Route exact path="/users" component={UsersList} />
       <Route exact path="/users/edit/:id" component={EditUser} />
       <Route exact path="/users/create-user" component={CreateUser} />
       <Route path="/users/activate/:token" component={ActivateAccount} />
+      <Route exact path="/hospitals" component={HospitalsList} />
+      <Route exact path="/hospital/edit/:id" component={EditHospital} />
       <Route exact path="/redefinition" component={ResetPasswordRequest} />
       <Route
         exact

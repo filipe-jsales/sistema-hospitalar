@@ -6,6 +6,9 @@ import createUserReducer from './slices/createUserSlice';
 import fetchUsersReducer from './slices/user/fetchUsersSlice';
 import fetchUserByIdReducer from './slices/user/fetchUserByIdSlice';
 import deleteUserReducer from './slices/user/deleteUserSlice';
+import fetchHospitalsReducer from './slices/hospital/fetchHospitalsSlice';
+import deleteHospitalReducer from './slices/hospital/deleteHospitalSlice';
+import fetchHospitalByIdReducer from './slices/hospital/fetchHospitalByIdSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +19,9 @@ const store = configureStore({
     users: fetchUsersReducer,
     userDetails: fetchUserByIdReducer,
     deleteUser: deleteUserReducer,
+    hospitals: fetchHospitalsReducer,
+    hospitalDetails: fetchHospitalByIdReducer,
+    deleteHospital: deleteHospitalReducer,
   },
 });
 

@@ -98,22 +98,6 @@ export class UsersController {
     @Request() req,
   ): Promise<User> {
     const currentUser = req.user;
-    const isSuperAdmin = currentUser.roles?.some(
-      (role) => role.name === 'superadmin',
-    );
-
-    if (
-      !isSuperAdmin &&
-      !(
-        currentUser.hospital?.id === hospitalId &&
-        currentUser.roles?.some((role) => role.name === 'admin')
-      )
-    ) {
-      throw new ForbiddenException(
-        'Você não tem permissão para atribuir usuários a este hospital.',
-      );
-    }
-
     return this.usersService.assignHospitalToUser(
       userId,
       hospitalId,
@@ -123,10 +107,7 @@ export class UsersController {
 
   @Delete(':id')
   @CheckPolicies((ability) => ability.can(Action.Delete, User))
-  async remove(
-    @Param('id', ParseIntPipe) id: number,
-    @Request() req,
-  ): Promise<void> {
+  async remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const currentUser = req.user;
     return this.usersService.remove(id, currentUser);
   }

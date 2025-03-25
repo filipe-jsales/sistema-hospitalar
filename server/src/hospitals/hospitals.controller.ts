@@ -3,11 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
   Request,
+  Put,
 } from '@nestjs/common';
 import { HospitalsService } from './hospitals.service';
 import { CreateHospitalDto } from './dto/create-hospital.dto';
@@ -41,7 +41,7 @@ export class HospitalsController {
     return this.hospitalsService.findOne(+id, req.user);
   }
   
-  @Patch(':id')
+  @Put(':id')
   @CheckPolicies((ability) => ability.can(Action.Update, Hospital))
   update(
     @Param('id') id: string,
