@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType } from '@nestjs/swagger';
 import { RoleDto } from './create-role.dto';
 import { IsArray, IsInt, IsOptional, IsString } from 'class-validator';
 
