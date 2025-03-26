@@ -12,6 +12,14 @@ import { AuthModule } from './auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/auth.guard';
 import { PoliciesGuard } from './casl/casl-ability.factory/policies.guard';
+import { ThemesModule } from './themes/themes.module';
+import { PrioritiesModule } from './priorities/priorities.module';
+import { IncidentsModule } from './incidents/incidents.module';
+import { SubcategoriesModule } from './subcategories/subcategories.module';
+import { CategoriesModule } from './categories/categories.module';
+import { NotifyingServicesModule } from './notifying-services/notifying-services.module';
+import { OrganizationalUnitiesModule } from './organizational-unities/organizational-unities.module';
+import { ResponsiblesModule } from './responsibles/responsibles.module';
 
 @Module({
   imports: [
@@ -39,6 +47,14 @@ import { PoliciesGuard } from './casl/casl-ability.factory/policies.guard';
     PermissionsModule,
     HospitalsModule,
     AuthModule,
+    ThemesModule,
+    PrioritiesModule,
+    IncidentsModule,
+    SubcategoriesModule,
+    CategoriesModule,
+    NotifyingServicesModule,
+    OrganizationalUnitiesModule,
+    ResponsiblesModule,
   ],
   providers: [
     {
