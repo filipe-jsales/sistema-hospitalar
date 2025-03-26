@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
+import { HospitalData } from "../hospital/fetchHospitalsSlice";
 
 export interface UserData {
   id: number;
@@ -12,6 +13,7 @@ export interface UserData {
   createdAt: string;
   updatedAt: string;
   lasLogin: string;
+  hospital: HospitalData;
   hospitalId: number;
 }
 

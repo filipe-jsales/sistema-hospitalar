@@ -9,6 +9,15 @@ interface UserState {
   successMessage: string | null;
 }
 
+interface UpdateUserPayload {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  isActive?: boolean;
+  hospitalId?: number | null;
+}
+
 const initialState: UserState = {
   user: null,
   loading: false,
@@ -31,13 +40,23 @@ export const fetchUserById = createAsyncThunk(
 );
 
 export const updateUser = createAsyncThunk(
-  "users/update",
+  "user/update",
   async (
-    { userId, userData }: { userId: number; userData: Partial<UserData> },
+    { 
+      userId, 
+      userData 
+    }: { 
+      userId: number; 
+      userData: UpdateUserPayload 
+    }, 
     { rejectWithValue }
   ) => {
     try {
-      const response = await apiService.put(`/users/${userId}`, userData);
+      const cleanedUserData = Object.fromEntries(
+        Object.entries(userData).filter(([_, v]) => v !== undefined)
+      );
+
+      const response = await apiService.put(`/users/${userId}`, cleanedUserData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

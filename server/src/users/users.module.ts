@@ -7,10 +7,11 @@ import { CaslModule } from '../casl/casl.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { Role } from 'src/roles/entities/role.entity';
 import { HospitalsModule } from 'src/hospitals/hospitals.module';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role]),
+    TypeOrmModule.forFeature([User, Role, Hospital]),
     CaslModule,
     forwardRef(() => AuthModule),
     forwardRef(() => HospitalsModule),

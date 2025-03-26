@@ -19,7 +19,6 @@ import { CheckPolicies } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
-import { CreateUserRequestDto } from './dto/info-user.dto';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), PoliciesGuard)
@@ -43,7 +42,7 @@ export class UsersController {
     @Request() req,
   ): Promise<{ message: string }> {
     const currentUser = req.user;
-    await this.authService.register(createUserRequestDto, currentUser);
+    await this.usersService.create(createUserRequestDto, currentUser);
     return { message: 'Usuário cadastrado com sucesso.' };
   }
 
@@ -69,13 +68,11 @@ export class UsersController {
       (role) => role.name === 'superadmin',
     );
     const currentUser = req.user;
-    //TODO: check better ways to (modularize) owner and superadmin checks also if we need to enumerate/interface this
     if (!isOwnProfile && !isSuperAdmin) {
       throw new ForbiddenException(
         'Você não tem permissão para atualizar este perfil.',
       );
     }
-
     return this.usersService.update(id, updateUserDto, currentUser);
   }
 
@@ -88,21 +85,6 @@ export class UsersController {
   ): Promise<User> {
     const currentUser = req.user;
     return this.usersService.addRoleToUser(userId, roleId, currentUser);
-  }
-
-  @Post(':userId/hospital/:hospitalId')
-  @CheckPolicies((ability) => ability.can(Action.Update, User))
-  async assignHospitalToUser(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Param('hospitalId', ParseIntPipe) hospitalId: number,
-    @Request() req,
-  ): Promise<User> {
-    const currentUser = req.user;
-    return this.usersService.assignHospitalToUser(
-      userId,
-      hospitalId,
-      currentUser,
-    );
   }
 
   @Delete(':id')

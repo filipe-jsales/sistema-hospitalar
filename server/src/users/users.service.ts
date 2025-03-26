@@ -11,12 +11,15 @@ import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '../roles/entities/role.entity';
 import { HospitalsService } from 'src/hospitals/hospitals.service';
+import { Hospital } from 'src/hospitals/entities/hospital.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Hospital)
+    private readonly hospitalsRepository: Repository<Hospital>,
     @InjectRepository(Role)
     private readonly rolesRepository: Repository<Role>,
     @Inject(forwardRef(() => HospitalsService))
@@ -175,17 +178,29 @@ export class UsersService {
     );
   }
 
-  //testar também se usuario admin ou normal ta conseguindo dar update de outros hospitais
-  //TODO superadmin pode dar update em tudo
-  // admin só pode dar update no proprio hospital
   async update(
     id: number,
     updateUserDto: Partial<CreateUserDto>,
     currentUser: User,
   ): Promise<User> {
-    await this.usersRepository.update(id, updateUserDto);
-    const user = await this.findOne(id, currentUser);
-    return user;
+    const { hospitalId, ...userData } = updateUserDto;
+
+    if (hospitalId !== undefined) {
+      const hospital = await this.hospitalsRepository.findOne({
+        where: { id: hospitalId },
+      });
+
+      if (!hospital) {
+        throw new NotFoundException(
+          `Hospital com ID ${hospitalId} não encontrado.`,
+        );
+      }
+
+      userData['hospital'] = hospital;
+    }
+
+    await this.usersRepository.update(id, userData);
+    return this.findOne(id, currentUser);
   }
 
   async addRoleToUser(
@@ -216,36 +231,6 @@ export class UsersService {
       where: { email },
       relations: ['roles', 'roles.permissions'],
     });
-  }
-
-  async assignHospitalToUser(
-    userId: number,
-    hospitalId: number,
-    currentUser: User,
-  ): Promise<User> {
-    const user = await this.findOne(userId, currentUser);
-    const isSuperAdmin = currentUser.roles?.some(
-      (role) => role.name === 'superadmin',
-    );
-
-    if (
-      !isSuperAdmin &&
-      !(
-        currentUser.hospital?.id === hospitalId &&
-        currentUser.roles?.some((role) => role.name === 'admin')
-      )
-    ) {
-      throw new ForbiddenException(
-        'Você não tem permissão para atribuir usuários a este hospital.',
-      );
-    }
-    const hospital = await this.hospitalsService.findOne(
-      hospitalId,
-      currentUser,
-    );
-
-    user.hospital = hospital;
-    return this.usersRepository.save(user);
   }
 
   async remove(id: number, currentUser: User) {

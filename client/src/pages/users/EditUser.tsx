@@ -15,6 +15,8 @@ import {
   IonToggle,
   IonItem,
   IonLabel,
+  IonSelect,
+  IonSelectOption,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
@@ -26,6 +28,7 @@ import {
 } from "../../store/slices/user/fetchUserByIdSlice";
 import { clearUserError } from "../../store/slices/user/fetchUsersSlice";
 import { clearSuccessMessage } from "../../store/slices/activationSlice";
+import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
 
 interface UserParams {
   id: string;
@@ -40,6 +43,9 @@ const EditUser: React.FC = () => {
   const { user, loading, error, successMessage } = useAppSelector(
     (state) => state.userDetails
   );
+  const { hospitals, loading: hospitalsLoading } = useAppSelector(
+    (state) => state.hospitals
+  );
 
   const [userInfo, setUserInfo] = useState({
     firstName: "",
@@ -47,6 +53,7 @@ const EditUser: React.FC = () => {
     email: "",
     phoneNumber: "",
     isActive: true,
+    hospitalId: null as number | null,
   });
 
   const [errors, setErrors] = useState({
@@ -54,6 +61,7 @@ const EditUser: React.FC = () => {
     lastName: "",
     email: "",
     phoneNumber: "",
+    hospitalId: "",
   });
 
   useEffect(() => {
@@ -61,6 +69,11 @@ const EditUser: React.FC = () => {
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar usuário:", error);
+      });
+    dispatch(fetchHospitals())
+      .unwrap()
+      .catch((error) => {
+        console.error("Falha ao carregar hospitais:", error);
       });
 
     return () => {
@@ -78,6 +91,7 @@ const EditUser: React.FC = () => {
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
         isActive: user.isActive,
+        hospitalId: user.hospitalId || null,
       });
     }
   }, [user]);
@@ -90,6 +104,7 @@ const EditUser: React.FC = () => {
       newErrors.email = "Email precisa ser válido.";
     if (userInfo.phoneNumber && userInfo.phoneNumber.length > 20)
       newErrors.phoneNumber = "Telefone pode ter no máximo 20 dígitos.";
+    if (!userInfo.hospitalId) newErrors.hospitalId = "Selecione um hospital.";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -101,7 +116,12 @@ const EditUser: React.FC = () => {
     dispatch(clearSuccessMessage());
 
     if (validateInputs()) {
-      dispatch(updateUser({ userId, userData: userInfo }))
+      const userDataToUpdate = {
+        ...userInfo,
+        hospitalId:
+          userInfo.hospitalId === null ? undefined : userInfo.hospitalId,
+      };
+      dispatch(updateUser({ userId, userData: userDataToUpdate }))
         .unwrap()
         .then(() => {
           setTimeout(() => {
@@ -247,10 +267,45 @@ const EditUser: React.FC = () => {
                       <span className="text-danger">{errors.phoneNumber}</span>
                     )}
                   </div>
+                  <div className="col-12">
+                    <IonItem>
+                      <IonLabel position="stacked">Hospital</IonLabel>
+                      <IonSelect
+                        value={userInfo.hospitalId}
+                        placeholder={user?.hospital?.name}
+                        onIonChange={(e) => {
+                          setUserInfo({
+                            ...userInfo,
+                            hospitalId: e.detail.value,
+                          });
+                          if (errors.hospitalId)
+                            setErrors({ ...errors, hospitalId: "" });
+                        }}
+                      >
+                        {hospitalsLoading ? (
+                          <IonSelectOption disabled>
+                            Carregando hospitais...
+                          </IonSelectOption>
+                        ) : (
+                          hospitals.map((hospital) => (
+                            <IonSelectOption
+                              key={hospital.id}
+                              value={hospital.id}
+                            >
+                              {hospital.name}
+                            </IonSelectOption>
+                          ))
+                        )}
+                      </IonSelect>
+                    </IonItem>
+                    {errors.hospitalId && (
+                      <span className="text-danger">{errors.hospitalId}</span>
+                    )}
+                  </div>
 
                   <div className="col-12">
                     <IonItem lines="none">
-                      <IonLabel>Status do usuário</IonLabel>
+                      <IonLabel position="stacked">Status do usuário</IonLabel>
                       <IonToggle
                         checked={userInfo.isActive}
                         onIonChange={(e) => {
