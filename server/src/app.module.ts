@@ -20,6 +20,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { NotifyingServicesModule } from './notifying-services/notifying-services.module';
 import { OrganizationalUnitiesModule } from './organizational-unities/organizational-unities.module';
 import { ResponsiblesModule } from './responsibles/responsibles.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { ResponsiblesModule } from './responsibles/responsibles.module';
     NotifyingServicesModule,
     OrganizationalUnitiesModule,
     ResponsiblesModule,
+    NotificationsModule,
   ],
   providers: [
     {
