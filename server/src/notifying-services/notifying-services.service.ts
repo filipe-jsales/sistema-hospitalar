@@ -14,15 +14,17 @@ export class NotifyingServicesService {
     // TODO: add nest logger
   ) {}
 
-  create(createNotifyingServiceDto: CreateNotifyingServiceDto) {
+  create(
+    createNotifyingServiceDto: CreateNotifyingServiceDto,
+  ): Promise<NotifyingService> {
     return this.notifyingServicesRepository.save(createNotifyingServiceDto);
   }
 
-  findAll() {
+  findAll(): Promise<NotifyingService[]> {
     return this.notifyingServicesRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<NotifyingService> {
     const notifyingService = await this.notifyingServicesRepository.findOne({
       where: { id },
     });
@@ -37,23 +39,20 @@ export class NotifyingServicesService {
   async update(
     id: number,
     updateNotifyingServiceDto: UpdateNotifyingServiceDto,
-  ) {
-    const notifyingService = this.notifyingServicesRepository.findOne({
-      where: { id },
-    });
+  ): Promise<NotifyingService> {
+    const notifyingService = this.findOne(id);
 
-    if (!notifyingService) {
-      throw new NotFoundException(`Serviço notificante ${id} não encontrado`);
+    if (notifyingService) {
+      await this.notifyingServicesRepository.update(
+        id,
+        updateNotifyingServiceDto,
+      );
     }
 
-    await this.notifyingServicesRepository.update(
-      id,
-      updateNotifyingServiceDto,
-    );
     return this.findOne(id);
   }
 
-  async remove(id: number) {
+  async remove(id: number): Promise<{ message: string }> {
     const notifyingService = await this.findOne(id);
     await this.notifyingServicesRepository.softRemove(notifyingService);
     return { message: `Serviço notificante ${id} removido com sucesso` };
