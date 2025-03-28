@@ -20,8 +20,9 @@ export class HospitalsService {
     private caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
+  // FIXME: use the user: User here
   create(createHospitalDto: CreateHospitalDto, user: User) {
-    return this.hospitalsRepository.create(createHospitalDto);
+    return this.hospitalsRepository.save(createHospitalDto);
   }
 
   async findAll(user: User) {

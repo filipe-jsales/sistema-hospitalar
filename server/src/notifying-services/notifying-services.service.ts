@@ -1,26 +1,61 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotifyingServiceDto } from './dto/create-notifying-service.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { NotifyingService } from './entities/notifying-service.entity';
+import { Repository } from 'typeorm';
 import { UpdateNotifyingServiceDto } from './dto/update-notifying-service.dto';
 
 @Injectable()
 export class NotifyingServicesService {
+  constructor(
+    @InjectRepository(NotifyingService)
+    private readonly notifyingServicesRepository: Repository<NotifyingService>,
+    // TODO: add CaslAbilityFactory?
+    // TODO: add nest logger
+  ) {}
+
   create(createNotifyingServiceDto: CreateNotifyingServiceDto) {
-    return 'This action adds a new notifyingService';
+    return this.notifyingServicesRepository.save(createNotifyingServiceDto);
   }
 
   findAll() {
-    return `This action returns all notifyingServices`;
+    return this.notifyingServicesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notifyingService`;
+  async findOne(id: number) {
+    const notifyingService = await this.notifyingServicesRepository.findOne({
+      where: { id },
+    });
+
+    if (!notifyingService) {
+      throw new NotFoundException(`NotifyingService with ID ${id} not found`);
+    }
+
+    return notifyingService;
   }
 
-  update(id: number, updateNotifyingServiceDto: UpdateNotifyingServiceDto) {
-    return `This action updates a #${id} notifyingService`;
+  async update(
+    id: number,
+    updateNotifyingServiceDto: UpdateNotifyingServiceDto,
+  ) {
+    const notifyingService = this.notifyingServicesRepository.findOne({
+      where: { id },
+    });
+
+    if (!notifyingService) {
+      throw new NotFoundException(`Serviço notificante ${id} não encontrado`);
+    }
+
+    await this.notifyingServicesRepository.update(
+      id,
+      updateNotifyingServiceDto,
+    );
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notifyingService`;
+  async remove(id: number) {
+    const notifyingService = await this.findOne(id);
+    await this.notifyingServicesRepository.softRemove(notifyingService);
+    return { message: `Serviço notificante ${id} removido com sucesso` };
   }
 }

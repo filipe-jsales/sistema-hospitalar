@@ -1,11 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { NotifyingServicesService } from './notifying-services.service';
 import { CreateNotifyingServiceDto } from './dto/create-notifying-service.dto';
 import { UpdateNotifyingServiceDto } from './dto/update-notifying-service.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('notifying-services')
+@UseGuards(AuthGuard('jwt')) //TODO: add policies guard?
 export class NotifyingServicesController {
-  constructor(private readonly notifyingServicesService: NotifyingServicesService) {}
+  constructor(
+    private readonly notifyingServicesService: NotifyingServicesService,
+  ) {}
 
   @Post()
   create(@Body() createNotifyingServiceDto: CreateNotifyingServiceDto) {
@@ -23,7 +36,10 @@ export class NotifyingServicesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNotifyingServiceDto: UpdateNotifyingServiceDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateNotifyingServiceDto: UpdateNotifyingServiceDto,
+  ) {
     return this.notifyingServicesService.update(+id, updateNotifyingServiceDto);
   }
 
