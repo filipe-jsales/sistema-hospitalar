@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 
 @Entity('Priority')
@@ -11,6 +11,15 @@ export class Priority {
 
   @Column()
   numericalPriority: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToMany(() => Notification, (notification) => notification.priority)
   notifications: Notification[];
