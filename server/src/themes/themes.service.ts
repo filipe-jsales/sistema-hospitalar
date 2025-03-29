@@ -1,26 +1,43 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Theme } from './entities/theme.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ThemesService {
-  create(createThemeDto: CreateThemeDto) {
-    return 'This action adds a new theme';
+  constructor(
+    @InjectRepository(Theme)
+    private readonly themesRepository: Repository<Theme>,
+  ) {}
+
+  create(createThemeDto: CreateThemeDto): Promise<Theme> {
+    return this.themesRepository.save(createThemeDto);
   }
 
-  findAll() {
-    return `This action returns all themes`;
+  findAll(): Promise<Theme[]> {
+    return this.themesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} theme`;
+  async findOne(id: number): Promise<Theme> {
+    const theme = await this.themesRepository.findOne({ where: { id } });
+
+    if (!theme) {
+      throw new NotFoundException(`Tema com ID ${id} não encontrado`);
+    }
+    return theme;
   }
 
-  update(id: number, updateThemeDto: UpdateThemeDto) {
-    return `This action updates a #${id} theme`;
+  async update(id: number, updateThemeDto: UpdateThemeDto): Promise<Theme> {
+    await this.findOne(id);
+    await this.themesRepository.update(id, updateThemeDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} theme`;
+  async remove(id: number): Promise<{ message: string }> {
+    const theme = await this.findOne(id);
+    await this.themesRepository.softRemove(theme);
+    return { message: `Tema com ID ${id} removido` };
   }
 }
