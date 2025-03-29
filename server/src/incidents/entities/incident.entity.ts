@@ -1,5 +1,5 @@
 import { Notification } from 'src/notifications/entities/notification.entity';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('Incident')
 export class Incident {
@@ -17,6 +17,15 @@ export class Incident {
 
   @Column()
   conclusionDate: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @OneToMany(() => Notification, (notification) => notification.incident)
   notifications: Notification[];

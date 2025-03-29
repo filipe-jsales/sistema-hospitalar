@@ -1,12 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('incidents')
+@UseGuards(AuthGuard('jwt'))
 export class IncidentsController {
   constructor(private readonly incidentsService: IncidentsService) {}
-
   @Post()
   create(@Body() createIncidentDto: CreateIncidentDto) {
     return this.incidentsService.create(createIncidentDto);
