@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { Subcategory } from 'src/subcategories/entities/subcategory.entity';
 
 @Entity('Category')
 export class Category {
@@ -28,4 +29,7 @@ export class Category {
 
   @OneToMany(() => Notification, (notification) => notification.priority)
   notifications: Notification[];
+
+  @OneToMany(() => Subcategory, (subcategory) => subcategory.category)
+  subcategories: Subcategory[];
 }

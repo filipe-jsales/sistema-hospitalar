@@ -33,10 +33,8 @@ export class CategoriesService {
     id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    const category = await this.findOne(id);
-    if (category) {
-      await this.categoriesRepository.update(id, updateCategoryDto);
-    }
+    await this.findOne(id);
+    await this.categoriesRepository.update(id, updateCategoryDto);
     return this.findOne(id);
   }
 
