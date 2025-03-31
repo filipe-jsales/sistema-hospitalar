@@ -2,16 +2,16 @@ import { Redirect, Route } from "react-router-dom";
 import { IonReactRouter } from "@ionic/react-router";
 import Menu from "./components/Menu/Menu";
 import { IonRouterOutlet } from "@ionic/react";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import CreateUser from "./pages/CreateUser";
-import ActivateAccount from "./pages/Activation";
-import ResetPasswordRequest from "./pages/ResetPassword";
-import ResetPassword from "./pages/ResetPasswordForm";
+import ActivateAccount from "./pages/auth/Activation";
 import EditUser from "./pages/users/EditUser";
 import HospitalsList from "./pages/hospitals/HospitalsList";
-import UsersList from "./pages/UsersList";
 import EditHospital from "./pages/hospitals/EditHospital";
+import Login from "./pages/auth/Login";
+import Home from "./pages/home/Home";
+import UsersList from "./pages/users/UsersList";
+import CreateUser from "./pages/users/CreateUser";
+import ResetPasswordRequest from "./pages/auth/ResetPassword";
+import ResetPassword from "./pages/auth/ResetPasswordForm";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -29,6 +29,15 @@ const Router: React.FC = () => (
       <Route exact path="/hospitals" component={HospitalsList} />
       <Route exact path="/hospital/edit/:id" component={EditHospital} />
       <Route exact path="/redefinition" component={ResetPasswordRequest} />
+      {/* TODO: create the respective pages */}
+      <Route exact path="/themes" component={HospitalsList} />
+      <Route exact path="/notifications" component={HospitalsList} />
+      <Route exact path="/incidents" component={HospitalsList} />
+      <Route exact path="/organizational-unities" component={HospitalsList} />
+      <Route exact path="/priorities" component={HospitalsList} />
+      <Route exact path="/responsibles" component={HospitalsList} />
+      <Route exact path="/categories" component={HospitalsList} />
+      <Route exact path="/subcategories" component={HospitalsList} />
       <Route
         exact
         path="/users/reset-password/:token"
