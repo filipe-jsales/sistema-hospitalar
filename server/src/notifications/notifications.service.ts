@@ -1,26 +1,104 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
+import { Notification } from './entities/notification.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CategoriesService } from 'src/categories/categories.service';
+import { SubcategoriesService } from 'src/subcategories/subcategories.service';
+import { ThemesService } from 'src/themes/themes.service';
+import { PrioritiesService } from 'src/priorities/priorities.service';
+import { IncidentsService } from 'src/incidents/incidents.service';
+import { ResponsiblesService } from 'src/responsibles/responsibles.service';
+import { OrganizationalUnitiesService } from 'src/organizational-unities/organizational-unities.service';
+import { NotifyingServicesService } from 'src/notifying-services/notifying-services.service';
 
 @Injectable()
 export class NotificationsService {
-  create(createNotificationDto: CreateNotificationDto) {
-    return 'This action adds a new notification';
+  constructor(
+    @InjectRepository(Notification)
+    private readonly notificationRepository: Repository<Notification>,
+    private readonly categoriesService: CategoriesService,
+    private readonly subcategoriesService: SubcategoriesService,
+    private readonly themesServices: ThemesService,
+    private readonly prioritiesService: PrioritiesService,
+    private readonly incidentsService: IncidentsService,
+    private readonly responsiblesService: ResponsiblesService,
+    private readonly organizationalUnitiesService: OrganizationalUnitiesService,
+    private readonly notifyingServicesService: NotifyingServicesService,
+  ) {}
+
+  async create(
+    createNotificationDto: CreateNotificationDto,
+  ): Promise<Notification> {
+    const category = await this.categoriesService.findOne(
+      createNotificationDto.categoryId,
+    );
+    const subcategory = await this.subcategoriesService.findOne(
+      createNotificationDto.subcategoryId,
+    );
+    const theme = await this.themesServices.findOne(
+      createNotificationDto.themeId,
+    );
+    const priority = await this.prioritiesService.findOne(
+      createNotificationDto.priorityId,
+    );
+    const incident = await this.incidentsService.findOne(
+      createNotificationDto.incidentId,
+    );
+    const responsible = await this.responsiblesService.findOne(
+      createNotificationDto.responsibleId,
+    );
+    const organizationalUnity = await this.organizationalUnitiesService.findOne(
+      createNotificationDto.organizationalUnityId,
+    );
+    const notifyingService = await this.notifyingServicesService.findOne(
+      createNotificationDto.notifyingServiceId,
+    );
+
+    // TODO: verify 'local-incident' foreign key not referring to any other table?
+
+    const notification = this.notificationRepository.create({
+      ...createNotificationDto,
+      category,
+      subcategory,
+      theme,
+      priority,
+      incident,
+      responsible,
+      organizationalUnity,
+      notifyingService,
+    });
+
+    return this.notificationRepository.save(notification);
   }
 
-  findAll() {
-    return `This action returns all notifications`;
+  findAll(): Promise<Notification[]> {
+    return this.notificationRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} notification`;
+  async findOne(id: number): Promise<Notification> {
+    const notification = await this.notificationRepository.findOne({
+      where: { id },
+    });
+    if (!notification) {
+      throw new NotFoundException(`Notificação com ${id} não encontrado`);
+    }
+    return notification;
   }
 
-  update(id: number, updateNotificationDto: UpdateNotificationDto) {
-    return `This action updates a #${id} notification`;
+  async update(
+    id: number,
+    updateNotificationDto: UpdateNotificationDto,
+  ): Promise<Notification> {
+    await this.findOne(id);
+    await this.notificationRepository.update(id, updateNotificationDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} notification`;
+  async remove(id: number): Promise<{ message: string }> {
+    const notification = await this.findOne(id);
+    await this.notificationRepository.softRemove(notification);
+    return { message: `Notificação com ID ${id} removida` };
   }
 }

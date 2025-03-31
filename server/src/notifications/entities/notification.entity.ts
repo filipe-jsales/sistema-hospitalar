@@ -6,7 +6,7 @@ import { Priority } from 'src/priorities/entities/priority.entity';
 import { Responsible } from 'src/responsibles/entities/responsible.entity';
 import { Subcategory } from 'src/subcategories/entities/subcategory.entity';
 import { Theme } from 'src/themes/entities/theme.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 @Entity('Notification')
 export class Notification {
@@ -66,6 +66,15 @@ export class Notification {
 
   @Column({ nullable: true })
   actionPlan: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 
   @ManyToOne(() => Priority, (priority) => priority.notifications)
   priority: Priority;
