@@ -9,10 +9,10 @@ import {
   IonSpinner,
 } from '@ionic/react';
 import { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { login } from '../store/slices/authSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { login } from '../../store/slices/authSlice';
 import { useHistory } from 'react-router-dom';
-import ImageLogo from '../components/ImageLogo';
+import ImageLogo from '../../components/ImageLogo';
 
 const Login: React.FC = () => {
   const [userInfos, setUserInfos] = useState({

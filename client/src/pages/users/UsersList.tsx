@@ -22,7 +22,7 @@ import {
   IonToast,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
 import { RefresherEventDetail } from "@ionic/core";
 import {
@@ -36,9 +36,12 @@ import {
   clearUsers,
   fetchUsers,
   UserData,
-} from "../store/slices/user/fetchUsersSlice";
+} from "../../store/slices/user/fetchUsersSlice";
 import { useHistory } from "react-router";
-import { deleteUser, resetDeleteStatus } from "../store/slices/user/deleteUserSlice";
+import {
+  deleteUser,
+  resetDeleteStatus,
+} from "../../store/slices/user/deleteUserSlice";
 
 const UsersList: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -54,7 +57,6 @@ const UsersList: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
-
 
   useEffect(() => {
     loadUsers();

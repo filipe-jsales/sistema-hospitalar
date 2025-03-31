@@ -9,8 +9,8 @@ import {
   IonSpinner,
 } from '@ionic/react';
 import { useParams, useHistory } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { resetPassword, clearError, clearSuccessMessage } from '../store/slices/passwordResetSlice';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { clearError, clearSuccessMessage, resetPassword } from '../../store/slices/passwordResetSlice';
 
 const ResetPassword: React.FC = () => {
   const { token } = useParams<{ token: string }>();

@@ -3,12 +3,16 @@ import {
   IonContent,
   IonCard,
   IonCardContent,
-  IonSpinner
-} from '@ionic/react';
-import { useEffect } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { activateAccount, clearError, clearSuccessMessage } from '../store/slices/activationSlice';
+  IonSpinner,
+} from "@ionic/react";
+import { useEffect } from "react";
+import { useParams, useHistory } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  activateAccount,
+  clearError,
+  clearSuccessMessage,
+} from "../../store/slices/activationSlice";
 
 interface ActivationParams {
   token: string;
@@ -18,7 +22,9 @@ const ActivateAccount: React.FC = () => {
   const { token } = useParams<ActivationParams>();
   const history = useHistory();
   const dispatch = useAppDispatch();
-  const { loading, error, successMessage } = useAppSelector((state) => state.activation);
+  const { loading, error, successMessage } = useAppSelector(
+    (state) => state.activation
+  );
 
   useEffect(() => {
     dispatch(clearError());
@@ -26,10 +32,10 @@ const ActivateAccount: React.FC = () => {
     dispatch(activateAccount(token))
       .unwrap()
       .then(() => {
-        setTimeout(() => history.push('/login'), 3000);
+        setTimeout(() => history.push("/login"), 3000);
       })
       .catch((error) => {
-        console.error('Activation failed:', error);
+        console.error("Activation failed:", error);
       });
   }, [token, history, dispatch]);
 
@@ -37,7 +43,9 @@ const ActivateAccount: React.FC = () => {
     <IonPage>
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center">
-          <IonCard style={{ width: '90%', maxWidth: '30rem', textAlign: 'center' }}>
+          <IonCard
+            style={{ width: "90%", maxWidth: "30rem", textAlign: "center" }}
+          >
             <IonCardContent>
               {loading && (
                 <>

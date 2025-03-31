@@ -17,14 +17,14 @@ import {
   IonSelectOption,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   createUser,
   clearError,
   clearSuccessMessage,
-} from "../store/slices/createUserSlice";
-import { useFormCleanup } from "../hooks/useFormCleanup";
-import { fetchHospitals } from "../store/slices/hospital/fetchHospitalsSlice";
+} from "../../store/slices/createUserSlice";
+import { useFormCleanup } from "../../hooks/useFormCleanup";
+import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
 
 const CreateUser: React.FC = () => {
   const [userInfos, setUserInfos] = useState({

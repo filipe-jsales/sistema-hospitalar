@@ -9,9 +9,9 @@ import {
   IonButton,
   IonSpinner,
 } from '@ionic/react';
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { requestPasswordReset, clearError, clearSuccessMessage } from '../store/slices/passwordResetSlice';
-import { useFormCleanup } from '../hooks/useFormCleanup';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { requestPasswordReset, clearError, clearSuccessMessage } from '../../store/slices/passwordResetSlice';
+import { useFormCleanup } from '../../hooks/useFormCleanup';
 
 const ResetPasswordRequest: React.FC = () => {
   const [email, setEmail] = useState('');
