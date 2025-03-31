@@ -1,26 +1,49 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateResponsibleDto } from './dto/create-responsible.dto';
 import { UpdateResponsibleDto } from './dto/update-responsible.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Responsible } from './entities/responsible.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ResponsiblesService {
-  create(createResponsibleDto: CreateResponsibleDto) {
-    return 'This action adds a new responsible';
+  constructor(
+    @InjectRepository(Responsible)
+    private readonly responsiblesRepository: Repository<Responsible>,
+  ) {}
+  create(createResponsibleDto: CreateResponsibleDto): Promise<Responsible> {
+    return this.responsiblesRepository.save(createResponsibleDto);
   }
 
-  findAll() {
-    return `This action returns all responsibles`;
+  findAll(): Promise<Responsible[]> {
+    return this.responsiblesRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} responsible`;
+  async findOne(id: number): Promise<Responsible> {
+    const responsible = await this.responsiblesRepository.findOne({
+      where: { id },
+    });
+    if (!responsible) {
+      throw new NotFoundException(`Responsável com ID ${id} não encontrado`);
+    }
+    return responsible;
   }
 
-  update(id: number, updateResponsibleDto: UpdateResponsibleDto) {
-    return `This action updates a #${id} responsible`;
+  async update(
+    id: number,
+    updateResponsibleDto: UpdateResponsibleDto,
+  ): Promise<Responsible> {
+    await this.findOne(id);
+    await this.responsiblesRepository.update(id, updateResponsibleDto);
+    return this.findOne(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} responsible`;
+  async remove(id: number): Promise<{ message: string }> {
+    await this.findOne(id);
+    const responsible = await this.responsiblesRepository.findOne({
+      where: { id },
+    });
+    await this.responsiblesRepository.softRemove(responsible);
+    return { message: `Usuário com ID ${id} removido.` };
   }
 }

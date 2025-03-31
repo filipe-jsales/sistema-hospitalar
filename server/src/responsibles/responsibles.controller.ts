@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { ResponsiblesService } from './responsibles.service';
 import { CreateResponsibleDto } from './dto/create-responsible.dto';
 import { UpdateResponsibleDto } from './dto/update-responsible.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('responsibles')
+@UseGuards(AuthGuard('jwt'))
 export class ResponsiblesController {
   constructor(private readonly responsiblesService: ResponsiblesService) {}
 
