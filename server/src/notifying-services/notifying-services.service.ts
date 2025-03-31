@@ -40,15 +40,11 @@ export class NotifyingServicesService {
     id: number,
     updateNotifyingServiceDto: UpdateNotifyingServiceDto,
   ): Promise<NotifyingService> {
-    const notifyingService = this.findOne(id);
-
-    if (notifyingService) {
-      await this.notifyingServicesRepository.update(
-        id,
-        updateNotifyingServiceDto,
-      );
-    }
-
+    await this.findOne(id);
+    await this.notifyingServicesRepository.update(
+      id,
+      updateNotifyingServiceDto,
+    );
     return this.findOne(id);
   }
 
