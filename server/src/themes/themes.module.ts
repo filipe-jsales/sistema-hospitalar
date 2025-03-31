@@ -8,5 +8,6 @@ import { Theme } from './entities/theme.entity';
   imports: [TypeOrmModule.forFeature([Theme])],
   controllers: [ThemesController],
   providers: [ThemesService],
+  exports: [ThemesService],
 })
 export class ThemesModule {}

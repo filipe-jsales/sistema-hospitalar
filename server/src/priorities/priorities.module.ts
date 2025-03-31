@@ -8,5 +8,6 @@ import { Priority } from './entities/priority.entity';
   imports: [TypeOrmModule.forFeature([Priority])],
   controllers: [PrioritiesController],
   providers: [PrioritiesService],
+  exports: [PrioritiesService],
 })
 export class PrioritiesModule {}
