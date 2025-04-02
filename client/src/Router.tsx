@@ -28,6 +28,15 @@ import EditPriority from "./pages/priorities/EditPriority";
 import EditResponsible from "./pages/responsibles/EditResponsible";
 import EditCategory from "./pages/categories/EditCategory";
 import EditSubcategory from "./pages/subcategories/EditSubcategory";
+import CreateHospital from "./pages/hospitals/CreateHospital";
+import CreateSubcategory from "./pages/subcategories/CreateSubcategory";
+import CreateCategory from "./pages/categories/CreateCategory";
+import CreateResponsible from "./pages/responsibles/CreateResponsible";
+import CreatePriority from "./pages/priorities/CreatePriority";
+import CreateOrganizationalUnity from "./pages/organizational-unities/CreateOrganizationalUnity";
+import CreateIncident from "./pages/incidents/CreateIncident";
+import CreateNotification from "./pages/notifications/CreateNotification";
+import CreateTheme from "./pages/themes/CreateTheme";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -39,7 +48,6 @@ const Router: React.FC = () => (
       <Route exact path="/login" component={Login} />
       <Route exact path="/home" component={Home} />
       <Route exact path="/redefinition" component={ResetPasswordRequest} />
-      {/* TODO: the correct should this be part of /auth route */}
       <Route
         exact
         path="/users/reset-password/:token"
@@ -52,12 +60,23 @@ const Router: React.FC = () => (
       <Route path="/users/activate/:token" component={ActivateAccount} />
 
       <Route exact path="/hospitals" component={HospitalsList} />
+      <Route
+        exact
+        path="/hospitals/create-hospital"
+        component={CreateHospital}
+      />
       <Route exact path="/hospitals/edit/:id" component={EditHospital} />
 
       <Route exact path="/themes" component={ThemesList} />
+      <Route exact path="/themes/create-theme" component={CreateTheme} />
       <Route exact path="/themes/edit/:id" component={EditTheme} />
 
       <Route exact path="/notifications" component={NotificationsList} />
+      <Route
+        exact
+        path="/notifications/create-notification"
+        component={CreateNotification}
+      />
       <Route
         exact
         path="/notifications/edit/:id"
@@ -65,11 +84,22 @@ const Router: React.FC = () => (
       />
 
       <Route exact path="/incidents" component={IncidentsList} />
+      <Route
+        exact
+        path="/incidents/create-incident"
+        component={CreateIncident}
+      />
       <Route exact path="/incidents/edit/:id" component={EditIncident} />
+
       <Route
         exact
         path="/organizational-unities"
         component={OrganizationalUnitiesList}
+      />
+      <Route
+        exact
+        path="/organizational-unities/create-organizational-unity"
+        component={CreateOrganizationalUnity}
       />
       <Route
         exact
@@ -78,17 +108,36 @@ const Router: React.FC = () => (
       />
 
       <Route exact path="/priorities" component={PrioritiesList} />
+      <Route
+        exact
+        path="/priorities/create-priority"
+        component={CreatePriority}
+      />
       <Route exact path="/priorities/edit/:id" component={EditPriority} />
 
       <Route exact path="/responsibles" component={ResponsiblesList} />
+      <Route
+        exact
+        path="/responsibles/create-responsible"
+        component={CreateResponsible}
+      />
       <Route exact path="/responsibles/edit/:id" component={EditResponsible} />
 
       <Route exact path="/categories" component={CategoriesList} />
+      <Route
+        exact
+        path="/categories/create-category"
+        component={CreateCategory}
+      />
       <Route exact path="/categories/edit/:id" component={EditCategory} />
 
       <Route exact path="/subcategories" component={SubcategoriesList} />
+      <Route
+        exact
+        path="/subcategories/create-subcategory"
+        component={CreateSubcategory}
+      />
       <Route exact path="/subcategories/edit/:id" component={EditSubcategory} />
-
     </IonRouterOutlet>
   </IonReactRouter>
 );

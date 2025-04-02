@@ -19,15 +19,14 @@ export interface SideMenuPages {
   title: string;
 }
 
-// TODO: change this name to represent the sidemenu pages
-export const appPages: SideMenuPages[] = [
+export const sideMenuPages: SideMenuPages[] = [
   {
     title: "Home",
     url: "/home",
     icon: homeOutline,
   },
   {
-    title: "Cadastro de Usuário",
+    title: "Cadastrar Usuário",
     url: "/users/create-user",
     icon: personAddOutline,
   },
@@ -35,6 +34,11 @@ export const appPages: SideMenuPages[] = [
     title: "Listar Usuários",
     url: "/users",
     icon: peopleCircleOutline,
+  },
+  {
+    title: "Cadastrar Hospital",
+    url: "/hospitals/create-hospital",
+    icon: medicalOutline,
   },
   {
     title: "Listar Hospitais",
@@ -47,8 +51,18 @@ export const appPages: SideMenuPages[] = [
     icon: notificationsOutline,
   },
   {
+    title: "Cadastrar Notificação",
+    url: "/notifications/create-notification",
+    icon: notificationsOutline,
+  },
+  {
     title: "Temas",
     url: "/themes",
+    icon: brushOutline,
+  },
+  {
+    title: "Cadastrar Temas",
+    url: "/themes/create-theme",
     icon: brushOutline,
   },
   {
@@ -57,8 +71,18 @@ export const appPages: SideMenuPages[] = [
     icon: bagOutline,
   },
   {
+    title: "Cadastrar Categorias",
+    url: "/categories/create-category",
+    icon: bagOutline,
+  },
+  {
     title: "Subcategorias",
     url: "/subcategories",
+    icon: carOutline,
+  },
+  {
+    title: "Cadastrar Subcategorias",
+    url: "/subcategories/create-subcategory",
     icon: carOutline,
   },
   {
@@ -67,13 +91,28 @@ export const appPages: SideMenuPages[] = [
     icon: cutOutline,
   },
   {
+    title: "Cadastrar Incidentes",
+    url: "/incidents/create-incident",
+    icon: cutOutline,
+  },
+  {
     title: "Responsáveis",
     url: "/responsibles",
     icon: manOutline,
   },
   {
+    title: "Cadastrar Responsáveis",
+    url: "/responsibles/create-responsible",
+    icon: manOutline,
+  },
+  {
     title: "Prioridades",
     url: "/priorities",
+    icon: warningOutline,
+  },
+  {
+    title: "Cadastrar Prioridades",
+    url: "/priorities/create-priority",
     icon: warningOutline,
   },
   // {
@@ -84,6 +123,11 @@ export const appPages: SideMenuPages[] = [
   {
     title: "Unidades Organizacionais",
     url: "/organizational-unities",
+    icon: medicalOutline,
+  },
+  {
+    title: "Cadastrar Unidades Organizacionais",
+    url: "/organizational-unities/create-organizational-unity",
     icon: medicalOutline,
   },
   {

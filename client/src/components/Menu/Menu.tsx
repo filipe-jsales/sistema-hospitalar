@@ -13,7 +13,7 @@ import {
 } from "@ionic/react";
 import { useLocation } from "react-router-dom";
 import "./menu.css";
-import { appPages } from "../../config/constants";
+import { sideMenuPages } from "../../config/constants";
 
 const Menu: React.FC = () => {
   const location = useLocation();
@@ -27,15 +27,15 @@ const Menu: React.FC = () => {
       </IonHeader>
       <IonContent>
         <IonList id="inbox-list">
-          <IonListHeader>Navigation</IonListHeader>
-          {appPages.map((appPage, index) => {
+          <IonListHeader>Nome do Hospital</IonListHeader>
+          {sideMenuPages.map((sideMenuPage, index) => {
             return (
               <IonMenuToggle key={index} autoHide={false}>
                 <IonItem
                   className={
-                    location.pathname === appPage.url ? "selected" : ""
+                    location.pathname === sideMenuPage.url ? "selected" : ""
                   }
-                  routerLink={appPage.url}
+                  routerLink={sideMenuPage.url}
                   routerDirection="none"
                   lines="none"
                   detail={false}
@@ -43,9 +43,9 @@ const Menu: React.FC = () => {
                   <IonIcon
                     aria-hidden="true"
                     slot="start"
-                    icon={appPage.icon}
+                    icon={sideMenuPage.icon}
                   />
-                  <IonLabel>{appPage.title}</IonLabel>
+                  <IonLabel>{sideMenuPage.title}</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             );
