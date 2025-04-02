@@ -22,7 +22,7 @@ import {
   createUser,
   clearError,
   clearSuccessMessage,
-} from "../../store/slices/createUserSlice";
+} from "../../store/slices/user/createUserSlice";
 import { useFormCleanup } from "../../hooks/useFormCleanup";
 import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
 

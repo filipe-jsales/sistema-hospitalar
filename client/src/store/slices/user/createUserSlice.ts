@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { User } from './authSlice';
-import apiService from '../../utils/apiService';
-
-//TODO: move to the folder slices/user
+import { User } from '../authSlice';
+import apiService from '../../../utils/apiService';
 
 interface UserState {
   loading: boolean;
