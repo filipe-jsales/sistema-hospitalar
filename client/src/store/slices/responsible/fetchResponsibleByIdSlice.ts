@@ -17,10 +17,10 @@ const initialState: ResponsibleState = {
 };
 
 export const fetchResponsibleById = createAsyncThunk(
-  "responsible/fetchById",
+  "responsibles/fetchById",
   async (responsibleId: number, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/responsible/${responsibleId}`);
+      const response = await apiService.get(`/responsibles/${responsibleId}`);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(
@@ -31,13 +31,13 @@ export const fetchResponsibleById = createAsyncThunk(
 );
 
 export const updateResponsible = createAsyncThunk(
-  "responsible/update",
+  "responsibles/update",
   async (
     { responsibleId, responsibleData }: { responsibleId: number; responsibleData: Partial<ResponsibleData> },
     { rejectWithValue }
   ) => {
     try {
-      const response = await apiService.patch(`/responsible/${responsibleId}`, responsibleData);
+      const response = await apiService.patch(`/responsibles/${responsibleId}`, responsibleData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

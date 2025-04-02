@@ -24,10 +24,10 @@ const initialState: ResponsiblesState = {
 };
 
 export const fetchResponsibles = createAsyncThunk(
-  "responsible/fetchAll",
+  "responsibles/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/responsible");
+      const response = await apiService.get("/responsibles");
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

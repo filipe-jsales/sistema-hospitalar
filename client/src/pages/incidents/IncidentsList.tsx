@@ -98,7 +98,7 @@ const IncidentsList: React.FC = () => {
   };
 
   const handleEdit = (incident: IncidentData) => {
-    history.push(`/incident/edit/${incident.id}`);
+    history.push(`/incidents/edit/${incident.id}`);
   };
 
   const handleDelete = (incident: IncidentData) => {

@@ -99,7 +99,7 @@ const HospitalsList: React.FC = () => {
   };
 
   const handleEdit = (hospital: HospitalData) => {
-    history.push(`/hospital/edit/${hospital.id}`);
+    history.push(`/hospitals/edit/${hospital.id}`);
   };
 
   const handleDelete = (hospital: HospitalData) => {

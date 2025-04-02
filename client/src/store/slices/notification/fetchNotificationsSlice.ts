@@ -5,12 +5,7 @@ import { updateNotification } from "./fetchNotificationByIdSlice";
 
 export interface NotificationData {
   id: number;
-  message: string;
-  read: boolean;
-  userId?: number;
-  createdAt?: string;
-  type?: string;
-  targetId?: number;
+  description: string;
 }
 
 interface NotificationsState {

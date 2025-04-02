@@ -22,57 +22,56 @@ import {
   IonToast,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-
 import { RefresherEventDetail } from "@ionic/core";
-import {
-  createOutline,
-  trashOutline,
-  checkmarkCircle,
-  closeCircle,
-} from "ionicons/icons";
-import {
-  clearUserError,
-  clearUsers,
-  fetchUsers,
-  UserData,
-} from "../../store/slices/user/fetchUsersSlice";
+import { createOutline, trashOutline, notifications, notificationsCircle } from "ionicons/icons";
 import { useHistory } from "react-router";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
-  deleteUser,
+  clearNotificationError,
+  clearNotifications,
+  fetchNotifications,
+  NotificationData,
+} from "../../store/slices/notification/fetchNotificationsSlice";
+import {
+  deleteNotification,
   resetDeleteStatus,
-} from "../../store/slices/user/deleteUserSlice";
+} from "../../store/slices/notification/deleteNotificationSlice";
 
-const UsersList: React.FC = () => {
+const NotificationsList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { users, loading, error } = useAppSelector((state) => state.users);
+  const { notifications, loading, error } = useAppSelector(
+    (state) => state.notifications
+  );
+
   const {
     loading: deleteLoading,
     error: deleteError,
     success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteUser);
+  } = useAppSelector((state) => state.deleteNotification);
+
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
+  const [selectedNotification, setSelectedNotification] =
+    useState<NotificationData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
-    loadUsers();
+    loadNotifications();
 
     return () => {
-      dispatch(clearUsers());
-      dispatch(clearUserError());
+      dispatch(clearNotifications());
+      dispatch(clearNotificationError());
       dispatch(resetDeleteStatus());
     };
   }, [dispatch]);
 
   useEffect(() => {
     if (deleteSuccess) {
-      setToastMessage("Usuário excluído com sucesso!");
+      setToastMessage("Notificação excluída com sucesso!");
       setShowToast(true);
-      loadUsers();
+      loadNotifications();
       dispatch(resetDeleteStatus());
     }
 
@@ -82,46 +81,44 @@ const UsersList: React.FC = () => {
     }
   }, [deleteSuccess, deleteError, dispatch]);
 
-  const loadUsers = () => {
-    dispatch(fetchUsers())
+  const loadNotifications = () => {
+    dispatch(fetchNotifications())
       .unwrap()
       .catch((error) => {
-        console.error("Falha ao carregar usuários:", error);
+        console.error("Falha ao carregar notificações:", error);
       });
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchUsers())
+    dispatch(fetchNotifications())
       .unwrap()
       .finally(() => {
         event.detail.complete();
       });
   };
 
-  const handleEdit = (user: UserData) => {
-    history.push(`/users/edit/${user.id}`);
+  const handleEdit = (notification: NotificationData) => {
+    history.push(`/notifications/edit/${notification.id}`);
   };
 
-  const handleDelete = (user: UserData) => {
-    setSelectedUser(user);
+  const handleDelete = (notification: NotificationData) => {
+    setSelectedNotification(notification);
     setShowAlert(true);
   };
 
   const confirmDelete = () => {
-    if (selectedUser) {
-      dispatch(deleteUser(selectedUser.id));
+    if (selectedNotification) {
+      dispatch(deleteNotification(selectedNotification.id));
       setShowAlert(false);
-      setSelectedUser(null);
+      setSelectedNotification(null);
     }
   };
 
-  //TODO: mudar a lógica de filtragem/paginação para o backend
-  const filteredUsers = users.filter((user) => {
-    const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
-    const email = user.email.toLowerCase();
+  const filteredNotifications = notifications.filter((notification) => {
+    const description = notification.description.toLowerCase();
     const searchLower = searchText.toLowerCase();
 
-    return fullName.includes(searchLower) || email.includes(searchLower);
+    return description.includes(searchLower);
   });
 
   return (
@@ -131,7 +128,7 @@ const UsersList: React.FC = () => {
           <IonButtons slot="start">
             <IonMenuButton />
           </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
+          <IonTitle>Sistema de Notificações</IonTitle>
         </IonToolbar>
       </IonHeader>
 
@@ -143,7 +140,7 @@ const UsersList: React.FC = () => {
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
             <h1 className="text-center text-uppercase fw-bold">
-              Listagem de Usuários
+              Listagem de Notificações
             </h1>
 
             <IonCardContent>
@@ -151,83 +148,80 @@ const UsersList: React.FC = () => {
                 <IonSearchbar
                   value={searchText}
                   onIonInput={(e) => setSearchText(e.detail.value || "")}
-                  placeholder="Buscar usuários"
+                  placeholder="Buscar notificações"
                 />
 
                 <IonButton
                   color="primary"
-                  routerLink="/users/create"
+                  routerLink="/notifications/create"
                   className="ms-2"
                 >
-                  Novo Usuário
+                  Nova Notificação
                 </IonButton>
               </div>
 
               {loading ? (
                 <div className="text-center p-3">
                   <IonSpinner name="crescent" />
-                  <p>Carregando usuários...</p>
+                  <p>Carregando notificações...</p>
                 </div>
               ) : error ? (
                 <div className="alert alert-danger col-12 text-center">
                   {error}
                 </div>
-              ) : filteredUsers.length === 0 ? (
+              ) : filteredNotifications.length === 0 ? (
                 <div className="alert alert-info col-12 text-center">
                   {searchText
-                    ? "Nenhum usuário encontrado com esta busca."
-                    : "Nenhum usuário cadastrado."}
+                    ? "Nenhuma notificação encontrada com esta busca."
+                    : "Nenhuma notificação cadastrada."}
                 </div>
               ) : (
                 <IonList>
-                  {filteredUsers.map((user: UserData) => (
-                    <IonItem key={user.id} className="mb-2">
-                      <div className="d-flex w-100 justify-content-between align-items-center">
-                        <div>
-                          <IonLabel>
-                            <h2>{`${user.firstName} ${user.lastName}`}</h2>
-                            <p>{user.email}</p>
-                            <p>{user.phoneNumber || "Sem telefone"}</p>
-                          </IonLabel>
-                        </div>
-
-                        <div className="d-flex align-items-center">
-                          <IonChip color={user.isActive ? "success" : "danger"}>
-                            <IonIcon
-                              icon={
-                                user.isActive ? checkmarkCircle : closeCircle
-                              }
-                            />
+                  {filteredNotifications.map(
+                    (notification: NotificationData) => (
+                      <IonItem key={notification.id} className="mb-2">
+                        <div className="d-flex w-100 justify-content-between align-items-center">
+                          <div>
                             <IonLabel>
-                              {user.isActive ? "Ativo" : "Inativo"}
+                              <h2>{notification.description}</h2>
+                              <p className="text-muted">
+                                ID: {notification.id}
+                              </p>
                             </IonLabel>
-                          </IonChip>
+                          </div>
 
-                          <IonButton
-                            fill="clear"
-                            color="primary"
-                            onClick={() => handleEdit(user)}
-                          >
-                            <IonIcon slot="icon-only" icon={createOutline} />
-                          </IonButton>
+                          <div className="d-flex align-items-center">
+                            <IonChip color="primary">
+                              <IonIcon icon={notificationsCircle} />
+                              <IonLabel>Notificação</IonLabel>
+                            </IonChip>
 
-                          <IonButton
-                            fill="clear"
-                            color="danger"
-                            onClick={() => handleDelete(user)}
-                          >
-                            <IonIcon slot="icon-only" icon={trashOutline} />
-                          </IonButton>
+                            <IonButton
+                              fill="clear"
+                              color="primary"
+                              onClick={() => handleEdit(notification)}
+                            >
+                              <IonIcon slot="icon-only" icon={createOutline} />
+                            </IonButton>
+
+                            <IonButton
+                              fill="clear"
+                              color="danger"
+                              onClick={() => handleDelete(notification)}
+                            >
+                              <IonIcon slot="icon-only" icon={trashOutline} />
+                            </IonButton>
+                          </div>
                         </div>
-                      </div>
-                    </IonItem>
-                  ))}
+                      </IonItem>
+                    )
+                  )}
                 </IonList>
               )}
 
-              {!loading && !error && users.length > 0 && (
+              {!loading && !error && notifications.length > 0 && (
                 <div className="text-center mt-3">
-                  <p>Total de usuários: {users.length}</p>
+                  <p>Total de notificações: {notifications.length}</p>
                 </div>
               )}
             </IonCardContent>
@@ -238,13 +232,13 @@ const UsersList: React.FC = () => {
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
           header="Confirmar exclusão"
-          message={`Tem certeza que deseja excluir o usuário ${selectedUser?.firstName} ${selectedUser?.lastName}?`}
+          message={`Tem certeza que deseja excluir a notificação "${selectedNotification?.id}"?`}
           buttons={[
             {
               text: "Cancelar",
               role: "cancel",
               handler: () => {
-                setSelectedUser(null);
+                setSelectedNotification(null);
               },
             },
             {
@@ -266,4 +260,4 @@ const UsersList: React.FC = () => {
   );
 };
 
-export default UsersList;
+export default NotificationsList;
