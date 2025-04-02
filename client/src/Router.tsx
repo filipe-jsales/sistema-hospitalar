@@ -12,6 +12,8 @@ import UsersList from "./pages/users/UsersList";
 import CreateUser from "./pages/users/CreateUser";
 import ResetPasswordRequest from "./pages/auth/ResetPassword";
 import ResetPassword from "./pages/auth/ResetPasswordForm";
+import IncidentsList from "./pages/incidents/IncidentsList";
+import EditIncident from "./pages/incidents/EditIncident";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -32,7 +34,8 @@ const Router: React.FC = () => (
       {/* TODO: create the respective pages */}
       <Route exact path="/themes" component={HospitalsList} />
       <Route exact path="/notifications" component={HospitalsList} />
-      <Route exact path="/incidents" component={HospitalsList} />
+      <Route exact path="/incidents" component={IncidentsList} />
+      <Route exact path="/incident/edit/:id" component={EditIncident} />
       <Route exact path="/organizational-unities" component={HospitalsList} />
       <Route exact path="/priorities" component={HospitalsList} />
       <Route exact path="/responsibles" component={HospitalsList} />

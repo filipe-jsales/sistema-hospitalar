@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
+import { updateHospital } from "./fetchHospitalByIdSlice";
 
 export interface HospitalData {
   id: number;
@@ -57,9 +58,19 @@ const fetchHospitalsSlice = createSlice({
       .addCase(fetchHospitals.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
+      })
+      .addCase(updateHospital.fulfilled, (state, action) => {
+        const updatedHospital = action.payload;
+        const index = state.hospitals.findIndex(
+          (h) => h.id === updatedHospital.id
+        );
+        if (index !== -1) {
+          state.hospitals[index] = updatedHospital;
+        }
       });
   },
 });
 
-export const { clearError: clearHospitalError, clearHospitals } = fetchHospitalsSlice.actions;
+export const { clearError: clearHospitalError, clearHospitals } =
+  fetchHospitalsSlice.actions;
 export default fetchHospitalsSlice.reducer;

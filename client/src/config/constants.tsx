@@ -11,6 +11,8 @@ export interface AppPage {
   icon: string;
   title: string;
 }
+
+// TODO: change this name to represent the sidemenu pages
 export const appPages: AppPage[] = [
   {
     title: "Home",
@@ -54,7 +56,7 @@ export const appPages: AppPage[] = [
   },
   {
     title: "Incidentes",
-    url: "/hospitals",
+    url: "/incidents",
     icon: medicalOutline,
   },
   {

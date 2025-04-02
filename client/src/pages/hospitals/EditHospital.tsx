@@ -18,11 +18,11 @@ import { useParams, useHistory } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   clearHospitalData,
+  clearSuccessMessage,
   fetchHospitalById,
   updateHospital,
 } from "../../store/slices/hospital/fetchHospitalByIdSlice";
 import { clearHospitalError } from "../../store/slices/hospital/fetchHospitalsSlice";
-import { clearSuccessMessage } from "../../store/slices/activationSlice";
 
 interface HospitalParams {
   id: string;

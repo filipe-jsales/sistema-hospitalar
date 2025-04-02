@@ -37,7 +37,7 @@ export const updateHospital = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await apiService.put(`/hospitals/${hospitalId}`, hospitalData);
+      const response = await apiService.patch(`/hospitals/${hospitalId}`, hospitalData);
       return response.data;
     } catch (error: any) {
       return rejectWithValue(

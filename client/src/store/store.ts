@@ -9,6 +9,11 @@ import deleteUserReducer from './slices/user/deleteUserSlice';
 import fetchHospitalsReducer from './slices/hospital/fetchHospitalsSlice';
 import deleteHospitalReducer from './slices/hospital/deleteHospitalSlice';
 import fetchHospitalByIdReducer from './slices/hospital/fetchHospitalByIdSlice';
+import fetchIncidentsReducer from './slices/incident/fetchIncidentsSlice';
+import fetchIncidentByIdReducer from './slices/incident/fetchIncidentByIdSlice';
+import deleteIncidentReducer from './slices/incident/deleteIncidentSlice';
+
+// TODO: finish the implementation of the incidents slice
 
 const store = configureStore({
   reducer: {
@@ -22,6 +27,9 @@ const store = configureStore({
     hospitals: fetchHospitalsReducer,
     hospitalDetails: fetchHospitalByIdReducer,
     deleteHospital: deleteHospitalReducer,
+    incidents: fetchIncidentsReducer,
+    incidentDetails: fetchIncidentByIdReducer,
+    deleteIncident: deleteIncidentReducer,
   },
 });
 
