@@ -115,11 +115,6 @@ export const sideMenuPages: SideMenuPages[] = [
     url: "/priorities/create",
     icon: warningOutline,
   },
-  // {
-  //   title: "Serviços Notificantes",
-  //   url: "/hospitals",
-  //   icon: medicalOutline,
-  // },
   {
     title: "Unidades Organizacionais",
     url: "/organizational-unities",
@@ -128,6 +123,16 @@ export const sideMenuPages: SideMenuPages[] = [
   {
     title: "Cadastrar Unidades Organizacionais",
     url: "/organizational-unities/create",
+    icon: medicalOutline,
+  },
+  {
+    title: "Serviços Notificantes",
+    url: "/notifying-services",
+    icon: medicalOutline,
+  },
+  {
+    title: "Cadastrar Serviços Notificantes",
+    url: "/notifying-services/create",
     icon: medicalOutline,
   },
   {

@@ -37,6 +37,9 @@ import CreateOrganizationalUnity from "./pages/organizational-unities/CreateOrga
 import CreateIncident from "./pages/incidents/CreateIncident";
 import CreateNotification from "./pages/notifications/CreateNotification";
 import CreateTheme from "./pages/themes/CreateTheme";
+import NotifyingServicesList from "./pages/notifying-services/NotifyingServicesList";
+import CreateNotifyingService from "./pages/notifying-services/CreateNotifyingService";
+import EditNotifyingService from "./pages/notifying-services/EditNotifyingService";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -60,11 +63,7 @@ const Router: React.FC = () => (
       <Route path="/users/activate/:token" component={ActivateAccount} />
 
       <Route exact path="/hospitals" component={HospitalsList} />
-      <Route
-        exact
-        path="/hospitals/create"
-        component={CreateHospital}
-      />
+      <Route exact path="/hospitals/create" component={CreateHospital} />
       <Route exact path="/hospitals/edit/:id" component={EditHospital} />
 
       <Route exact path="/themes" component={ThemesList} />
@@ -84,11 +83,7 @@ const Router: React.FC = () => (
       />
 
       <Route exact path="/incidents" component={IncidentsList} />
-      <Route
-        exact
-        path="/incidents/create"
-        component={CreateIncident}
-      />
+      <Route exact path="/incidents/create" component={CreateIncident} />
       <Route exact path="/incidents/edit/:id" component={EditIncident} />
 
       <Route
@@ -108,36 +103,36 @@ const Router: React.FC = () => (
       />
 
       <Route exact path="/priorities" component={PrioritiesList} />
-      <Route
-        exact
-        path="/priorities/create"
-        component={CreatePriority}
-      />
+      <Route exact path="/priorities/create" component={CreatePriority} />
       <Route exact path="/priorities/edit/:id" component={EditPriority} />
 
       <Route exact path="/responsibles" component={ResponsiblesList} />
-      <Route
-        exact
-        path="/responsibles/create"
-        component={CreateResponsible}
-      />
+      <Route exact path="/responsibles/create" component={CreateResponsible} />
       <Route exact path="/responsibles/edit/:id" component={EditResponsible} />
 
       <Route exact path="/categories" component={CategoriesList} />
-      <Route
-        exact
-        path="/categories/create"
-        component={CreateCategory}
-      />
+      <Route exact path="/categories/create" component={CreateCategory} />
       <Route exact path="/categories/edit/:id" component={EditCategory} />
 
       <Route exact path="/subcategories" component={SubcategoriesList} />
+      <Route exact path="/subcategories/create" component={CreateSubcategory} />
+      <Route exact path="/subcategories/edit/:id" component={EditSubcategory} />
+
       <Route
         exact
-        path="/subcategories/create"
-        component={CreateSubcategory}
+        path="/notifying-services"
+        component={NotifyingServicesList}
       />
-      <Route exact path="/subcategories/edit/:id" component={EditSubcategory} />
+      <Route
+        exact
+        path="/notifying-services/create"
+        component={CreateNotifyingService}
+      />
+      <Route
+        exact
+        path="/notifying-services/edit/:id"
+        component={EditNotifyingService}
+      />
     </IonRouterOutlet>
   </IonReactRouter>
 );

@@ -10,15 +10,15 @@ import {
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
-  createTheme,
+  createNotifyingService,
   clearError,
   clearSuccessMessage,
-} from "../../store/slices/theme/createThemeSlice";
+} from "../../store/slices/notifyingService/createNotifyingServiceSlice";
 import { useFormCleanup } from "../../hooks/useFormCleanup";
 import Header from "../../components/Header/Header";
 
-const CreateTheme: React.FC = () => {
-  const [themeInfos, setThemeInfos] = useState({
+const CreateNotifyingService: React.FC = () => {
+  const [notifyingServiceInfos, setNotifyingServiceInfos] = useState({
     name: "",
   });
 
@@ -31,7 +31,7 @@ const CreateTheme: React.FC = () => {
     (state) => state.auth
   );
   const { loading, error, successMessage } = useAppSelector(
-    (state) => state.createTheme
+    (state) => state.createNotifyingService
   );
 
   useFormCleanup({
@@ -39,7 +39,7 @@ const CreateTheme: React.FC = () => {
     clearError,
     clearSuccessMessage,
     resetFormState: () => {
-      setThemeInfos({
+      setNotifyingServiceInfos({
         name: "",
       });
     },
@@ -53,7 +53,8 @@ const CreateTheme: React.FC = () => {
   const validateInputs = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newErrors: any = {};
-    if (!themeInfos.name.trim()) newErrors.name = "Campo obrigatório.";
+    if (!notifyingServiceInfos.name.trim())
+      newErrors.name = "Campo obrigatório.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -66,17 +67,17 @@ const CreateTheme: React.FC = () => {
     if (validateInputs()) {
       if (user?.id && user.email && user.roles) {
         const payload = {
-          name: themeInfos.name,
+          name: notifyingServiceInfos.name,
         };
-        dispatch(createTheme(payload))
+        dispatch(createNotifyingService(payload))
           .unwrap()
           .then(() => {
-            setThemeInfos({
+            setNotifyingServiceInfos({
               name: "",
             });
           })
           .catch((error) => {
-            console.error("Theme creation failed:", error);
+            console.error("Notifying Service creation failed:", error);
           });
       }
     }
@@ -89,7 +90,7 @@ const CreateTheme: React.FC = () => {
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
             <h1 className="text-center text-uppercase fw-bold">
-              Cadastro de Temas
+              Cadastro de Serviços de Notificação
             </h1>
             <IonCardContent>
               <form
@@ -100,14 +101,14 @@ const CreateTheme: React.FC = () => {
                   <IonInput
                     color={"dark"}
                     fill="outline"
-                    placeholder="Nome do Tema"
-                    label="Nome do Tema"
+                    placeholder="Nome do Serviço"
+                    label="Nome do Serviço"
                     labelPlacement="floating"
                     mode="md"
-                    value={themeInfos.name}
+                    value={notifyingServiceInfos.name}
                     onIonInput={(e) => {
-                      setThemeInfos({
-                        ...themeInfos,
+                      setNotifyingServiceInfos({
+                        ...notifyingServiceInfos,
                         name: String(e.target.value),
                       });
                       if (errors.name) setErrors({ ...errors, name: "" });
@@ -150,4 +151,4 @@ const CreateTheme: React.FC = () => {
   );
 };
 
-export default CreateTheme;
+export default CreateNotifyingService;

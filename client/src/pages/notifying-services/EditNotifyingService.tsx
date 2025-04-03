@@ -11,29 +11,29 @@ import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
-  clearThemeData,
+  clearNotifyingServiceData,
   clearSuccessMessage,
-  fetchThemeById,
-  updateTheme,
-} from "../../store/slices/theme/fetchThemeByIdSlice";
-import { clearThemeError } from "../../store/slices/theme/fetchThemesSlice";
+  fetchNotifyingServiceById,
+  updateNotifyingService,
+} from "../../store/slices/notifyingService/fetchNotifyingServiceByIdSlice";
+import { clearNotifyingServiceError } from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
 import Header from "../../components/Header/Header";
 
-interface ThemeParams {
+interface NotifyingServiceParams {
   id: string;
 }
 
-const EditTheme: React.FC = () => {
-  const { id } = useParams<ThemeParams>();
-  const themeId = parseInt(id, 10);
+const EditNotifyingService: React.FC = () => {
+  const { id } = useParams<NotifyingServiceParams>();
+  const notifyingServiceId = parseInt(id, 10);
   const history = useHistory();
   const dispatch = useAppDispatch();
 
-  const { theme, loading, error, successMessage } = useAppSelector(
-    (state) => state.themeDetails
+  const { notifyingService, loading, error, successMessage } = useAppSelector(
+    (state) => state.notifyingServiceDetails
   );
 
-  const [themeInfo, setThemeInfo] = useState({
+  const [notifyingServiceInfo, setNotifyingServiceInfo] = useState({
     name: "",
   });
 
@@ -42,50 +42,51 @@ const EditTheme: React.FC = () => {
   });
 
   useEffect(() => {
-    dispatch(fetchThemeById(themeId))
+    dispatch(fetchNotifyingServiceById(notifyingServiceId))
       .unwrap()
       .catch((error) => {
-        console.error("Falha ao carregar tema:", error);
+        console.error("Falha ao carregar serviço de notificação:", error);
       });
 
     return () => {
-      dispatch(clearThemeError());
+      dispatch(clearNotifyingServiceError());
       dispatch(clearSuccessMessage());
-      dispatch(clearThemeData());
+      dispatch(clearNotifyingServiceData());
     };
-  }, [dispatch, themeId]);
+  }, [dispatch, notifyingServiceId]);
 
   useEffect(() => {
-    if (theme) {
-      setThemeInfo({
-        name: theme.name || "",
+    if (notifyingService) {
+      setNotifyingServiceInfo({
+        name: notifyingService.name || "",
       });
     }
-  }, [theme]);
+  }, [notifyingService]);
 
   const validateInputs = () => {
     const newErrors: any = {};
-    if (!themeInfo.name.trim()) newErrors.name = "Campo obrigatório.";
+    if (!notifyingServiceInfo.name.trim())
+      newErrors.name = "Campo obrigatório.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch(clearThemeError());
+    dispatch(clearNotifyingServiceError());
     dispatch(clearSuccessMessage());
 
     if (validateInputs()) {
       dispatch(
-        updateTheme({
-          themeId,
-          themeData: themeInfo,
+        updateNotifyingService({
+          notifyingServiceId,
+          notifyingServiceData: notifyingServiceInfo,
         })
       )
         .unwrap()
         .then(() => {
           setTimeout(() => {
-            history.push("/themes");
+            history.push("/notifying-services");
           }, 2000);
         })
         .catch((error) => {
@@ -100,21 +101,23 @@ const EditTheme: React.FC = () => {
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
-            <h1 className="text-center text-uppercase fw-bold">Editar Tema</h1>
+            <h1 className="text-center text-uppercase fw-bold">
+              Editar Serviço de Notificação
+            </h1>
             <IonCardContent>
-              {loading && !theme ? (
+              {loading && !notifyingService ? (
                 <div className="text-center p-3">
                   <IonSpinner name="crescent" />
-                  <p>Carregando dados do tema...</p>
+                  <p>Carregando dados do serviço de notificação...</p>
                 </div>
-              ) : error && !theme ? (
+              ) : error && !notifyingService ? (
                 <div className="alert alert-danger col-12 text-center">
                   {error}
                   <div className="mt-3">
                     <IonButton
                       fill="solid"
                       color="primary"
-                      onClick={() => history.push("/themes")}
+                      onClick={() => history.push("/notifying-services")}
                     >
                       Voltar para a listagem
                     </IonButton>
@@ -129,14 +132,14 @@ const EditTheme: React.FC = () => {
                     <IonInput
                       color={"dark"}
                       fill="outline"
-                      placeholder="Nome do Tema"
+                      placeholder="Nome do Serviço de Notificação"
                       label="Nome"
                       labelPlacement="floating"
                       mode="md"
-                      value={themeInfo.name}
+                      value={notifyingServiceInfo.name}
                       onIonInput={(e) => {
-                        setThemeInfo({
-                          ...themeInfo,
+                        setNotifyingServiceInfo({
+                          ...notifyingServiceInfo,
                           name: String(e.target.value),
                         });
                         if (errors.name) setErrors({ ...errors, name: "" });
@@ -150,7 +153,7 @@ const EditTheme: React.FC = () => {
                   <div className="col-12 d-flex justify-content-between">
                     <IonButton
                       color="medium"
-                      onClick={() => history.push("/themes")}
+                      onClick={() => history.push("/notifying-services")}
                     >
                       Cancelar
                     </IonButton>
@@ -190,4 +193,4 @@ const EditTheme: React.FC = () => {
   );
 };
 
-export default EditTheme;
+export default EditNotifyingService;
