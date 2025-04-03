@@ -23,7 +23,7 @@ export const createResponsible = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const response = await apiService.post('/responsible', data);
+      const response = await apiService.post('/responsibles', data);
       return response.data.message || 'Responsável criado com sucesso!';
     } catch (error: any) {
       return rejectWithValue(

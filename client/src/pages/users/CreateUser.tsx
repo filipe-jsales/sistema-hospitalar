@@ -52,6 +52,7 @@ const CreateUser: React.FC = () => {
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createUser
   );
+  
   const {
     hospitals,
     loading: hospitalsLoading,

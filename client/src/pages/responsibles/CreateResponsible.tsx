@@ -11,12 +11,8 @@ import {
   IonButtons,
   IonMenuButton,
   IonTitle,
-  IonItem,
-  IonLabel,
-  IonSelect,
-  IonSelectOption,
 } from "@ionic/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   createResponsible,
@@ -24,15 +20,19 @@ import {
   clearSuccessMessage,
 } from "../../store/slices/responsible/createResponsibleSlice";
 import { useFormCleanup } from "../../hooks/useFormCleanup";
-import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
+import Header from "../../components/Header/Header";
 
 const CreateResponsible: React.FC = () => {
   const [responsibleInfos, setResponsibleInfos] = useState({
     name: "",
+    cpf: "",
+    email: "",
   });
 
   const [errors, setErrors] = useState({
     name: "",
+    cpf: "",
+    email: "",
   });
 
   const dispatch = useAppDispatch();
@@ -42,19 +42,6 @@ const CreateResponsible: React.FC = () => {
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createResponsible
   );
-  const {
-    hospitals,
-    loading: hospitalsLoading,
-    error: hospitalsError,
-  } = useAppSelector((state) => state.hospitals);
-
-  useEffect(() => {
-    dispatch(fetchHospitals())
-      .unwrap()
-      .catch((error) => {
-        console.error("Falha ao carregar hospitais:", error);
-      });
-  }, [dispatch]);
 
   useFormCleanup({
     dispatch,
@@ -63,11 +50,15 @@ const CreateResponsible: React.FC = () => {
     resetFormState: () => {
       setResponsibleInfos({
         name: "",
+        cpf: "",
+        email: "",
       });
     },
     resetFormErrors: () => {
       setErrors({
         name: "",
+        cpf: "",
+        email: "",
       });
     },
   });
@@ -76,6 +67,8 @@ const CreateResponsible: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const newErrors: any = {};
     if (!responsibleInfos.name.trim()) newErrors.name = "Campo obrigatório.";
+    if (!responsibleInfos.cpf.trim()) newErrors.cpf = "Campo obrigatório.";
+    if (!responsibleInfos.email.trim()) newErrors.email = "Campo obrigatório.";
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -89,12 +82,16 @@ const CreateResponsible: React.FC = () => {
       if (user?.id && user.email && user.roles) {
         const payload = {
           name: responsibleInfos.name,
+          cpf: responsibleInfos.cpf,
+          email: responsibleInfos.email,
         };
         dispatch(createResponsible(payload))
           .unwrap()
           .then(() => {
             setResponsibleInfos({
               name: "",
+              cpf: "",
+              email: "",
             });
           })
           .catch((error) => {
@@ -106,14 +103,7 @@ const CreateResponsible: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
@@ -144,6 +134,50 @@ const CreateResponsible: React.FC = () => {
                   />
                   {errors.name && (
                     <span className="text-danger">{errors.name}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonInput
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="CPF do Responsável"
+                    label="CPF do Responsável"
+                    labelPlacement="floating"
+                    mode="md"
+                    value={responsibleInfos.cpf}
+                    onIonInput={(e) => {
+                      setResponsibleInfos({
+                        ...responsibleInfos,
+                        cpf: String(e.target.value),
+                      });
+                      if (errors.cpf) setErrors({ ...errors, cpf: "" });
+                    }}
+                  />
+                  {errors.cpf && (
+                    <span className="text-danger">{errors.cpf}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonInput
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="Email do Responsável"
+                    label="Email do Responsável"
+                    labelPlacement="floating"
+                    mode="md"
+                    value={responsibleInfos.email}
+                    onIonInput={(e) => {
+                      setResponsibleInfos({
+                        ...responsibleInfos,
+                        email: String(e.target.value),
+                      });
+                      if (errors.email) setErrors({ ...errors, email: "" });
+                    }}
+                  />
+                  {errors.email && (
+                    <span className="text-danger">{errors.email}</span>
                   )}
                 </div>
 
