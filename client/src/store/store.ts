@@ -42,6 +42,10 @@ import createResponsibleReducer from "./slices/responsible/createResponsibleSlic
 import fetchResponsiblesReducer from "./slices/responsible/fetchResponsiblesSlice";
 import fetchResponsibleByIdReducer from "./slices/responsible/fetchResponsibleByIdSlice";
 import deleteResponsibleReducer from "./slices/responsible/deleteResponsibleSlice";
+import createNotifyingServiceReducer from "./slices/notifyingService/createNotifyingServiceSlice";
+import fetchNotifyingServicesReducer from "./slices/notifyingService/fetchNotifyingServicesSlice";
+import fetchNotifyingServiceByIdReducer from "./slices/notifyingService/fetchNotifyingServiceByIdSlice";
+import deleteNotifyingServiceReducer from "./slices/notifyingService/deleteNotifyingServiceSlice";
 
 const store = configureStore({
   reducer: {
@@ -88,6 +92,10 @@ const store = configureStore({
     responsibles: fetchResponsiblesReducer,
     responsibleDetails: fetchResponsibleByIdReducer,
     deleteResponsible: deleteResponsibleReducer,
+    createNotifyingService: createNotifyingServiceReducer,
+    notifyingServices: fetchNotifyingServicesReducer,
+    notifyingServiceDetails: fetchNotifyingServiceByIdReducer,
+    deleteNotifyingService: deleteNotifyingServiceReducer,
   },
 });
 
