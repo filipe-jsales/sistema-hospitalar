@@ -9,7 +9,7 @@ import { IsOptional } from 'class-validator';
 import { Permission } from '../../permissions/entities/permission.entity';
 import { User } from '../../users/entities/user.entity';
 
-@Entity('roles')
+@Entity()
 export class Role {
   @PrimaryGeneratedColumn()
   id: number;

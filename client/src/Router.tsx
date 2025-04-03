@@ -62,19 +62,19 @@ const Router: React.FC = () => (
       <Route exact path="/hospitals" component={HospitalsList} />
       <Route
         exact
-        path="/hospitals/create-hospital"
+        path="/hospitals/create"
         component={CreateHospital}
       />
       <Route exact path="/hospitals/edit/:id" component={EditHospital} />
 
       <Route exact path="/themes" component={ThemesList} />
-      <Route exact path="/themes/create-theme" component={CreateTheme} />
+      <Route exact path="/themes/create" component={CreateTheme} />
       <Route exact path="/themes/edit/:id" component={EditTheme} />
 
       <Route exact path="/notifications" component={NotificationsList} />
       <Route
         exact
-        path="/notifications/create-notification"
+        path="/notifications/create"
         component={CreateNotification}
       />
       <Route
@@ -86,7 +86,7 @@ const Router: React.FC = () => (
       <Route exact path="/incidents" component={IncidentsList} />
       <Route
         exact
-        path="/incidents/create-incident"
+        path="/incidents/create"
         component={CreateIncident}
       />
       <Route exact path="/incidents/edit/:id" component={EditIncident} />
@@ -98,7 +98,7 @@ const Router: React.FC = () => (
       />
       <Route
         exact
-        path="/organizational-unities/create-organizational-unity"
+        path="/organizational-unities/create"
         component={CreateOrganizationalUnity}
       />
       <Route
@@ -110,7 +110,7 @@ const Router: React.FC = () => (
       <Route exact path="/priorities" component={PrioritiesList} />
       <Route
         exact
-        path="/priorities/create-priority"
+        path="/priorities/create"
         component={CreatePriority}
       />
       <Route exact path="/priorities/edit/:id" component={EditPriority} />
@@ -118,7 +118,7 @@ const Router: React.FC = () => (
       <Route exact path="/responsibles" component={ResponsiblesList} />
       <Route
         exact
-        path="/responsibles/create-responsible"
+        path="/responsibles/create"
         component={CreateResponsible}
       />
       <Route exact path="/responsibles/edit/:id" component={EditResponsible} />
@@ -126,7 +126,7 @@ const Router: React.FC = () => (
       <Route exact path="/categories" component={CategoriesList} />
       <Route
         exact
-        path="/categories/create-category"
+        path="/categories/create"
         component={CreateCategory}
       />
       <Route exact path="/categories/edit/:id" component={EditCategory} />
@@ -134,7 +134,7 @@ const Router: React.FC = () => (
       <Route exact path="/subcategories" component={SubcategoriesList} />
       <Route
         exact
-        path="/subcategories/create-subcategory"
+        path="/subcategories/create"
         component={CreateSubcategory}
       />
       <Route exact path="/subcategories/edit/:id" component={EditSubcategory} />

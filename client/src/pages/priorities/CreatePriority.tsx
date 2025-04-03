@@ -140,6 +140,8 @@ const CreatePriority: React.FC = () => {
                   <IonInput
                     color={"dark"}
                     fill="outline"
+                    type="number"
+                    min={0}
                     placeholder="Número da Prioridade"
                     label="Número da Prioridade"
                     labelPlacement="floating"

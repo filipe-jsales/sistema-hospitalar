@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 import { IsOptional, IsString } from 'class-validator';
 
-@Entity('permissions')
+@Entity('Permissions')
 export class Permission {
   @PrimaryGeneratedColumn()
   id: number;

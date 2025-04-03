@@ -94,6 +94,7 @@ import {
         if (user?.id && user.email && user.roles) {
           const payload = {
             name: subcategoryInfos.name,
+            categoryId: subcategoryInfos.categoryId,
           };
           dispatch(createSubcategory(payload))
             .unwrap()

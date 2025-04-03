@@ -1,7 +1,7 @@
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 
-@Entity('Priority')
+@Entity()
 export class Priority {
   @PrimaryGeneratedColumn()
   id: number;

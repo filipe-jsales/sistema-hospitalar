@@ -27,7 +27,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Usuário",
-    url: "/users/create-user",
+    url: "/users/create",
     icon: personAddOutline,
   },
   {
@@ -37,7 +37,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Hospital",
-    url: "/hospitals/create-hospital",
+    url: "/hospitals/create",
     icon: medicalOutline,
   },
   {
@@ -52,7 +52,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Notificação",
-    url: "/notifications/create-notification",
+    url: "/notifications/create",
     icon: notificationsOutline,
   },
   {
@@ -62,7 +62,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Temas",
-    url: "/themes/create-theme",
+    url: "/themes/create",
     icon: brushOutline,
   },
   {
@@ -72,7 +72,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Categorias",
-    url: "/categories/create-category",
+    url: "/categories/create",
     icon: bagOutline,
   },
   {
@@ -82,7 +82,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Subcategorias",
-    url: "/subcategories/create-subcategory",
+    url: "/subcategories/create",
     icon: carOutline,
   },
   {
@@ -92,7 +92,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Incidentes",
-    url: "/incidents/create-incident",
+    url: "/incidents/create",
     icon: cutOutline,
   },
   {
@@ -102,7 +102,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Responsáveis",
-    url: "/responsibles/create-responsible",
+    url: "/responsibles/create",
     icon: manOutline,
   },
   {
@@ -112,7 +112,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Prioridades",
-    url: "/priorities/create-priority",
+    url: "/priorities/create",
     icon: warningOutline,
   },
   // {
@@ -127,7 +127,7 @@ export const sideMenuPages: SideMenuPages[] = [
   },
   {
     title: "Cadastrar Unidades Organizacionais",
-    url: "/organizational-unities/create-organizational-unity",
+    url: "/organizational-unities/create",
     icon: medicalOutline,
   },
   {

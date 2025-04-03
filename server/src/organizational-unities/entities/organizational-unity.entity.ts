@@ -12,7 +12,7 @@ import {
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Responsible } from 'src/responsibles/entities/responsible.entity';
 
-@Entity('OrganizationalUnity')
+@Entity()
 export class OrganizationalUnity {
   @PrimaryGeneratedColumn()
   id: number;

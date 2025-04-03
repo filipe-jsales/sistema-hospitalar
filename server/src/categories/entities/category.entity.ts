@@ -10,7 +10,7 @@ import {
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Subcategory } from 'src/subcategories/entities/subcategory.entity';
 
-@Entity('Category')
+@Entity()
 export class Category {
   @PrimaryGeneratedColumn()
   id: number;

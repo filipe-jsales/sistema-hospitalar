@@ -1,7 +1,7 @@
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
-@Entity('Theme')
+@Entity()
 export class Theme {
   @PrimaryGeneratedColumn()
   id: number;

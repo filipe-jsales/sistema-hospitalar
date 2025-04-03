@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 
-@Entity('NotifyingService')
+@Entity()
 export class NotifyingService {
   @PrimaryGeneratedColumn()
   id: number;

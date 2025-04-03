@@ -8,7 +8,7 @@ import { Subcategory } from 'src/subcategories/entities/subcategory.entity';
 import { Theme } from 'src/themes/entities/theme.entity';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
-@Entity('Notification')
+@Entity()
 export class Notification {
   @PrimaryGeneratedColumn()
   id: number;

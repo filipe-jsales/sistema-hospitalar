@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToO
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Category } from 'src/categories/entities/category.entity';
 
-@Entity('Subcategory')
+@Entity()
 export class Subcategory {
   @PrimaryGeneratedColumn()
   id: number;
