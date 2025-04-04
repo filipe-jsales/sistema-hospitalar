@@ -1,167 +1,736 @@
 import {
-    IonContent,
-    IonPage,
-    IonCard,
-    IonCardContent,
-    IonInput,
-    IonButton,
-    IonSpinner,
-    IonHeader,
-    IonToolbar,
-    IonButtons,
-    IonMenuButton,
-    IonTitle,
-    IonTextarea,
-  } from "@ionic/react";
-  import { useState } from "react";
-  import { useAppDispatch, useAppSelector } from "../../store/hooks";
-  import {
-    createNotification,
+  IonContent,
+  IonPage,
+  IonCard,
+  IonCardContent,
+  IonButton,
+  IonSpinner,
+  IonTextarea,
+  IonItem,
+  IonLabel,
+  IonSelect,
+  IonSelectOption,
+  IonInput,
+} from "@ionic/react";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+  createNotification,
+  clearError,
+  clearSuccessMessage,
+} from "../../store/slices/notification/createNotificationSlice";
+import { useFormCleanup } from "../../hooks/useFormCleanup";
+import { fetchCategories } from "../../store/slices/category/fetchCategoriesSlice";
+import { fetchThemes } from "../../store/slices/theme/fetchThemesSlice";
+import { fetchSubcategories } from "../../store/slices/subcategory/fetchSubcategoriesSlice";
+import { fetchNotifyingServices } from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
+import { fetchOrganizationalUnities } from "../../store/slices/organizationalUnity/fetchOrganizationalUnitiesSlice";
+import { fetchResponsibles } from "../../store/slices/responsible/fetchResponsiblesSlice";
+import { fetchIncidents } from "../../store/slices/incident/fetchIncidentsSlice";
+import { fetchPriorities } from "../../store/slices/priority/fetchPrioritiesSlice";
+import Header from "../../components/Header/Header";
+
+const CreateNotification: React.FC = () => {
+  const [notificationInfos, setNotificationInfos] = useState({
+    description: "",
+    processSEI: "",
+    observations: "",
+    actionPlan: "",
+    situation: "",
+    anvisaNotification: "",
+    notificationNumber: "",
+    categoryId: null as number | null,
+    themeId: null,
+    subcategoryId: null,
+    notifyingServiceId: null,
+    organizationalUnityId: null,
+    incidentId: null,
+    responsibleId: null,
+    priorityId: null,
+  });
+
+  const [errors, setErrors] = useState({
+    description: "",
+    processSEI: "",
+    observations: "",
+    actionPlan: "",
+    situation: "",
+    anvisaNotification: "",
+    notificationNumber: "",
+    categoryId: "",
+    themeId: "",
+    subcategoryId: "",
+    notifyingServiceId: "",
+    organizationalUnityId: "",
+    incidentId: "",
+    responsibleId: "",
+    priorityId: "",
+  });
+
+  const dispatch = useAppDispatch();
+  const { isAuthenticated, user, token } = useAppSelector(
+    (state) => state.auth
+  );
+  const { loading, error, successMessage } = useAppSelector(
+    (state) => state.createNotification
+  );
+
+  const {
+    categories,
+    loading: categoriesLoading,
+    error: categoriesError,
+  } = useAppSelector((state) => state.categories);
+
+  const {
+    themes,
+    loading: themesLoading,
+    error: themesError,
+  } = useAppSelector((state) => state.themes);
+
+  const {
+    subcategories,
+    loading: subcategoriesLoading,
+    error: subcategoriesError,
+  } = useAppSelector((state) => state.subcategories);
+
+  const {
+    notifyingServices,
+    loading: notifyingServicesLoading,
+    error: notifyingServicesError,
+  } = useAppSelector((state) => state.notifyingServices);
+
+  const {
+    organizationalUnities,
+    loading: organizationalUnitiesLoading,
+    error: organizationalUnitiesError,
+  } = useAppSelector((state) => state.organizationalUnities);
+
+  const {
+    responsibles,
+    loading: responsiblesLoading,
+    error: responsiblesError,
+  } = useAppSelector((state) => state.responsibles);
+
+  const {
+    incidents,
+    loading: incidentsLoading,
+    error: incidentsError,
+  } = useAppSelector((state) => state.incidents);
+
+  const {
+    priorities,
+    loading: prioritiesLoading,
+    error: prioritiesError,
+  } = useAppSelector((state) => state.priorities);
+
+  const fetchActions = [
+    { action: fetchCategories, name: "categorias" },
+    { action: fetchThemes, name: "temas" },
+    { action: fetchSubcategories, name: "subcategorias" },
+    { action: fetchNotifyingServices, name: "serviços notificantes" },
+    { action: fetchOrganizationalUnities, name: "unidades organizacionais" },
+    { action: fetchResponsibles, name: "responsáveis" },
+    { action: fetchIncidents, name: "incidentes" },
+    { action: fetchPriorities, name: "prioridades" },
+  ];
+
+  useEffect(() => {
+    fetchActions.forEach(({ action, name }) => {
+      dispatch(action())
+        .unwrap()
+        .catch((error) => {
+          console.error(`Falha ao carregar ${name}:`, error);
+        });
+    });
+  }, [dispatch]);
+
+  useFormCleanup({
+    dispatch,
     clearError,
     clearSuccessMessage,
-  } from "../../store/slices/notification/createNotificationSlice";
-  import { useFormCleanup } from "../../hooks/useFormCleanup";
-  
-  const CreateNotification: React.FC = () => {
-    const [notificationInfos, setNotificationInfos] = useState({
-      description: "",
-    });
-  
-    const [errors, setErrors] = useState({
-      description: "",
-    });
-  
-    const dispatch = useAppDispatch();
-    const { isAuthenticated, user, token } = useAppSelector(
-      (state) => state.auth
-    );
-    const { loading, error, successMessage } = useAppSelector(
-      (state) => state.createNotification
-    );
-  
-    useFormCleanup({
-      dispatch,
-      clearError,
-      clearSuccessMessage,
-      resetFormState: () => {
-        setNotificationInfos({
-          description: "",
-        });
-      },
-      resetFormErrors: () => {
-        setErrors({
-          description: "",
-        });
-      },
-    });
-  
-    const validateInputs = () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const newErrors: any = {};
-      if (!notificationInfos.description.trim()) newErrors.description = "Campo obrigatório.";
-      setErrors(newErrors);
-      return Object.keys(newErrors).length === 0;
-    };
-  
-    const handleRegister = async (e: React.FormEvent) => {
-      e.preventDefault();
-      dispatch(clearError());
-      dispatch(clearSuccessMessage());
-  
-      if (validateInputs()) {
-        if (user?.id && user.email && user.roles) {
-          const payload = {
-            message: notificationInfos.description,
-          };
-          dispatch(createNotification(payload))
-            .unwrap()
-            .then(() => {
-              setNotificationInfos({
-                description: "",
-              });
-            })
-            .catch((error) => {
-              console.error("Notification creation failed:", error);
+    resetFormState: () => {
+      setNotificationInfos({
+        description: "",
+        processSEI: "",
+        observations: "",
+        actionPlan: "",
+        situation: "",
+        anvisaNotification: "",
+        notificationNumber: "",
+        categoryId: null,
+        themeId: null,
+        subcategoryId: null,
+        notifyingServiceId: null,
+        organizationalUnityId: null,
+        incidentId: null,
+        responsibleId: null,
+        priorityId: null,
+      });
+    },
+    resetFormErrors: () => {
+      setErrors({
+        description: "",
+        processSEI: "",
+        observations: "",
+        actionPlan: "",
+        situation: "",
+        anvisaNotification: "",
+        notificationNumber: "",
+        categoryId: "",
+        themeId: "",
+        subcategoryId: "",
+        notifyingServiceId: "",
+        organizationalUnityId: "",
+        incidentId: "",
+        responsibleId: "",
+        priorityId: "",
+      });
+    },
+  });
+
+  const validateInputs = () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newErrors: any = {};
+    if (!notificationInfos.description.trim())
+      newErrors.description = "Campo obrigatório.";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    dispatch(clearError());
+    dispatch(clearSuccessMessage());
+
+    if (validateInputs()) {
+      if (user?.id && user.email && user.roles) {
+        const payload = {
+          message: notificationInfos.description,
+          processSEI: notificationInfos.processSEI,
+          observations: notificationInfos.observations,
+          actionPlan: notificationInfos.actionPlan,
+          situation: notificationInfos.situation,
+          anvisaNotification: notificationInfos.anvisaNotification,
+          notificationNumber: Number(notificationInfos.notificationNumber),
+          categoryId: notificationInfos.categoryId,
+          themeId: notificationInfos.themeId,
+          subcategoryId: notificationInfos.subcategoryId,
+          notifyingServiceId: notificationInfos.notifyingServiceId,
+          organizationalUnityId: notificationInfos.organizationalUnityId,
+          incidentId: notificationInfos.incidentId,
+          responsibleId: notificationInfos.responsibleId,
+          priorityId: notificationInfos.priorityId,
+        };
+        dispatch(createNotification(payload))
+          .unwrap()
+          .then(() => {
+            setNotificationInfos({
+              description: "",
+              processSEI: "",
+              observations: "",
+              actionPlan: "",
+              situation: "",
+              anvisaNotification: "",
+              notificationNumber: "",
+              categoryId: null,
+              themeId: null,
+              subcategoryId: null,
+              notifyingServiceId: null,
+              organizationalUnityId: null,
+              incidentId: null,
+              responsibleId: null,
+              priorityId: null,
             });
-        }
+          })
+          .catch((error) => {
+            console.error("Notification creation failed:", error);
+          });
       }
-    };
-  
-    return (
-      <IonPage>
-        <IonHeader>
-          <IonToolbar>
-            <IonButtons slot="start">
-              <IonMenuButton />
-            </IonButtons>
-            <IonTitle>Sistema Hospitalar</IonTitle>
-          </IonToolbar>
-        </IonHeader>
-        <IonContent>
-          <div className="m-2 row justify-content-center align-items-center mt-6">
-            <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
-              <h1 className="text-center text-uppercase fw-bold">
-                Cadastro de Notificação
-              </h1>
-              <IonCardContent>
-                <form
-                  onSubmit={handleRegister}
-                  className="row justify-content-center align-items-center gap-3 p-2"
-                >
-                  <div className="col-12">
-                    <IonTextarea
-                      color={"dark"}
-                      fill="outline"
-                      placeholder="Descrição da Notificação"
-                      label="Descrição da Notificação"
-                      labelPlacement="floating"
-                      rows={4}
-                      mode="md"
-                      value={notificationInfos.description}
-                      onIonInput={(e) => {
+    }
+  };
+
+  return (
+    <IonPage>
+      <Header />
+      <IonContent>
+        <div className="m-2 row justify-content-center align-items-center mt-6">
+          <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
+            <h1 className="text-center text-uppercase fw-bold">
+              Cadastro de Notificação
+            </h1>
+            <IonCardContent>
+              <form
+                onSubmit={handleRegister}
+                className="row justify-content-center align-items-center gap-3 p-2"
+              >
+                <div className="col-12">
+                  <IonTextarea
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="Descrição da Notificação"
+                    label="Descrição da Notificação"
+                    labelPlacement="floating"
+                    rows={4}
+                    mode="md"
+                    value={notificationInfos.description}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        description: String(e.target.value),
+                      });
+                      if (errors.description)
+                        setErrors({ ...errors, description: "" });
+                    }}
+                  />
+                  {errors.description && (
+                    <span className="text-danger">{errors.description}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonTextarea
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="processSEI"
+                    label="processSEI"
+                    labelPlacement="floating"
+                    rows={4}
+                    mode="md"
+                    value={notificationInfos.processSEI}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        processSEI: String(e.target.value),
+                      });
+                      if (errors.processSEI)
+                        setErrors({ ...errors, processSEI: "" });
+                    }}
+                  />
+                  {errors.processSEI && (
+                    <span className="text-danger">{errors.processSEI}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonTextarea
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="Observações"
+                    label="Observações"
+                    labelPlacement="floating"
+                    rows={4}
+                    mode="md"
+                    value={notificationInfos.observations}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        observations: String(e.target.value),
+                      });
+                      if (errors.observations)
+                        setErrors({ ...errors, observations: "" });
+                    }}
+                  />
+                  {errors.observations && (
+                    <span className="text-danger">{errors.observations}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonTextarea
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="actionPlan"
+                    label="actionPlan"
+                    labelPlacement="floating"
+                    rows={4}
+                    mode="md"
+                    value={notificationInfos.actionPlan}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        actionPlan: String(e.target.value),
+                      });
+                      if (errors.actionPlan)
+                        setErrors({ ...errors, actionPlan: "" });
+                    }}
+                  />
+                  {errors.actionPlan && (
+                    <span className="text-danger">{errors.actionPlan}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonInput
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="Número da notificação"
+                    label="Número da notificação"
+                    labelPlacement="floating"
+                    type="number"
+                    min={0}
+                    mode="md"
+                    value={notificationInfos.notificationNumber}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        notificationNumber: String(e.target.value),
+                      });
+                      if (errors.notificationNumber)
+                        setErrors({ ...errors, notificationNumber: "" });
+                    }}
+                  />
+                  {errors.notificationNumber && (
+                    <span className="text-danger">
+                      {errors.notificationNumber}
+                    </span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonTextarea
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="Descrição da Notificação"
+                    label="Descrição da Notificação"
+                    labelPlacement="floating"
+                    rows={4}
+                    mode="md"
+                    value={notificationInfos.description}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        description: String(e.target.value),
+                      });
+                      if (errors.description)
+                        setErrors({ ...errors, description: "" });
+                    }}
+                  />
+                  {errors.description && (
+                    <span className="text-danger">{errors.description}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">Serviço Notificante</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.notifyingServiceId}
+                      placeholder="Selecione Serviço Notificante"
+                      onIonChange={(e) => {
                         setNotificationInfos({
                           ...notificationInfos,
-                          description: String(e.target.value),
+                          notifyingServiceId: e.detail.value,
                         });
-                        if (errors.description)
-                          setErrors({ ...errors, description: "" });
+                        if (errors.notifyingServiceId)
+                          setErrors({ ...errors, notifyingServiceId: "" });
                       }}
-                    />
-                    {errors.description && (
-                      <span className="text-danger">{errors.description}</span>
-                    )}
-                  </div>
-  
-                  <div className="col-12">
-                    <IonButton
-                      expand="block"
-                      color="primary"
-                      className="custom-button"
-                      onClick={handleRegister}
-                      disabled={loading}
                     >
-                      {loading ? <IonSpinner name="crescent" /> : "Cadastrar"}
-                    </IonButton>
+                      {notifyingServicesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando serviços notificantes...
+                        </IonSelectOption>
+                      ) : (
+                        notifyingServices.map((notifyingService) => (
+                          <IonSelectOption
+                            key={notifyingService.id}
+                            value={notifyingService.id}
+                          >
+                            {notifyingService.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.notifyingServiceId && (
+                    <span className="text-danger">
+                      {errors.notifyingServiceId}
+                    </span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">Tema</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.themeId}
+                      placeholder="Selecione um tema"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          themeId: e.detail.value,
+                        });
+                        if (errors.themeId)
+                          setErrors({ ...errors, themeId: "" });
+                      }}
+                    >
+                      {themesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando temas...
+                        </IonSelectOption>
+                      ) : (
+                        themes.map((theme) => (
+                          <IonSelectOption key={theme.id} value={theme.id}>
+                            {theme.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.categoryId && (
+                    <span className="text-danger">{errors.categoryId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">Incidente</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.incidentId}
+                      placeholder="Selecione um Incidente"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          incidentId: e.detail.value,
+                        });
+                        if (errors.incidentId)
+                          setErrors({ ...errors, incidentId: "" });
+                      }}
+                    >
+                      {incidentsLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando incidentes...
+                        </IonSelectOption>
+                      ) : (
+                        incidents.map((incident) => (
+                          <IonSelectOption
+                            key={incident.id}
+                            value={incident.id}
+                          >
+                            {incident.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.incidentId && (
+                    <span className="text-danger">{errors.incidentId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">responsibles</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.responsibleId}
+                      placeholder="Selecione um responsibles"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          responsibleId: e.detail.value,
+                        });
+                        if (errors.responsibleId)
+                          setErrors({ ...errors, responsibleId: "" });
+                      }}
+                    >
+                      {responsiblesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando responsibleId...
+                        </IonSelectOption>
+                      ) : (
+                        responsibles.map((responsible) => (
+                          <IonSelectOption
+                            key={responsible.id}
+                            value={responsible.id}
+                          >
+                            {responsible.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.responsibleId && (
+                    <span className="text-danger">{errors.responsibleId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">Subcategoria</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.subcategoryId}
+                      placeholder="Selecione uma categoria"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          subcategoryId: e.detail.value,
+                        });
+                        if (errors.subcategoryId)
+                          setErrors({ ...errors, subcategoryId: "" });
+                      }}
+                    >
+                      {subcategoriesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando subcategorias...
+                        </IonSelectOption>
+                      ) : (
+                        subcategories.map((subcategory) => (
+                          <IonSelectOption
+                            key={subcategory.id}
+                            value={subcategory.id}
+                          >
+                            {subcategory.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.subcategoryId && (
+                    <span className="text-danger">{errors.subcategoryId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">
+                      organizationalUnityId
+                    </IonLabel>
+                    <IonSelect
+                      value={notificationInfos.organizationalUnityId}
+                      placeholder="Selecione uma organizationalUnityId"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          organizationalUnityId: e.detail.value,
+                        });
+                        if (errors.organizationalUnityId)
+                          setErrors({ ...errors, organizationalUnityId: "" });
+                      }}
+                    >
+                      {organizationalUnitiesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando organizationalUnityId...
+                        </IonSelectOption>
+                      ) : (
+                        organizationalUnities.map((organizationalUnity) => (
+                          <IonSelectOption
+                            key={organizationalUnity.id}
+                            value={organizationalUnity.id}
+                          >
+                            {organizationalUnity.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.organizationalUnityId && (
+                    <span className="text-danger">
+                      {errors.organizationalUnityId}
+                    </span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">categoryId</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.categoryId}
+                      placeholder="Selecione uma categoria"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          categoryId: e.detail.value,
+                        });
+                        if (errors.categoryId)
+                          setErrors({ ...errors, categoryId: "" });
+                      }}
+                    >
+                      {categoriesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando categorias...
+                        </IonSelectOption>
+                      ) : (
+                        categories.map((category) => (
+                          <IonSelectOption
+                            key={category.id}
+                            value={category.id}
+                          >
+                            {category.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.categoryId && (
+                    <span className="text-danger">{errors.categoryId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonItem>
+                    <IonLabel position="stacked">Prioridade</IonLabel>
+                    <IonSelect
+                      value={notificationInfos.priorityId}
+                      placeholder="Selecione uma Prioridade"
+                      onIonChange={(e) => {
+                        setNotificationInfos({
+                          ...notificationInfos,
+                          priorityId: e.detail.value,
+                        });
+                        if (errors.categoryId)
+                          setErrors({ ...errors, priorityId: "" });
+                      }}
+                    >
+                      {categoriesLoading ? (
+                        <IonSelectOption disabled>
+                          Carregando priorityId...
+                        </IonSelectOption>
+                      ) : (
+                        priorities.map((priority) => (
+                          <IonSelectOption
+                            key={priority.id}
+                            value={priority.id}
+                          >
+                            {priority.name}
+                          </IonSelectOption>
+                        ))
+                      )}
+                    </IonSelect>
+                  </IonItem>
+                  {errors.priorityId && (
+                    <span className="text-danger">{errors.priorityId}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonButton
+                    expand="block"
+                    color="primary"
+                    className="custom-button"
+                    onClick={handleRegister}
+                    disabled={loading}
+                  >
+                    {loading ? <IonSpinner name="crescent" /> : "Cadastrar"}
+                  </IonButton>
+                </div>
+
+                {successMessage && (
+                  <div className="alert alert-success col-12 text-center">
+                    {successMessage}
                   </div>
-  
-                  {successMessage && (
-                    <div className="alert alert-success col-12 text-center">
-                      {successMessage}
-                    </div>
-                  )}
-  
-                  {error && (
-                    <div className="alert alert-danger col-12 text-center">
-                      {error}
-                    </div>
-                  )}
-                </form>
-              </IonCardContent>
-            </IonCard>
-          </div>
-        </IonContent>
-      </IonPage>
-    );
-  };
-  
-  export default CreateNotification;
+                )}
+
+                {error && (
+                  <div className="alert alert-danger col-12 text-center">
+                    {error}
+                  </div>
+                )}
+              </form>
+            </IonCardContent>
+          </IonCard>
+        </div>
+      </IonContent>
+    </IonPage>
+  );
+};
+
+export default CreateNotification;
