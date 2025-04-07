@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { HospitalsService } from './hospitals.service';
 import { CreateHospitalDto } from './dto/create-hospital.dto';
@@ -18,6 +19,8 @@ import { CheckPolicies } from 'src/casl/casl-ability.factory/policies.decorator'
 import { Action } from 'src/casl/casl-ability.factory/action.enum';
 import { Hospital } from './entities/hospital.entity';
 import { ApiOperation } from '@nestjs/swagger';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('hospitals')
 @UseGuards(AuthGuard('jwt'), PoliciesGuard)
@@ -32,10 +35,14 @@ export class HospitalsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os hospitais' })
+  @ApiOperation({ summary: 'Listar todos os usuários (paginado)' })
   @CheckPolicies((ability) => ability.can(Action.Read, Hospital))
-  findAll(@Request() req) {
-    return this.hospitalsService.findAll(req.user);
+  async findAll(
+    @Request() req,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Hospital>> {
+    const currentUser = req.user;
+    return this.hospitalsService.findAllPaginated(currentUser, paginationQuery);
   }
 
   @Get(':id')

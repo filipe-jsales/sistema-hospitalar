@@ -4,9 +4,10 @@ import { HospitalsController } from './hospitals.controller';
 import { CaslModule } from 'src/casl/casl.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Hospital } from './entities/hospital.entity';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Hospital]), CaslModule],
+  imports: [TypeOrmModule.forFeature([Hospital]), CaslModule, SharedModule],
   controllers: [HospitalsController],
   providers: [HospitalsService],
   exports: [HospitalsService],

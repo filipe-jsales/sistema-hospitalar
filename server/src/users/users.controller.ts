@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   Request,
   ForbiddenException,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,23 +19,32 @@ import { PoliciesGuard } from '../casl/casl-ability.factory/policies.guard';
 import { CheckPolicies } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../auth/auth.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), PoliciesGuard)
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly authService: AuthService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
+
+  // @Get()
+  // @ApiOperation({ summary: 'Listar todos os usuários' })
+  // @CheckPolicies((ability) => ability.can(Action.Read, User))
+  // async findAll(@Request() req): Promise<User[]> {
+  //   const currentUser = req.user;
+  //   return this.usersService.findAll(currentUser);
+  // }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos os usuários' })
+  @ApiOperation({ summary: 'Listar todos os usuários (paginado)' })
   @CheckPolicies((ability) => ability.can(Action.Read, User))
-  async findAll(@Request() req): Promise<User[]> {
+  async findAll(
+    @Request() req,
+    @Query() paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<User>> {
     const currentUser = req.user;
-    return this.usersService.findAll(currentUser);
+    return this.usersService.findAllPaginated(currentUser, paginationQuery);
   }
 
   @Post('create-user')

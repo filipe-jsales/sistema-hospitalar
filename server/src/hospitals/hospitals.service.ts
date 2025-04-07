@@ -11,6 +11,9 @@ import { UpdateHospitalDto } from './dto/update-hospital.dto';
 import { User } from '../users/entities/user.entity';
 import { CaslAbilityFactory } from 'src/casl/casl-ability.factory/casl-ability.factory';
 import { Action } from 'src/casl/casl-ability.factory/action.enum';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class HospitalsService {
@@ -18,6 +21,7 @@ export class HospitalsService {
     @InjectRepository(Hospital)
     private readonly hospitalsRepository: Repository<Hospital>,
     private caslAbilityFactory: CaslAbilityFactory,
+    private readonly paginationService: PaginationService,
   ) {}
 
   // FIXME: use the user: User here
@@ -49,6 +53,23 @@ export class HospitalsService {
     throw new ForbiddenException(
       'Você não tem permissão para listar hospitais',
     );
+  }
+
+  async findAllPaginated(
+    user: User,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Hospital>> {
+    const ability = this.caslAbilityFactory.createForUser(user);
+    const canReadAllHospitals = ability.can(Action.Manage, Hospital);
+
+    const queryBuilder =
+      this.hospitalsRepository.createQueryBuilder('hospital');
+
+    if (!canReadAllHospitals) {
+      queryBuilder.where('hospital.id = :id', { id: user.hospital.id });
+    }
+
+    return this.paginationService.paginate(queryBuilder, paginationQuery);
   }
 
   async findOne(id: number, user: User) {

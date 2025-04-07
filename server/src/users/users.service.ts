@@ -12,6 +12,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { Role } from '../roles/entities/role.entity';
 import { HospitalsService } from 'src/hospitals/hospitals.service';
 import { Hospital } from 'src/hospitals/entities/hospital.entity';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class UsersService {
@@ -24,6 +27,7 @@ export class UsersService {
     private readonly rolesRepository: Repository<Role>,
     @Inject(forwardRef(() => HospitalsService))
     private readonly hospitalsService: HospitalsService,
+    private readonly paginationService: PaginationService,
   ) {}
 
   private buildUserQueryOptions(currentUser: User) {
@@ -48,6 +52,28 @@ export class UsersService {
     }
     throw new ForbiddenException(
       'Você não tem permissão para realizar esta ação.',
+    );
+  }
+
+  async findAll(currentUser: User): Promise<User[]> {
+    const queryOptions = this.buildUserQueryOptions(currentUser);
+    return this.usersRepository.find(queryOptions);
+  }
+
+  async findAllPaginated(
+    currentUser: User,
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<User>> {
+    const queryOptions = this.buildUserQueryOptions(currentUser);
+
+    return this.paginationService.paginateRepository(
+      this.usersRepository,
+      paginationQuery,
+      {
+        relations: queryOptions.relations,
+        where: queryOptions.where,
+        order: { id: 'DESC' },
+      },
     );
   }
 
@@ -128,11 +154,6 @@ export class UsersService {
     });
 
     return this.usersRepository.save(user);
-  }
-
-  async findAll(currentUser: User): Promise<User[]> {
-    const queryOptions = this.buildUserQueryOptions(currentUser);
-    return this.usersRepository.find(queryOptions);
   }
 
   async findOneUnauthenticated(id: number): Promise<User> {
