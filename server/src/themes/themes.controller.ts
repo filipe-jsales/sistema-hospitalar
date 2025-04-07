@@ -13,10 +13,9 @@ import { ThemesService } from './themes.service';
 import { CreateThemeDto } from './dto/create-theme.dto';
 import { UpdateThemeDto } from './dto/update-theme.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOperation } from '@nestjs/swagger';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
-@ApiTags('themes')
 @Controller('themes')
 @UseGuards(AuthGuard('jwt'))
 export class ThemesController {

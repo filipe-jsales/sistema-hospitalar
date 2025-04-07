@@ -22,6 +22,7 @@ export class ResponsiblesController {
   constructor(private readonly responsiblesService: ResponsiblesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar um novo responsável' })
   create(@Body() createResponsibleDto: CreateResponsibleDto) {
     return this.responsiblesService.create(createResponsibleDto);
   }
@@ -33,11 +34,13 @@ export class ResponsiblesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar responsável por ID' })
   findOne(@Param('id') id: string) {
     return this.responsiblesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar responsável por ID' })
   update(
     @Param('id') id: string,
     @Body() updateResponsibleDto: UpdateResponsibleDto,
@@ -46,6 +49,7 @@ export class ResponsiblesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover responsável por ID' })
   remove(@Param('id') id: string) {
     return this.responsiblesService.remove(+id);
   }

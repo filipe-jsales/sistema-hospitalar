@@ -17,11 +17,12 @@ import { ApiOperation } from '@nestjs/swagger';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('categories')
-@UseGuards(AuthGuard('jwt')) //TODO: add policies guard
+@UseGuards(AuthGuard('jwt'))
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar uma nova categoria' })
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoriesService.create(createCategoryDto);
   }
@@ -33,11 +34,13 @@ export class CategoriesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar categoria por ID' })
   findOne(@Param('id') id: string) {
     return this.categoriesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar categoria por ID' })
   update(
     @Param('id') id: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
@@ -46,6 +49,7 @@ export class CategoriesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover categoria por ID' })
   remove(@Param('id') id: string) {
     return this.categoriesService.remove(+id);
   }

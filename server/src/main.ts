@@ -39,7 +39,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document); // aqui fica o endpoint '/api'
+  SwaggerModule.setup('api', app, document);
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

@@ -24,6 +24,7 @@ export class NotifyingServicesController {
   ) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar um novo serviço notificante' })
   create(@Body() createNotifyingServiceDto: CreateNotifyingServiceDto) {
     return this.notifyingServicesService.create(createNotifyingServiceDto);
   }
@@ -35,11 +36,13 @@ export class NotifyingServicesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar serviço notificante por ID' })
   findOne(@Param('id') id: string) {
     return this.notifyingServicesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar serviço notificante por ID' })
   update(
     @Param('id') id: string,
     @Body() updateNotifyingServiceDto: UpdateNotifyingServiceDto,
@@ -48,6 +51,7 @@ export class NotifyingServicesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover serviço notificante por ID' })
   remove(@Param('id') id: string) {
     return this.notifyingServicesService.remove(+id);
   }

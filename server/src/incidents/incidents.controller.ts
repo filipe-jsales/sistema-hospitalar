@@ -20,7 +20,9 @@ import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 @UseGuards(AuthGuard('jwt'))
 export class IncidentsController {
   constructor(private readonly incidentsService: IncidentsService) {}
+
   @Post()
+  @ApiOperation({ summary: 'Criar um novo incidente' })
   create(@Body() createIncidentDto: CreateIncidentDto) {
     return this.incidentsService.create(createIncidentDto);
   }
@@ -32,11 +34,13 @@ export class IncidentsController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar incidente por ID' })
   findOne(@Param('id') id: string) {
     return this.incidentsService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar incidente por ID' })
   update(
     @Param('id') id: string,
     @Body() updateIncidentDto: UpdateIncidentDto,
@@ -45,6 +49,7 @@ export class IncidentsController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover incidente por ID' })
   remove(@Param('id') id: string) {
     return this.incidentsService.remove(+id);
   }

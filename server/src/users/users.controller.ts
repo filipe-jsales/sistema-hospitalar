@@ -19,6 +19,7 @@ import { CheckPolicies } from '../casl/casl-ability.factory/policies.decorator';
 import { Action } from '../casl/casl-ability.factory/action.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from '../auth/auth.service';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('users')
 @UseGuards(AuthGuard('jwt'), PoliciesGuard)
@@ -29,6 +30,7 @@ export class UsersController {
   ) {}
 
   @Get()
+  @ApiOperation({ summary: 'Listar todos os usuários' })
   @CheckPolicies((ability) => ability.can(Action.Read, User))
   async findAll(@Request() req): Promise<User[]> {
     const currentUser = req.user;
@@ -36,6 +38,7 @@ export class UsersController {
   }
 
   @Post('create-user')
+  @ApiOperation({ summary: 'Criar um novo usuário' })
   @CheckPolicies((ability) => ability.can(Action.Create, User))
   async createUser(
     @Body() createUserRequestDto: CreateUserDto,
@@ -47,6 +50,7 @@ export class UsersController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar usuário por ID' })
   @CheckPolicies((ability) => ability.can(Action.Read, User))
   async findOne(
     @Param('id', ParseIntPipe) id: number,
@@ -57,6 +61,7 @@ export class UsersController {
   }
 
   @Put(':id')
+  @ApiOperation({ summary: 'Atualizar usuário por ID' })
   @CheckPolicies((ability) => ability.can(Action.Update, User))
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -77,6 +82,7 @@ export class UsersController {
   }
 
   @Post(':userId/roles/:roleId')
+  @ApiOperation({ summary: 'Adicionar papel a um usuário' })
   @CheckPolicies((ability) => ability.can(Action.Update, User))
   async addRoleToUser(
     @Param('userId', ParseIntPipe) userId: number,
@@ -88,6 +94,7 @@ export class UsersController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover usuário por ID' })
   @CheckPolicies((ability) => ability.can(Action.Delete, User))
   async remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const currentUser = req.user;

@@ -22,6 +22,7 @@ export class PrioritiesController {
   constructor(private readonly prioritiesService: PrioritiesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar uma nova prioridade' })
   create(@Body() createPriorityDto: CreatePriorityDto) {
     return this.prioritiesService.create(createPriorityDto);
   }
@@ -33,11 +34,13 @@ export class PrioritiesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar prioridade por ID' })
   findOne(@Param('id') id: string) {
     return this.prioritiesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar prioridade por ID' })
   update(
     @Param('id') id: string,
     @Body() updatePriorityDto: UpdatePriorityDto,
@@ -46,6 +49,7 @@ export class PrioritiesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover prioridade por ID' })
   remove(@Param('id') id: string) {
     return this.prioritiesService.remove(+id);
   }

@@ -15,6 +15,7 @@ import { CreateUserDto } from '../users/dto/create-user.dto';
 import { AuthUserDto } from '../users/dto/auth-user.dto';
 import { Public } from 'src/casl/casl-ability.factory/policies.decorator';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
 
   @Public()
   @Post('register')
+  @ApiOperation({ summary: 'Registrar um novo usuário' })
   async register(@Body() createUserDto: CreateUserDto, @Request() req) {
     const currentUser = req.user;
     await this.authService.register(createUserDto, currentUser);
@@ -33,6 +35,7 @@ export class AuthController {
 
   @Public()
   @Post('signup')
+  @ApiOperation({ summary: 'Cadastrar um novo usuário' })
   async signup(@Body() createUserDto: CreateUserDto) {
     await this.authService.signup(createUserDto);
     return {
@@ -43,6 +46,7 @@ export class AuthController {
 
   @Public()
   @Post('login')
+  @ApiOperation({ summary: 'Login de usuário' })
   @HttpCode(HttpStatus.OK)
   async login(@Body() authUserDto: AuthUserDto) {
     const { email, password } = authUserDto;
@@ -57,6 +61,7 @@ export class AuthController {
 
   @Public()
   @Get('activate/:token')
+  @ApiOperation({ summary: 'Ativar conta de usuário' })
   async activateAccount(@Param('token') token: string) {
     await this.authService.activateAccount(token);
     return {
@@ -66,6 +71,7 @@ export class AuthController {
 
   @Public()
   @Post('reset-password-request')
+  @ApiOperation({ summary: 'Solicitar redefinição de senha' })
   async requestPasswordReset(@Body('email') email: string) {
     await this.authService.sendPasswordResetEmail(email);
     return { message: 'Email de redefinição de senha enviado com sucesso.' };
@@ -73,6 +79,7 @@ export class AuthController {
 
   @Public()
   @Post('reset-password/:token')
+  @ApiOperation({ summary: 'Redefinir senha' })
   async resetPassword(
     @Param('token') token: string,
     @Body()
@@ -93,6 +100,7 @@ export class AuthController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('profile')
+  @ApiOperation({ summary: 'Obter perfil do usuário' })
   getProfile(@Request() req) {
     return req.user;
   }

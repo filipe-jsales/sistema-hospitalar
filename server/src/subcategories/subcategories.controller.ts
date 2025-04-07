@@ -22,6 +22,7 @@ export class SubcategoriesController {
   constructor(private readonly subcategoriesService: SubcategoriesService) {}
 
   @Post()
+  @ApiOperation({ summary: 'Criar uma nova subcategoria' })
   create(@Body() createSubcategoryDto: CreateSubcategoryDto) {
     return this.subcategoriesService.create(createSubcategoryDto);
   }
@@ -33,11 +34,13 @@ export class SubcategoriesController {
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Buscar subcategoria por ID' })
   findOne(@Param('id') id: string) {
     return this.subcategoriesService.findOne(+id);
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Atualizar subcategoria por ID' })
   update(
     @Param('id') id: string,
     @Body() updateSubcategoryDto: UpdateSubcategoryDto,
@@ -46,6 +49,7 @@ export class SubcategoriesController {
   }
 
   @Delete(':id')
+  @ApiOperation({ summary: 'Remover subcategoria por ID' })
   remove(@Param('id') id: string) {
     return this.subcategoriesService.remove(+id);
   }
