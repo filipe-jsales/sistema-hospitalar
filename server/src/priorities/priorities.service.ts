@@ -4,12 +4,16 @@ import { UpdatePriorityDto } from './dto/update-priority.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Priority } from './entities/priority.entity';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class PrioritiesService {
   constructor(
     @InjectRepository(Priority)
     private readonly priorityRepository: Repository<Priority>,
+    private readonly paginationService: PaginationService,
   ) {}
   create(createPriorityDto: CreatePriorityDto): Promise<Priority> {
     return this.priorityRepository.save(createPriorityDto);
@@ -17,6 +21,18 @@ export class PrioritiesService {
 
   findAll(): Promise<Priority[]> {
     return this.priorityRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Priority>> {
+    return this.paginationService.paginateRepository(
+      this.priorityRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<Priority> {

@@ -10,6 +10,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Subcategory } from './entities/subcategory.entity';
 import { Repository } from 'typeorm';
 import { CategoriesService } from 'src/categories/categories.service';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class SubcategoriesService {
@@ -18,6 +21,7 @@ export class SubcategoriesService {
     private readonly subcategoriesRepository: Repository<Subcategory>,
     @Inject(forwardRef(() => CategoriesService))
     private readonly categoriesService: CategoriesService,
+    private readonly paginationService: PaginationService,
   ) {}
 
   async create(createSubcategoryDto: CreateSubcategoryDto) {
@@ -35,6 +39,18 @@ export class SubcategoriesService {
 
   findAll(): Promise<Subcategory[]> {
     return this.subcategoriesRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Subcategory>> {
+    return this.paginationService.paginateRepository(
+      this.subcategoriesRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<Subcategory> {

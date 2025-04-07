@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { ResponsiblesService } from './responsibles.service';
 import { CreateResponsibleDto } from './dto/create-responsible.dto';
 import { UpdateResponsibleDto } from './dto/update-responsible.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('responsibles')
 @UseGuards(AuthGuard('jwt'))
@@ -15,8 +27,9 @@ export class ResponsiblesController {
   }
 
   @Get()
-  findAll() {
-    return this.responsiblesService.findAll();
+  @ApiOperation({ summary: 'Listar todas as categorias (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.responsiblesService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
@@ -25,7 +38,10 @@ export class ResponsiblesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateResponsibleDto: UpdateResponsibleDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateResponsibleDto: UpdateResponsibleDto,
+  ) {
     return this.responsiblesService.update(+id, updateResponsibleDto);
   }
 

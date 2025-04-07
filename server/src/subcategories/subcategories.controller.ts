@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { SubcategoriesService } from './subcategories.service';
 import { CreateSubcategoryDto } from './dto/create-subcategory.dto';
 import { UpdateSubcategoryDto } from './dto/update-subcategory.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('subcategories')
 @UseGuards(AuthGuard('jwt'))
@@ -15,8 +27,9 @@ export class SubcategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.subcategoriesService.findAll();
+  @ApiOperation({ summary: 'Listar todas as subcategorias (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.subcategoriesService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
@@ -25,7 +38,10 @@ export class SubcategoriesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSubcategoryDto: UpdateSubcategoryDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateSubcategoryDto: UpdateSubcategoryDto,
+  ) {
     return this.subcategoriesService.update(+id, updateSubcategoryDto);
   }
 

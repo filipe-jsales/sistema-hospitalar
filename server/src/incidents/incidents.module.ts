@@ -3,9 +3,10 @@ import { IncidentsService } from './incidents.service';
 import { IncidentsController } from './incidents.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Incident } from './entities/incident.entity';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Incident])],
+  imports: [TypeOrmModule.forFeature([Incident]), SharedModule],
   controllers: [IncidentsController],
   providers: [IncidentsService],
   exports: [IncidentsService],

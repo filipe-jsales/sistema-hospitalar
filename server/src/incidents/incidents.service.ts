@@ -4,12 +4,16 @@ import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Incident } from './entities/incident.entity';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class IncidentsService {
   constructor(
     @InjectRepository(Incident)
     private readonly incidentRepository: Repository<Incident>,
+    private readonly paginationService: PaginationService,
   ) {}
   create(createIncidentDto: CreateIncidentDto): Promise<Incident> {
     return this.incidentRepository.save(createIncidentDto);
@@ -17,6 +21,18 @@ export class IncidentsService {
 
   findAll(): Promise<Incident[]> {
     return this.incidentRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Incident>> {
+    return this.paginationService.paginateRepository(
+      this.incidentRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<Incident> {

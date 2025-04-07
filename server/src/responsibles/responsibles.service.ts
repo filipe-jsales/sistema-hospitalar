@@ -4,12 +4,16 @@ import { UpdateResponsibleDto } from './dto/update-responsible.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Responsible } from './entities/responsible.entity';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class ResponsiblesService {
   constructor(
     @InjectRepository(Responsible)
     private readonly responsiblesRepository: Repository<Responsible>,
+    private readonly paginationService: PaginationService,
   ) {}
   create(createResponsibleDto: CreateResponsibleDto): Promise<Responsible> {
     return this.responsiblesRepository.save(createResponsibleDto);
@@ -17,6 +21,18 @@ export class ResponsiblesService {
 
   findAll(): Promise<Responsible[]> {
     return this.responsiblesRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Responsible>> {
+    return this.paginationService.paginateRepository(
+      this.responsiblesRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<Responsible> {

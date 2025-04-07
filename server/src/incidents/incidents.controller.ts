@@ -1,8 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { IncidentsService } from './incidents.service';
 import { CreateIncidentDto } from './dto/create-incident.dto';
 import { UpdateIncidentDto } from './dto/update-incident.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('incidents')
 @UseGuards(AuthGuard('jwt'))
@@ -14,8 +26,9 @@ export class IncidentsController {
   }
 
   @Get()
-  findAll() {
-    return this.incidentsService.findAll();
+  @ApiOperation({ summary: 'Listar todos os incidentes (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.incidentsService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
@@ -24,7 +37,10 @@ export class IncidentsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateIncidentDto: UpdateIncidentDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateIncidentDto: UpdateIncidentDto,
+  ) {
     return this.incidentsService.update(+id, updateIncidentDto);
   }
 

@@ -40,7 +40,7 @@ export class HospitalsController {
   findOne(@Param('id') id: string, @Request() req) {
     return this.hospitalsService.findOne(+id, req.user);
   }
-  
+
   @Patch(':id')
   @CheckPolicies((ability) => ability.can(Action.Update, Hospital))
   update(
@@ -50,7 +50,7 @@ export class HospitalsController {
   ) {
     return this.hospitalsService.update(+id, updateHospitalDto, req.user);
   }
-  
+
   @Delete(':id')
   @CheckPolicies((ability) => ability.can(Action.Delete, Hospital))
   remove(@Param('id') id: string, @Request() req) {

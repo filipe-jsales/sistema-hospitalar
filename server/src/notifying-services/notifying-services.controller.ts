@@ -7,14 +7,17 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { NotifyingServicesService } from './notifying-services.service';
 import { CreateNotifyingServiceDto } from './dto/create-notifying-service.dto';
 import { UpdateNotifyingServiceDto } from './dto/update-notifying-service.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('notifying-services')
-@UseGuards(AuthGuard('jwt')) //TODO: add policies guard?
+@UseGuards(AuthGuard('jwt'))
 export class NotifyingServicesController {
   constructor(
     private readonly notifyingServicesService: NotifyingServicesService,
@@ -26,8 +29,9 @@ export class NotifyingServicesController {
   }
 
   @Get()
-  findAll() {
-    return this.notifyingServicesService.findAll();
+  @ApiOperation({ summary: 'Listar todas os serviços notificantes (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.notifyingServicesService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')

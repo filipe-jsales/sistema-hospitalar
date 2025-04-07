@@ -4,12 +4,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NotifyingService } from './entities/notifying-service.entity';
 import { Repository } from 'typeorm';
 import { UpdateNotifyingServiceDto } from './dto/update-notifying-service.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class NotifyingServicesService {
   constructor(
     @InjectRepository(NotifyingService)
     private readonly notifyingServicesRepository: Repository<NotifyingService>,
+    private readonly paginationService: PaginationService,
+
     // TODO: add CaslAbilityFactory?
     // TODO: add nest logger
   ) {}
@@ -22,6 +27,18 @@ export class NotifyingServicesService {
 
   findAll(): Promise<NotifyingService[]> {
     return this.notifyingServicesRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<NotifyingService>> {
+    return this.paginationService.paginateRepository(
+      this.notifyingServicesRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<NotifyingService> {
