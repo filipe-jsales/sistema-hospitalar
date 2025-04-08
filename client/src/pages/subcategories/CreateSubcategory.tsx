@@ -10,6 +10,7 @@ import {
   IonLabel,
   IonSelect,
   IonSelectOption,
+  IonList,
 } from "@ionic/react";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -20,6 +21,7 @@ import {
 } from "../../store/slices/subcategory/createSubcategorySlice";
 import { useFormCleanup } from "../../hooks/useFormCleanup";
 import { fetchCategories } from "../../store/slices/category/fetchCategoriesSlice";
+import { fetchSubcategories } from "../../store/slices/subcategory/fetchSubcategoriesSlice";
 import Header from "../../components/Header/Header";
 
 const CreateSubcategory: React.FC = () => {
@@ -32,6 +34,8 @@ const CreateSubcategory: React.FC = () => {
     name: "",
     categoryId: "",
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   const dispatch = useAppDispatch();
   const { isAuthenticated, user, token } = useAppSelector(
@@ -46,13 +50,30 @@ const CreateSubcategory: React.FC = () => {
     error: categoriesError,
   } = useAppSelector((state) => state.categories);
 
+  const {
+    subcategories,
+    loading: subcategoriesLoading,
+    error: subcategoriesError,
+    pagination,
+  } = useAppSelector((state) => state.subcategories);
+
   useEffect(() => {
-    dispatch(fetchCategories())
+    dispatch(fetchCategories(1))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar categorias:", error);
       });
+
+    loadSubcategories(1);
   }, [dispatch]);
+
+  const loadSubcategories = (page: number) => {
+    dispatch(fetchSubcategories(page))
+      .unwrap()
+      .catch((error) => {
+        console.error("Falha ao carregar subcategorias:", error);
+      });
+  };
 
   useFormCleanup({
     dispatch,
@@ -100,6 +121,8 @@ const CreateSubcategory: React.FC = () => {
               name: "",
               categoryId: null,
             });
+            loadSubcategories(1);
+            setCurrentPage(1);
           })
           .catch((error) => {
             console.error("Subcategory creation failed:", error);
@@ -163,7 +186,7 @@ const CreateSubcategory: React.FC = () => {
                         <IonSelectOption disabled>
                           Carregando categorias...
                         </IonSelectOption>
-                      ) : (
+                      ) : categories && categories.length > 0 ? (
                         categories.map((category) => (
                           <IonSelectOption
                             key={category.id}
@@ -172,6 +195,10 @@ const CreateSubcategory: React.FC = () => {
                             {category.name}
                           </IonSelectOption>
                         ))
+                      ) : (
+                        <IonSelectOption disabled>
+                          Nenhuma categoria encontrada
+                        </IonSelectOption>
                       )}
                     </IonSelect>
                   </IonItem>
@@ -204,6 +231,81 @@ const CreateSubcategory: React.FC = () => {
                   </div>
                 )}
               </form>
+            </IonCardContent>
+          </IonCard>
+        </div>
+
+        {/* Lista de subcategorias com paginação */}
+        <div className="m-2 row justify-content-center align-items-center mt-4">
+          <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
+            <h2 className="text-center text-uppercase fw-bold mt-3">
+              Subcategorias
+            </h2>
+            <IonCardContent>
+              {subcategoriesLoading ? (
+                <div className="text-center p-3">
+                  <IonSpinner name="crescent" />
+                  <p>Carregando subcategorias...</p>
+                </div>
+              ) : subcategoriesError ? (
+                <div className="alert alert-danger text-center">
+                  {subcategoriesError}
+                </div>
+              ) : subcategories.length === 0 ? (
+                <div className="alert alert-info text-center">
+                  Nenhuma subcategoria encontrada.
+                </div>
+              ) : (
+                <>
+                  <IonList>
+                    {subcategories.map((subcategory) => (
+                      <IonItem key={subcategory.id}>
+                        <IonLabel>
+                          <h2>{subcategory.name}</h2>
+                          <p>ID da Categoria: {subcategory.categoryId}</p>
+                        </IonLabel>
+                      </IonItem>
+                    ))}
+                  </IonList>
+
+                  {pagination && pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() => {
+                          const newPage = Math.max(1, currentPage - 1);
+                          setCurrentPage(newPage);
+                          loadSubcategories(newPage);
+                        }}
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() => {
+                          const newPage = Math.min(
+                            pagination.totalPages,
+                            currentPage + 1
+                          );
+                          setCurrentPage(newPage);
+                          loadSubcategories(newPage);
+                        }}
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
+                </>
+              )}
             </IonCardContent>
           </IonCard>
         </div>

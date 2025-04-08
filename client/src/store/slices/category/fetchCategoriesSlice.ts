@@ -1,31 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateCategory } from "./fetchCategoryByIdSlice";
 
 export interface CategoryData {
   id: number;
   name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface CategoriesState {
   categories: CategoryData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: CategoriesState = {
   categories: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchCategories = createAsyncThunk(
   "categories/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/categories");
-      return response.data;
+      const response = await apiService.get(`/categories?page=${page}`);
+      return response.data as PaginatedResponse<CategoryData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar categorias."
@@ -43,6 +60,7 @@ const fetchCategoriesSlice = createSlice({
     },
     clearCategories(state) {
       state.categories = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,8 +69,9 @@ const fetchCategoriesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.categories = action.payload;
+      .addCase(fetchCategories.fulfilled, (state, action: PayloadAction<PaginatedResponse<CategoryData>>) => {
+        state.categories = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchCategories.rejected, (state, action) => {

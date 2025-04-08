@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateSubcategory } from "./fetchSubcategoryByIdSlice";
 
@@ -7,26 +7,43 @@ export interface SubcategoryData {
   id: number;
   name: string;
   categoryId?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface SubcategoriesState {
   subcategories: SubcategoryData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: SubcategoriesState = {
   subcategories: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchSubcategories = createAsyncThunk(
   "subcategories/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/subcategories");
-      return response.data;
+      const response = await apiService.get(`/subcategories?page=${page}`);
+      return response.data as PaginatedResponse<SubcategoryData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar subcategorias."
@@ -44,6 +61,7 @@ const fetchSubcategoriesSlice = createSlice({
     },
     clearSubcategories(state) {
       state.subcategories = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -52,10 +70,14 @@ const fetchSubcategoriesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchSubcategories.fulfilled, (state, action) => {
-        state.subcategories = action.payload;
-        state.loading = false;
-      })
+      .addCase(
+        fetchSubcategories.fulfilled,
+        (state, action: PayloadAction<PaginatedResponse<SubcategoryData>>) => {
+          state.subcategories = action.payload.items;
+          state.pagination = action.payload.meta;
+          state.loading = false;
+        }
+      )
       .addCase(fetchSubcategories.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
