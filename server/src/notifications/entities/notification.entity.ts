@@ -22,8 +22,8 @@ export class Notification {
   @Column()
   responsibleId: number;
 
-  @Column({ length: 20, unique: true })
-  notificationNumber: string;
+  @Column({ unique: true })
+  notificationNumber: number;
 
   @Column()
   organizationalUnityId: number;

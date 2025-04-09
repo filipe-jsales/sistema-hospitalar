@@ -6,11 +6,6 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
   IonItem,
   IonLabel,
   IonSelect,
@@ -25,6 +20,7 @@ import {
 } from "../../store/slices/user/createUserSlice";
 import { useFormCleanup } from "../../hooks/useFormCleanup";
 import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
+import Header from "../../components/Header/Header";
 
 const CreateUser: React.FC = () => {
   const [userInfos, setUserInfos] = useState({
@@ -52,14 +48,16 @@ const CreateUser: React.FC = () => {
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createUser
   );
-  
+
   const {
-    hospitals,
+    hospitals: hospitalItems,
     loading: hospitalsLoading,
     error: hospitalsError,
+    pagination: hospitalsPagination,
   } = useAppSelector((state) => state.hospitals);
+
   useEffect(() => {
-    dispatch(fetchHospitals())
+    dispatch(fetchHospitals(1))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar hospitais:", error);
@@ -138,16 +136,11 @@ const CreateUser: React.FC = () => {
     }
   };
 
+  const hasHospitals = hospitalItems && hospitalItems.length > 0;
+
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
@@ -295,8 +288,12 @@ const CreateUser: React.FC = () => {
                         <IonSelectOption disabled>
                           Carregando hospitais...
                         </IonSelectOption>
+                      ) : !hasHospitals ? (
+                        <IonSelectOption disabled>
+                          Nenhum hospital encontrado
+                        </IonSelectOption>
                       ) : (
-                        hospitals.map((hospital) => (
+                        hospitalItems.map((hospital) => (
                           <IonSelectOption
                             key={hospital.id}
                             value={hospital.id}

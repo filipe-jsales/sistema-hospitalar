@@ -11,6 +11,7 @@ import { IncidentsModule } from 'src/incidents/incidents.module';
 import { ResponsiblesModule } from 'src/responsibles/responsibles.module';
 import { OrganizationalUnitiesModule } from 'src/organizational-unities/organizational-unities.module';
 import { NotifyingServicesModule } from 'src/notifying-services/notifying-services.module';
+import { SharedModule } from 'src/shared/shared.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { NotifyingServicesModule } from 'src/notifying-services/notifying-servic
     ResponsiblesModule,
     OrganizationalUnitiesModule,
     NotifyingServicesModule,
+    SharedModule,
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService],

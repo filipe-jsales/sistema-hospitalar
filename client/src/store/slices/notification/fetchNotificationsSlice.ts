@@ -1,31 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateNotification } from "./fetchNotificationByIdSlice";
 
 export interface NotificationData {
   id: number;
   description: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface NotificationsState {
   notifications: NotificationData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: NotificationsState = {
   notifications: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchNotifications = createAsyncThunk(
   "notifications/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/notifications");
-      return response.data;
+      const response = await apiService.get(`/notifications?page=${page}`);
+      return response.data as PaginatedResponse<NotificationData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar notificações."
@@ -43,6 +60,7 @@ const fetchNotificationsSlice = createSlice({
     },
     clearNotifications(state) {
       state.notifications = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,8 +69,9 @@ const fetchNotificationsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchNotifications.fulfilled, (state, action) => {
-        state.notifications = action.payload;
+      .addCase(fetchNotifications.fulfilled, (state, action: PayloadAction<PaginatedResponse<NotificationData>>) => {
+        state.notifications = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {

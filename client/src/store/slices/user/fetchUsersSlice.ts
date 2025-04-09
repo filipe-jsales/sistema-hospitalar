@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { HospitalData } from "../hospital/fetchHospitalsSlice";
 
@@ -15,26 +15,41 @@ export interface UserData {
   lasLogin: string;
   hospital: HospitalData;
   hospitalId: number;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface UsersState {
   users: UserData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: UsersState = {
   users: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchUsers = createAsyncThunk(
   "users/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/users");
-      return response.data;
+      const response = await apiService.get(`/users?page=${page}`);
+      return response.data as PaginatedResponse<UserData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar usuários."
@@ -52,6 +67,7 @@ const fetchUsersSlice = createSlice({
     },
     clearUsers(state) {
       state.users = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -60,8 +76,9 @@ const fetchUsersSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchUsers.fulfilled, (state, action) => {
-        state.users = action.payload;
+      .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<PaginatedResponse<UserData>>) => {
+        state.users = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchUsers.rejected, (state, action) => {

@@ -1,31 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updatePriority } from "./fetchPriorityByIdSlice";
 
 export interface PriorityData {
   id: number;
   name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface PrioritiesState {
   priorities: PriorityData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: PrioritiesState = {
   priorities: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchPriorities = createAsyncThunk(
   "priorities/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/priorities");
-      return response.data;
+      const response = await apiService.get(`/priorities?page=${page}`);
+      return response.data as PaginatedResponse<PriorityData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar prioridades."
@@ -43,6 +60,7 @@ const fetchPrioritiesSlice = createSlice({
     },
     clearPriorities(state) {
       state.priorities = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,8 +69,9 @@ const fetchPrioritiesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchPriorities.fulfilled, (state, action) => {
-        state.priorities = action.payload;
+      .addCase(fetchPriorities.fulfilled, (state, action: PayloadAction<PaginatedResponse<PriorityData>>) => {
+        state.priorities = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchPriorities.rejected, (state, action) => {

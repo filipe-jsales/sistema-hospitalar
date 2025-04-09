@@ -33,13 +33,16 @@ import {
   fetchIncidents,
   IncidentData,
 } from "../../store/slices/incident/fetchIncidentsSlice";
-import { deleteIncident, resetDeleteStatus } from "../../store/slices/incident/deleteIncidentSlice";
+import {
+  deleteIncident,
+  resetDeleteStatus,
+} from "../../store/slices/incident/deleteIncidentSlice";
 import Header from "../../components/Header/Header";
 
 const IncidentsList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { incidents, loading, error } = useAppSelector(
+  const { incidents, loading, error, pagination } = useAppSelector(
     (state) => state.incidents
   );
 
@@ -56,9 +59,10 @@ const IncidentsList: React.FC = () => {
   );
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadIncidents();
+    loadIncidents(1);
 
     return () => {
       dispatch(clearIncidents());
@@ -71,7 +75,7 @@ const IncidentsList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Incidente excluído com sucesso!");
       setShowToast(true);
-      loadIncidents();
+      loadIncidents(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -79,18 +83,18 @@ const IncidentsList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadIncidents = () => {
-    dispatch(fetchIncidents())
+  const loadIncidents = (page: number) => {
+    dispatch(fetchIncidents(page))
       .unwrap()
       .catch((error) => {
-        console.error("Falha ao carregar hospitais:", error);
+        console.error("Falha ao carregar incidentes:", error);
       });
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchIncidents())
+    dispatch(fetchIncidents(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -113,6 +117,14 @@ const IncidentsList: React.FC = () => {
       setSelectedIncident(null);
     }
   };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadIncidents(newPage);
+    }
+  };
+
   const filteredIncidents = incidents.filter((incident) => {
     const name = incident.name.toLowerCase();
     const searchLower = searchText.toLowerCase();
@@ -122,9 +134,7 @@ const IncidentsList: React.FC = () => {
 
   return (
     <IonPage>
-      <Header/>
-      {/* TODO: ^ create a component for this header */}
-
+      <Header />
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
@@ -208,9 +218,39 @@ const IncidentsList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && incidents.length > 0 && (
+              {/* Informações de paginação e controles */}
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
-                  <p>Total de incidentes: {incidents.length}</p>
+                  <p>
+                    Exibindo {incidents.length} de {pagination.totalItems} incidentes
+                    {searchText && " (filtrados)"}
+                  </p>
+                  
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton 
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      >
+                        Anterior
+                      </IonButton>
+                      
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+                      
+                      <IonButton 
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>

@@ -6,12 +6,6 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
-  IonBackButton,
   IonToggle,
   IonItem,
   IonLabel,
@@ -29,6 +23,7 @@ import {
 import { clearUserError } from "../../store/slices/user/fetchUsersSlice";
 import { clearSuccessMessage } from "../../store/slices/activationSlice";
 import { fetchHospitals } from "../../store/slices/hospital/fetchHospitalsSlice";
+import Header from "../../components/Header/Header";
 
 interface UserParams {
   id: string;
@@ -43,9 +38,11 @@ const EditUser: React.FC = () => {
   const { user, loading, error, successMessage } = useAppSelector(
     (state) => state.userDetails
   );
-  const { hospitals, loading: hospitalsLoading } = useAppSelector(
-    (state) => state.hospitals
-  );
+  const { 
+    hospitals: hospitalItems, 
+    loading: hospitalsLoading,
+    pagination: hospitalsPagination
+  } = useAppSelector((state) => state.hospitals);
 
   const [userInfo, setUserInfo] = useState({
     firstName: "",
@@ -70,7 +67,8 @@ const EditUser: React.FC = () => {
       .catch((error) => {
         console.error("Falha ao carregar usuário:", error);
       });
-    dispatch(fetchHospitals())
+    
+    dispatch(fetchHospitals(1))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar hospitais:", error);
@@ -134,17 +132,12 @@ const EditUser: React.FC = () => {
     }
   };
 
+  // Verifica se hospitalItems existe e tem elementos
+  const hasHospitals = hospitalItems && hospitalItems.length > 0;
+
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton defaultHref="/users" />
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
@@ -286,8 +279,12 @@ const EditUser: React.FC = () => {
                           <IonSelectOption disabled>
                             Carregando hospitais...
                           </IonSelectOption>
+                        ) : !hasHospitals ? (
+                          <IonSelectOption disabled>
+                            Nenhum hospital encontrado
+                          </IonSelectOption>
                         ) : (
-                          hospitals.map((hospital) => (
+                          hospitalItems.map((hospital) => (
                             <IonSelectOption
                               key={hospital.id}
                               value={hospital.id}

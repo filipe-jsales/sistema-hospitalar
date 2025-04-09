@@ -5,11 +5,6 @@ import {
   IonCardContent,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
   IonItem,
   IonLabel,
   IonList,
@@ -23,7 +18,11 @@ import {
 } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { RefresherEventDetail } from "@ionic/core";
-import { createOutline, trashOutline, notifications, notificationsCircle } from "ionicons/icons";
+import {
+  createOutline,
+  trashOutline,
+  notificationsCircle,
+} from "ionicons/icons";
 import { useHistory } from "react-router";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
@@ -36,11 +35,12 @@ import {
   deleteNotification,
   resetDeleteStatus,
 } from "../../store/slices/notification/deleteNotificationSlice";
+import Header from "../../components/Header/Header";
 
 const NotificationsList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { notifications, loading, error } = useAppSelector(
+  const { notifications, loading, error, pagination } = useAppSelector(
     (state) => state.notifications
   );
 
@@ -56,9 +56,10 @@ const NotificationsList: React.FC = () => {
     useState<NotificationData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadNotifications();
+    loadNotifications(1);
 
     return () => {
       dispatch(clearNotifications());
@@ -71,7 +72,7 @@ const NotificationsList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Notificação excluída com sucesso!");
       setShowToast(true);
-      loadNotifications();
+      loadNotifications(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -79,10 +80,10 @@ const NotificationsList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadNotifications = () => {
-    dispatch(fetchNotifications())
+  const loadNotifications = (page: number) => {
+    dispatch(fetchNotifications(page))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar notificações:", error);
@@ -90,7 +91,7 @@ const NotificationsList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchNotifications())
+    dispatch(fetchNotifications(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -114,24 +115,25 @@ const NotificationsList: React.FC = () => {
     }
   };
 
-  const filteredNotifications = notifications.filter((notification) => {
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadNotifications(newPage);
+    }
+  };
+
+  const notificationsArray = Array.isArray(notifications) ? notifications : [];
+  
+  const filteredNotifications = notificationsArray.filter((notification) => {
+    if (!notification || !notification.description) return false;
     const description = notification.description.toLowerCase();
     const searchLower = searchText.toLowerCase();
-
     return description.includes(searchLower);
   });
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema de Notificações</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-
+      <Header />
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
@@ -219,9 +221,45 @@ const NotificationsList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && notifications.length > 0 && (
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
-                  <p>Total de notificações: {notifications.length}</p>
+                  <p>
+                    Exibindo {filteredNotifications.length} de {pagination.totalItems}{" "}
+                    notificações
+                    {searchText && " (filtradas)"}
+                  </p>
+
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>
@@ -232,7 +270,7 @@ const NotificationsList: React.FC = () => {
           isOpen={showAlert}
           onDidDismiss={() => setShowAlert(false)}
           header="Confirmar exclusão"
-          message={`Tem certeza que deseja excluir a notificação "${selectedNotification?.id}"?`}
+          message={`Tem certeza que deseja excluir a notificação "${selectedNotification?.description}"?`}
           buttons={[
             {
               text: "Cancelar",

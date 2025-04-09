@@ -1,9 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('notifications')
 @UseGuards(AuthGuard('jwt'))
@@ -17,9 +28,9 @@ export class NotificationsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as notificações' })
-  findAll() {
-    return this.notificationsService.findAll();
+  @ApiOperation({ summary: 'Listar todos as notificações (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.notificationsService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
@@ -30,7 +41,10 @@ export class NotificationsController {
 
   @Patch(':id')
   @ApiOperation({ summary: 'Atualizar notificação por ID' })
-  update(@Param('id') id: string, @Body() updateNotificationDto: UpdateNotificationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateNotificationDto: UpdateNotificationDto,
+  ) {
     return this.notificationsService.update(+id, updateNotificationDto);
   }
 

@@ -4,12 +4,16 @@ import { UpdateOrganizationalUnityDto } from './dto/update-organizational-unity.
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrganizationalUnity } from './entities/organizational-unity.entity';
 import { Repository } from 'typeorm';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class OrganizationalUnitiesService {
   constructor(
     @InjectRepository(OrganizationalUnity)
     private readonly organizationalUnityRepository: Repository<OrganizationalUnity>,
+    private readonly paginationService: PaginationService,
   ) {}
   create(
     createOrganizationalUnityDto: CreateOrganizationalUnityDto,
@@ -21,6 +25,18 @@ export class OrganizationalUnitiesService {
 
   findAll(): Promise<OrganizationalUnity[]> {
     return this.organizationalUnityRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<OrganizationalUnity>> {
+    return this.paginationService.paginateRepository(
+      this.organizationalUnityRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<OrganizationalUnity> {

@@ -36,7 +36,9 @@ import Header from "../../components/Header/Header";
 const ThemesList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { themes, loading, error } = useAppSelector((state) => state.themes);
+  const { themes, loading, error, pagination } = useAppSelector(
+    (state) => state.themes
+  );
 
   const {
     loading: deleteLoading,
@@ -49,9 +51,10 @@ const ThemesList: React.FC = () => {
   const [selectedTheme, setSelectedTheme] = useState<ThemeData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadThemes();
+    loadThemes(1);
 
     return () => {
       dispatch(clearThemes());
@@ -64,7 +67,7 @@ const ThemesList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Tema excluído com sucesso!");
       setShowToast(true);
-      loadThemes();
+      loadThemes(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -72,10 +75,10 @@ const ThemesList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadThemes = () => {
-    dispatch(fetchThemes())
+  const loadThemes = (page: number) => {
+    dispatch(fetchThemes(page))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar temas:", error);
@@ -83,7 +86,7 @@ const ThemesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchThemes())
+    dispatch(fetchThemes(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -107,6 +110,13 @@ const ThemesList: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadThemes(newPage);
+    }
+  };
+
   const filteredThemes = themes.filter((theme) => {
     const name = theme.name.toLowerCase();
     const searchLower = searchText.toLowerCase();
@@ -117,7 +127,6 @@ const ThemesList: React.FC = () => {
   return (
     <IonPage>
       <Header />
-
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
@@ -201,9 +210,44 @@ const ThemesList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && themes.length > 0 && (
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
-                  <p>Total de temas: {themes.length}</p>
+                  <p>
+                    Exibindo {themes.length} de {pagination.totalItems} temas
+                    {searchText && " (filtrados)"}
+                  </p>
+
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>

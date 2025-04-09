@@ -5,11 +5,6 @@ import {
   IonCardContent,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
   IonItem,
   IonLabel,
   IonList,
@@ -36,13 +31,17 @@ import {
   deleteHospital,
   resetDeleteStatus,
 } from "../../store/slices/hospital/deleteHospitalSlice";
+import Header from "../../components/Header/Header";
 
 const HospitalsList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { hospitals, loading, error } = useAppSelector(
-    (state) => state.hospitals
-  );
+  const {
+    hospitals: hospitalItems,
+    loading,
+    error,
+    pagination,
+  } = useAppSelector((state) => state.hospitals);
 
   const {
     loading: deleteLoading,
@@ -57,9 +56,10 @@ const HospitalsList: React.FC = () => {
   );
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadHospitals();
+    loadHospitals(1);
 
     return () => {
       dispatch(clearHospitals());
@@ -72,7 +72,7 @@ const HospitalsList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Hospital excluído com sucesso!");
       setShowToast(true);
-      loadHospitals();
+      loadHospitals(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -80,10 +80,10 @@ const HospitalsList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadHospitals = () => {
-    dispatch(fetchHospitals())
+  const loadHospitals = (page: number) => {
+    dispatch(fetchHospitals(page))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar hospitais:", error);
@@ -91,7 +91,7 @@ const HospitalsList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchHospitals())
+    dispatch(fetchHospitals(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -110,12 +110,19 @@ const HospitalsList: React.FC = () => {
   const confirmDelete = () => {
     if (selectedHospital) {
       dispatch(deleteHospital(selectedHospital.id));
-      console.log("Delete hospital:", selectedHospital);
       setShowAlert(false);
       setSelectedHospital(null);
     }
   };
-  const filteredHospitals = hospitals.filter((hospital) => {
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadHospitals(newPage);
+    }
+  };
+
+  const filteredHospitals = hospitalItems.filter((hospital) => {
     const name = hospital.name.toLowerCase();
     const searchLower = searchText.toLowerCase();
 
@@ -124,14 +131,7 @@ const HospitalsList: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
 
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
@@ -216,9 +216,46 @@ const HospitalsList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && hospitals.length > 0 && (
+              {/* Informações de paginação e controles */}
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
-                  <p>Total de hospitais: {hospitals.length}</p>
+                  <p>
+                    Exibindo {hospitalItems.length} de {pagination.totalItems}{" "}
+                    hospitais
+                    {searchText && " (filtrados)"}
+                  </p>
+
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>

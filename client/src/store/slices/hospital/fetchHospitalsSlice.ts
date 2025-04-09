@@ -1,31 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateHospital } from "./fetchHospitalByIdSlice";
 
 export interface HospitalData {
   id: number;
   name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface HospitalsState {
   hospitals: HospitalData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: HospitalsState = {
   hospitals: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchHospitals = createAsyncThunk(
   "hospitals/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/hospitals");
-      return response.data;
+      const response = await apiService.get(`/hospitals?page=${page}`);
+      return response.data as PaginatedResponse<HospitalData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar hospitais."
@@ -43,6 +60,7 @@ const fetchHospitalsSlice = createSlice({
     },
     clearHospitals(state) {
       state.hospitals = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -51,8 +69,9 @@ const fetchHospitalsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchHospitals.fulfilled, (state, action) => {
-        state.hospitals = action.payload;
+      .addCase(fetchHospitals.fulfilled, (state, action: PayloadAction<PaginatedResponse<HospitalData>>) => {
+        state.hospitals = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchHospitals.rejected, (state, action) => {

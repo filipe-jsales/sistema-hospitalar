@@ -18,7 +18,7 @@ export const createNotification = createAsyncThunk(
   'createNotification/create',
   async (
     data: {
-      message: string;
+      description: string;
     },
     { rejectWithValue }
   ) => {

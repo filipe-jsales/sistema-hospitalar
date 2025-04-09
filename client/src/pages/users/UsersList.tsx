@@ -5,11 +5,6 @@ import {
   IonCardContent,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
   IonItem,
   IonLabel,
   IonList,
@@ -42,11 +37,14 @@ import {
   deleteUser,
   resetDeleteStatus,
 } from "../../store/slices/user/deleteUserSlice";
+import Header from "../../components/Header/Header";
 
 const UsersList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { users, loading, error } = useAppSelector((state) => state.users);
+  const { users, loading, error, pagination } = useAppSelector(
+    (state) => state.users
+  );
   const {
     loading: deleteLoading,
     error: deleteError,
@@ -57,9 +55,10 @@ const UsersList: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadUsers();
+    loadUsers(1);
 
     return () => {
       dispatch(clearUsers());
@@ -72,7 +71,7 @@ const UsersList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Usuário excluído com sucesso!");
       setShowToast(true);
-      loadUsers();
+      loadUsers(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -80,10 +79,10 @@ const UsersList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadUsers = () => {
-    dispatch(fetchUsers())
+  const loadUsers = (page: number) => {
+    dispatch(fetchUsers(page))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar usuários:", error);
@@ -91,7 +90,7 @@ const UsersList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchUsers())
+    dispatch(fetchUsers(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -115,7 +114,13 @@ const UsersList: React.FC = () => {
     }
   };
 
-  //TODO: mudar a lógica de filtragem/paginação para o backend
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadUsers(newPage);
+    }
+  };
+
   const filteredUsers = users.filter((user) => {
     const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
     const email = user.email.toLowerCase();
@@ -126,14 +131,7 @@ const UsersList: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
 
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
@@ -225,9 +223,44 @@ const UsersList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && users.length > 0 && (
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
-                  <p>Total de usuários: {users.length}</p>
+                  <p>
+                    Exibindo {users.length} de {pagination.totalItems} usuários
+                    {searchText && " (filtrados)"}
+                  </p>
+
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>

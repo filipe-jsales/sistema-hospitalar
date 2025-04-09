@@ -59,7 +59,7 @@ const Router: React.FC = () => (
 
       <Route exact path="/users" component={UsersList} />
       <Route exact path="/users/edit/:id" component={EditUser} />
-      <Route exact path="/users/create-user" component={CreateUser} />
+      <Route exact path="/users/create" component={CreateUser} />
       <Route path="/users/activate/:token" component={ActivateAccount} />
 
       <Route exact path="/hospitals" component={HospitalsList} />

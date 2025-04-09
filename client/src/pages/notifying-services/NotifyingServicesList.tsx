@@ -36,7 +36,7 @@ import Header from "../../components/Header/Header";
 const NotifyingServicesList: React.FC = () => {
   const dispatch = useAppDispatch();
   const history = useHistory();
-  const { notifyingServices, loading, error } = useAppSelector(
+  const { notifyingServices, loading, error, pagination } = useAppSelector(
     (state) => state.notifyingServices
   );
 
@@ -52,9 +52,10 @@ const NotifyingServicesList: React.FC = () => {
     useState<NotifyingServiceData | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    loadNotifyingServices();
+    loadNotifyingServices(1);
 
     return () => {
       dispatch(clearNotifyingServices());
@@ -67,7 +68,7 @@ const NotifyingServicesList: React.FC = () => {
     if (deleteSuccess) {
       setToastMessage("Serviço de notificação excluído com sucesso!");
       setShowToast(true);
-      loadNotifyingServices();
+      loadNotifyingServices(currentPage);
       dispatch(resetDeleteStatus());
     }
 
@@ -75,10 +76,10 @@ const NotifyingServicesList: React.FC = () => {
       setToastMessage(deleteError);
       setShowToast(true);
     }
-  }, [deleteSuccess, deleteError, dispatch]);
+  }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
-  const loadNotifyingServices = () => {
-    dispatch(fetchNotifyingServices())
+  const loadNotifyingServices = (page: number) => {
+    dispatch(fetchNotifyingServices(page))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar serviços de notificação:", error);
@@ -86,7 +87,7 @@ const NotifyingServicesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchNotifyingServices())
+    dispatch(fetchNotifyingServices(currentPage))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -110,6 +111,13 @@ const NotifyingServicesList: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage !== currentPage) {
+      setCurrentPage(newPage);
+      loadNotifyingServices(newPage);
+    }
+  };
+
   const filteredNotifyingServices = notifyingServices.filter(
     (notifyingService) => {
       const name = notifyingService.name.toLowerCase();
@@ -122,7 +130,6 @@ const NotifyingServicesList: React.FC = () => {
   return (
     <IonPage>
       <Header />
-
       <IonContent>
         <IonRefresher slot="fixed" onIonRefresh={handleRefresh}>
           <IonRefresherContent></IonRefresherContent>
@@ -208,11 +215,45 @@ const NotifyingServicesList: React.FC = () => {
                 </IonList>
               )}
 
-              {!loading && !error && notifyingServices.length > 0 && (
+              {!loading && !error && pagination && (
                 <div className="text-center mt-3">
                   <p>
-                    Total de serviços de notificação: {notifyingServices.length}
+                    Exibindo {notifyingServices.length} de{" "}
+                    {pagination.totalItems} serviços de notificação
+                    {searchText && " (filtrados)"}
                   </p>
+
+                  {pagination.totalPages > 1 && (
+                    <div className="d-flex justify-content-center mt-3">
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === 1}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
+                      >
+                        Anterior
+                      </IonButton>
+
+                      <div className="d-flex align-items-center mx-2">
+                        <span>
+                          Página {currentPage} de {pagination.totalPages}
+                        </span>
+                      </div>
+
+                      <IonButton
+                        fill="clear"
+                        disabled={currentPage === pagination.totalPages}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
+                      >
+                        Próxima
+                      </IonButton>
+                    </div>
+                  )}
                 </div>
               )}
             </IonCardContent>

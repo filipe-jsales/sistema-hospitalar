@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateIncident } from "./fetchIncidentByIdSlice";
-import { act } from "react";
 
 export interface IncidentData {
   id: number;
@@ -10,26 +9,43 @@ export interface IncidentData {
   description: string;
   treatmentStartDate: number;
   conclusionDate: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface IncidentsState {
   incidents: IncidentData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: IncidentsState = {
   incidents: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchIncidents = createAsyncThunk(
   "incidents/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/incidents");
-      return response.data;
+      const response = await apiService.get(`/incidents?page=${page}`);
+      return response.data as PaginatedResponse<IncidentData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar incidentes."
@@ -47,6 +63,7 @@ const fetchIncidentsSlice = createSlice({
     },
     clearIncidents(state) {
       state.incidents = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -55,8 +72,9 @@ const fetchIncidentsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchIncidents.fulfilled, (state, action) => {
-        state.incidents = action.payload;
+      .addCase(fetchIncidents.fulfilled, (state, action: PayloadAction<PaginatedResponse<IncidentData>>) => {
+        state.incidents = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchIncidents.rejected, (state, action) => {

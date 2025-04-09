@@ -12,6 +12,9 @@ import { IncidentsService } from 'src/incidents/incidents.service';
 import { ResponsiblesService } from 'src/responsibles/responsibles.service';
 import { OrganizationalUnitiesService } from 'src/organizational-unities/organizational-unities.service';
 import { NotifyingServicesService } from 'src/notifying-services/notifying-services.service';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginationService } from 'src/shared/services/pagination.service';
 
 @Injectable()
 export class NotificationsService {
@@ -26,6 +29,7 @@ export class NotificationsService {
     private readonly responsiblesService: ResponsiblesService,
     private readonly organizationalUnitiesService: OrganizationalUnitiesService,
     private readonly notifyingServicesService: NotifyingServicesService,
+    private readonly paginationService: PaginationService,
   ) {}
 
   async create(
@@ -56,8 +60,6 @@ export class NotificationsService {
       createNotificationDto.notifyingServiceId,
     );
 
-    // TODO: verify 'local-incident' foreign key not referring to any other table?
-
     const notification = this.notificationRepository.create({
       ...createNotificationDto,
       category,
@@ -75,6 +77,18 @@ export class NotificationsService {
 
   findAll(): Promise<Notification[]> {
     return this.notificationRepository.find();
+  }
+
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Notification>> {
+    return this.paginationService.paginateRepository(
+      this.notificationRepository,
+      paginationQuery,
+      {
+        order: { id: 'DESC' },
+      },
+    );
   }
 
   async findOne(id: number): Promise<Notification> {

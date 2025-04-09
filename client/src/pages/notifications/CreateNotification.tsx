@@ -39,6 +39,8 @@ const CreateNotification: React.FC = () => {
     situation: "",
     anvisaNotification: "",
     notificationNumber: "",
+    initialDate: "",
+    endDate: "",
     categoryId: null as number | null,
     themeId: null,
     subcategoryId: null,
@@ -57,6 +59,8 @@ const CreateNotification: React.FC = () => {
     situation: "",
     anvisaNotification: "",
     notificationNumber: "",
+    initialDate: "",
+    endDate: "",
     categoryId: "",
     themeId: "",
     subcategoryId: "",
@@ -76,62 +80,69 @@ const CreateNotification: React.FC = () => {
   );
 
   const {
-    categories,
+    categories = [],
     loading: categoriesLoading,
     error: categoriesError,
-  } = useAppSelector((state) => state.categories);
+  } = useAppSelector((state) => state.categories || { categories: [] });
 
   const {
-    themes,
+    themes = [],
     loading: themesLoading,
     error: themesError,
-  } = useAppSelector((state) => state.themes);
+  } = useAppSelector((state) => state.themes || { themes: [] });
 
   const {
-    subcategories,
+    subcategories = [],
     loading: subcategoriesLoading,
     error: subcategoriesError,
-  } = useAppSelector((state) => state.subcategories);
+  } = useAppSelector((state) => state.subcategories || { subcategories: [] });
 
   const {
-    notifyingServices,
+    notifyingServices = [],
     loading: notifyingServicesLoading,
     error: notifyingServicesError,
-  } = useAppSelector((state) => state.notifyingServices);
+  } = useAppSelector(
+    (state) => state.notifyingServices || { notifyingServices: [] }
+  );
 
   const {
-    organizationalUnities,
+    organizationalUnities = [],
     loading: organizationalUnitiesLoading,
     error: organizationalUnitiesError,
-  } = useAppSelector((state) => state.organizationalUnities);
+  } = useAppSelector(
+    (state) => state.organizationalUnities || { organizationalUnities: [] }
+  );
 
   const {
-    responsibles,
+    responsibles = [],
     loading: responsiblesLoading,
     error: responsiblesError,
-  } = useAppSelector((state) => state.responsibles);
+  } = useAppSelector((state) => state.responsibles || { responsibles: [] });
 
   const {
-    incidents,
+    incidents = [],
     loading: incidentsLoading,
     error: incidentsError,
-  } = useAppSelector((state) => state.incidents);
+  } = useAppSelector((state) => state.incidents || { incidents: [] });
 
   const {
-    priorities,
+    priorities = [],
     loading: prioritiesLoading,
     error: prioritiesError,
-  } = useAppSelector((state) => state.priorities);
+  } = useAppSelector((state) => state.priorities || { priorities: [] });
 
   const fetchActions = [
-    { action: fetchCategories, name: "categorias" },
-    { action: fetchThemes, name: "temas" },
-    { action: fetchSubcategories, name: "subcategorias" },
-    { action: fetchNotifyingServices, name: "serviços notificantes" },
-    { action: fetchOrganizationalUnities, name: "unidades organizacionais" },
-    { action: fetchResponsibles, name: "responsáveis" },
-    { action: fetchIncidents, name: "incidentes" },
-    { action: fetchPriorities, name: "prioridades" },
+    { action: () => fetchCategories(1), name: "categorias" },
+    { action: () => fetchThemes(1), name: "temas" },
+    { action: () => fetchSubcategories(1), name: "subcategorias" },
+    { action: () => fetchNotifyingServices(1), name: "serviços notificantes" },
+    {
+      action: () => fetchOrganizationalUnities(1),
+      name: "unidades organizacionais",
+    },
+    { action: () => fetchResponsibles(1), name: "responsáveis" },
+    { action: () => fetchIncidents(1), name: "incidentes" },
+    { action: () => fetchPriorities(1), name: "prioridades" },
   ];
 
   useEffect(() => {
@@ -157,6 +168,8 @@ const CreateNotification: React.FC = () => {
         situation: "",
         anvisaNotification: "",
         notificationNumber: "",
+        initialDate: "",
+        endDate: "",
         categoryId: null,
         themeId: null,
         subcategoryId: null,
@@ -176,6 +189,8 @@ const CreateNotification: React.FC = () => {
         situation: "",
         anvisaNotification: "",
         notificationNumber: "",
+        initialDate: "",
+        endDate: "",
         categoryId: "",
         themeId: "",
         subcategoryId: "",
@@ -205,13 +220,15 @@ const CreateNotification: React.FC = () => {
     if (validateInputs()) {
       if (user?.id && user.email && user.roles) {
         const payload = {
-          message: notificationInfos.description,
+          description: notificationInfos.description,
           processSEI: notificationInfos.processSEI,
           observations: notificationInfos.observations,
           actionPlan: notificationInfos.actionPlan,
           situation: notificationInfos.situation,
           anvisaNotification: notificationInfos.anvisaNotification,
           notificationNumber: Number(notificationInfos.notificationNumber),
+          initialDate: notificationInfos.initialDate,
+          endDate: notificationInfos.endDate,
           categoryId: notificationInfos.categoryId,
           themeId: notificationInfos.themeId,
           subcategoryId: notificationInfos.subcategoryId,
@@ -232,6 +249,8 @@ const CreateNotification: React.FC = () => {
               situation: "",
               anvisaNotification: "",
               notificationNumber: "",
+              initialDate: "",
+              endDate: "",
               categoryId: null,
               themeId: null,
               subcategoryId: null,
@@ -291,8 +310,8 @@ const CreateNotification: React.FC = () => {
                   <IonTextarea
                     color={"dark"}
                     fill="outline"
-                    placeholder="processSEI"
-                    label="processSEI"
+                    placeholder="Processo SEI"
+                    label="Processo SEI"
                     labelPlacement="floating"
                     rows={4}
                     mode="md"
@@ -339,8 +358,8 @@ const CreateNotification: React.FC = () => {
                   <IonTextarea
                     color={"dark"}
                     fill="outline"
-                    placeholder="actionPlan"
-                    label="actionPlan"
+                    placeholder="Plano de Ação"
+                    label="Plano de Ação"
                     labelPlacement="floating"
                     rows={4}
                     mode="md"
@@ -390,23 +409,73 @@ const CreateNotification: React.FC = () => {
                   <IonTextarea
                     color={"dark"}
                     fill="outline"
-                    placeholder="Descrição da Notificação"
-                    label="Descrição da Notificação"
+                    placeholder="Notificação ANVISA"
+                    label="Notificação ANVISA"
                     labelPlacement="floating"
-                    rows={4}
+                    rows={2}
                     mode="md"
-                    value={notificationInfos.description}
+                    value={notificationInfos.anvisaNotification}
                     onIonInput={(e) => {
                       setNotificationInfos({
                         ...notificationInfos,
-                        description: String(e.target.value),
+                        anvisaNotification: String(e.target.value),
                       });
-                      if (errors.description)
-                        setErrors({ ...errors, description: "" });
+                      if (errors.anvisaNotification)
+                        setErrors({ ...errors, anvisaNotification: "" });
                     }}
                   />
-                  {errors.description && (
-                    <span className="text-danger">{errors.description}</span>
+                  {errors.anvisaNotification && (
+                    <span className="text-danger">
+                      {errors.anvisaNotification}
+                    </span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonInput
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="initialDate"
+                    label="initialDate"
+                    labelPlacement="floating"
+                    type="date"
+                    mode="md"
+                    value={notificationInfos.initialDate}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        initialDate: String(e.target.value),
+                      });
+                      if (errors.initialDate)
+                        setErrors({ ...errors, initialDate: "" });
+                    }}
+                  />
+                  {errors.initialDate && (
+                    <span className="text-danger">{errors.initialDate}</span>
+                  )}
+                </div>
+
+                <div className="col-12">
+                  <IonInput
+                    color={"dark"}
+                    fill="outline"
+                    placeholder="endDate"
+                    label="endDate"
+                    labelPlacement="floating"
+                    type="date"
+                    mode="md"
+                    value={notificationInfos.endDate}
+                    onIonInput={(e) => {
+                      setNotificationInfos({
+                        ...notificationInfos,
+                        endDate: String(e.target.value),
+                      });
+                      if (errors.endDate)
+                        setErrors({ ...errors, endDate: "" });
+                    }}
+                  />
+                  {errors.endDate && (
+                    <span className="text-danger">{errors.endDate}</span>
                   )}
                 </div>
 
@@ -430,6 +499,7 @@ const CreateNotification: React.FC = () => {
                           Carregando serviços notificantes...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(notifyingServices) &&
                         notifyingServices.map((notifyingService) => (
                           <IonSelectOption
                             key={notifyingService.id}
@@ -468,6 +538,7 @@ const CreateNotification: React.FC = () => {
                           Carregando temas...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(themes) &&
                         themes.map((theme) => (
                           <IonSelectOption key={theme.id} value={theme.id}>
                             {theme.name}
@@ -476,8 +547,8 @@ const CreateNotification: React.FC = () => {
                       )}
                     </IonSelect>
                   </IonItem>
-                  {errors.categoryId && (
-                    <span className="text-danger">{errors.categoryId}</span>
+                  {errors.themeId && (
+                    <span className="text-danger">{errors.themeId}</span>
                   )}
                 </div>
 
@@ -501,6 +572,7 @@ const CreateNotification: React.FC = () => {
                           Carregando incidentes...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(incidents) &&
                         incidents.map((incident) => (
                           <IonSelectOption
                             key={incident.id}
@@ -519,10 +591,10 @@ const CreateNotification: React.FC = () => {
 
                 <div className="col-12">
                   <IonItem>
-                    <IonLabel position="stacked">responsibles</IonLabel>
+                    <IonLabel position="stacked">Responsável</IonLabel>
                     <IonSelect
                       value={notificationInfos.responsibleId}
-                      placeholder="Selecione um responsibles"
+                      placeholder="Selecione um responsável"
                       onIonChange={(e) => {
                         setNotificationInfos({
                           ...notificationInfos,
@@ -534,9 +606,10 @@ const CreateNotification: React.FC = () => {
                     >
                       {responsiblesLoading ? (
                         <IonSelectOption disabled>
-                          Carregando responsibleId...
+                          Carregando responsáveis...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(responsibles) &&
                         responsibles.map((responsible) => (
                           <IonSelectOption
                             key={responsible.id}
@@ -558,7 +631,7 @@ const CreateNotification: React.FC = () => {
                     <IonLabel position="stacked">Subcategoria</IonLabel>
                     <IonSelect
                       value={notificationInfos.subcategoryId}
-                      placeholder="Selecione uma categoria"
+                      placeholder="Selecione uma subcategoria"
                       onIonChange={(e) => {
                         setNotificationInfos({
                           ...notificationInfos,
@@ -573,6 +646,7 @@ const CreateNotification: React.FC = () => {
                           Carregando subcategorias...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(subcategories) &&
                         subcategories.map((subcategory) => (
                           <IonSelectOption
                             key={subcategory.id}
@@ -592,11 +666,11 @@ const CreateNotification: React.FC = () => {
                 <div className="col-12">
                   <IonItem>
                     <IonLabel position="stacked">
-                      organizationalUnityId
+                      Unidade Organizacional
                     </IonLabel>
                     <IonSelect
                       value={notificationInfos.organizationalUnityId}
-                      placeholder="Selecione uma organizationalUnityId"
+                      placeholder="Selecione uma unidade organizacional"
                       onIonChange={(e) => {
                         setNotificationInfos({
                           ...notificationInfos,
@@ -608,9 +682,10 @@ const CreateNotification: React.FC = () => {
                     >
                       {organizationalUnitiesLoading ? (
                         <IonSelectOption disabled>
-                          Carregando organizationalUnityId...
+                          Carregando unidades organizacionais...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(organizationalUnities) &&
                         organizationalUnities.map((organizationalUnity) => (
                           <IonSelectOption
                             key={organizationalUnity.id}
@@ -631,7 +706,7 @@ const CreateNotification: React.FC = () => {
 
                 <div className="col-12">
                   <IonItem>
-                    <IonLabel position="stacked">categoryId</IonLabel>
+                    <IonLabel position="stacked">Categoria</IonLabel>
                     <IonSelect
                       value={notificationInfos.categoryId}
                       placeholder="Selecione uma categoria"
@@ -649,6 +724,7 @@ const CreateNotification: React.FC = () => {
                           Carregando categorias...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(categories) &&
                         categories.map((category) => (
                           <IonSelectOption
                             key={category.id}
@@ -676,15 +752,16 @@ const CreateNotification: React.FC = () => {
                           ...notificationInfos,
                           priorityId: e.detail.value,
                         });
-                        if (errors.categoryId)
+                        if (errors.priorityId)
                           setErrors({ ...errors, priorityId: "" });
                       }}
                     >
-                      {categoriesLoading ? (
+                      {prioritiesLoading ? (
                         <IonSelectOption disabled>
-                          Carregando priorityId...
+                          Carregando prioridades...
                         </IonSelectOption>
                       ) : (
+                        Array.isArray(priorities) &&
                         priorities.map((priority) => (
                           <IonSelectOption
                             key={priority.id}
@@ -701,12 +778,14 @@ const CreateNotification: React.FC = () => {
                   )}
                 </div>
 
+                {/* initialDate */}
+
                 <div className="col-12">
                   <IonButton
                     expand="block"
                     color="primary"
                     className="custom-button"
-                    onClick={handleRegister}
+                    type="submit"
                     disabled={loading}
                   >
                     {loading ? <IonSpinner name="crescent" /> : "Cadastrar"}

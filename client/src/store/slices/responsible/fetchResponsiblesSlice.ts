@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateResponsible } from "./fetchResponsibleByIdSlice";
 
@@ -9,26 +9,43 @@ export interface ResponsibleData {
   email?: string;
   phone?: string;
   department?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string | null;
+}
+
+export interface PaginationMeta {
+  totalItems: number;
+  itemsPerPage: number;
+  totalPages: number;
+  currentPage: number;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  meta: PaginationMeta;
 }
 
 interface ResponsiblesState {
   responsibles: ResponsibleData[];
   loading: boolean;
   error: string | null;
+  pagination: PaginationMeta | null;
 }
 
 const initialState: ResponsiblesState = {
   responsibles: [],
   loading: false,
   error: null,
+  pagination: null,
 };
 
 export const fetchResponsibles = createAsyncThunk(
   "responsibles/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (page: number = 1, { rejectWithValue }) => {
     try {
-      const response = await apiService.get("/responsibles");
-      return response.data;
+      const response = await apiService.get(`/responsibles?page=${page}`);
+      return response.data as PaginatedResponse<ResponsibleData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar responsáveis."
@@ -46,6 +63,7 @@ const fetchResponsiblesSlice = createSlice({
     },
     clearResponsibles(state) {
       state.responsibles = [];
+      state.pagination = null;
     },
   },
   extraReducers: (builder) => {
@@ -54,8 +72,9 @@ const fetchResponsiblesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchResponsibles.fulfilled, (state, action) => {
-        state.responsibles = action.payload;
+      .addCase(fetchResponsibles.fulfilled, (state, action: PayloadAction<PaginatedResponse<ResponsibleData>>) => {
+        state.responsibles = action.payload.items;
+        state.pagination = action.payload.meta;
         state.loading = false;
       })
       .addCase(fetchResponsibles.rejected, (state, action) => {

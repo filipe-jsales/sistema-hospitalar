@@ -1,4 +1,4 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsDateString, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateNotificationDto {
   @IsNotEmpty()
@@ -14,8 +14,9 @@ export class CreateNotificationDto {
   responsibleId: number;
 
   @IsNotEmpty()
-  @IsString()
-  notificationNumber: string;
+  @IsOptional()
+  @IsNumber()
+  notificationNumber: number;
 
   @IsNotEmpty()
   @IsNumber()
@@ -25,6 +26,7 @@ export class CreateNotificationDto {
   @IsNumber()
   notifyingServiceId: number;
 
+  @IsOptional()
   @IsNumber()
   incidentLocation: number;
 

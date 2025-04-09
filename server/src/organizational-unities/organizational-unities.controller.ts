@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { OrganizationalUnitiesService } from './organizational-unities.service';
 import { CreateOrganizationalUnityDto } from './dto/create-organizational-unity.dto';
 import { UpdateOrganizationalUnityDto } from './dto/update-organizational-unity.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiOperation } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 
 @Controller('organizational-unities')
 @UseGuards(AuthGuard('jwt'))
@@ -30,9 +32,9 @@ export class OrganizationalUnitiesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todas as unidades organizacionais' })
-  findAll() {
-    return this.organizationalUnitiesService.findAll();
+  @ApiOperation({ summary: 'Listar todos as unidades organizacionais (paginado)' })
+  findAll(@Query() paginationQuery: PaginationQueryDto) {
+    return this.organizationalUnitiesService.findAllPaginated(paginationQuery);
   }
 
   @Get(':id')
