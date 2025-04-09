@@ -778,8 +778,6 @@ const CreateNotification: React.FC = () => {
                   )}
                 </div>
 
-                {/* initialDate */}
-
                 <div className="col-12">
                   <IonButton
                     expand="block"

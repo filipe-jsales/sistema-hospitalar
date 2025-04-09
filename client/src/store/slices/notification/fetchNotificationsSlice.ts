@@ -6,6 +6,22 @@ import { updateNotification } from "./fetchNotificationByIdSlice";
 export interface NotificationData {
   id: number;
   description: string;
+  processSEI: string;
+  observations: string;
+  actionPlan: string;
+  situation: string;
+  anvisaNotification: string;
+  notificationNumber: string;
+  initialDate: string;
+  endDate: string;
+  categoryId: number | null;
+  themeId: number | null;
+  subcategoryId: number | null;
+  notifyingServiceId: number | null;
+  organizationalUnityId: number | null;
+  incidentId: number | null;
+  responsibleId: number | null;
+  priorityId: number | null;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -69,11 +85,14 @@ const fetchNotificationsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchNotifications.fulfilled, (state, action: PayloadAction<PaginatedResponse<NotificationData>>) => {
-        state.notifications = action.payload.items;
-        state.pagination = action.payload.meta;
-        state.loading = false;
-      })
+      .addCase(
+        fetchNotifications.fulfilled,
+        (state, action: PayloadAction<PaginatedResponse<NotificationData>>) => {
+          state.notifications = action.payload.items;
+          state.pagination = action.payload.meta;
+          state.loading = false;
+        }
+      )
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;
