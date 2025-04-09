@@ -1,20 +1,14 @@
-import { IonButtons, IonContent, IonHeader, IonMenuButton, IonPage, IonTitle, IonToolbar } from '@ionic/react';
-import ExploreContainer from '../../components/ExplorerContainer/ExploreContainer';
-import './Home.css';
+import { IonContent, IonPage } from "@ionic/react";
+import "./Home.css";
+import Header from "../../components/Header/Header";
+import Dashboard from "../dashboard/Dashboard";
 
 const Home: React.FC = () => {
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonMenuButton /> 
-          </IonButtons>
-          <IonTitle>Sistema Hospitalar</IonTitle>
-        </IonToolbar>
-      </IonHeader>
-      <IonContent >
-        <ExploreContainer />
+      <Header />
+      <IonContent>
+        <Dashboard />
       </IonContent>
     </IonPage>
   );
