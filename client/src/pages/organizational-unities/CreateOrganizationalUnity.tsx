@@ -59,7 +59,7 @@ const CreateOrganizationalUnity: React.FC = () => {
     error: responsiblesError,
   } = useAppSelector((state) => state.responsibles);
   useEffect(() => {
-    dispatch(fetchResponsibles())
+    dispatch(fetchResponsibles(1))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar chefes:", error);

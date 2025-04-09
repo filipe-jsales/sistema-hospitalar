@@ -135,7 +135,7 @@ const CreatePriority: React.FC = () => {
                     <span className="text-danger">{errors.name}</span>
                   )}
                 </div>
-                {/* TODO: after successful creation, redirect user to priorities page */}
+
                 <div className="col-12">
                   <IonInput
                     color={"dark"}

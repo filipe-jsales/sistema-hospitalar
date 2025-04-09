@@ -7,8 +7,7 @@ export interface ResponsibleData {
   id: number;
   name: string;
   email?: string;
-  phone?: string;
-  department?: string;
+  cpf?: string;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;

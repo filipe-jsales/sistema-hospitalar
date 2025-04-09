@@ -6,7 +6,7 @@ import { updateSubcategory } from "./fetchSubcategoryByIdSlice";
 export interface SubcategoryData {
   id: number;
   name: string;
-  categoryId?: number;
+  categoryId?: number | null;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;

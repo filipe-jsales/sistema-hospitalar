@@ -235,7 +235,6 @@ const CreateSubcategory: React.FC = () => {
           </IonCard>
         </div>
 
-        {/* Lista de subcategorias com paginação */}
         <div className="m-2 row justify-content-center align-items-center mt-4">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
             <h2 className="text-center text-uppercase fw-bold mt-3">

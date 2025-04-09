@@ -6,6 +6,7 @@ import { updatePriority } from "./fetchPriorityByIdSlice";
 export interface PriorityData {
   id: number;
   name: string;
+  numericalPriority: number;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;

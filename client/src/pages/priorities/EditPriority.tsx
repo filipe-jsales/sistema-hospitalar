@@ -6,12 +6,6 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
-  IonBackButton,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
 import { useParams, useHistory } from "react-router-dom";
@@ -23,6 +17,7 @@ import {
   updatePriority,
 } from "../../store/slices/priority/fetchPriorityByIdSlice";
 import { clearPriorityError } from "../../store/slices/priority/fetchPrioritiesSlice";
+import Header from "../../components/Header/Header";
 
 interface PriorityParams {
   id: string;
@@ -40,10 +35,12 @@ const EditPriority: React.FC = () => {
 
   const [priorityInfo, setPriorityInfo] = useState({
     name: "",
+    numericalPriority: 0,
   });
 
   const [errors, setErrors] = useState({
     name: "",
+    numericalPriority: "",
   });
 
   useEffect(() => {
@@ -64,6 +61,7 @@ const EditPriority: React.FC = () => {
     if (priority) {
       setPriorityInfo({
         name: priority.name || "",
+        numericalPriority: priority.numericalPriority || 0,
       });
     }
   }, [priority]);
@@ -96,15 +94,7 @@ const EditPriority: React.FC = () => {
 
   return (
     <IonPage>
-      <IonHeader>
-        <IonToolbar>
-          <IonButtons slot="start">
-            <IonBackButton defaultHref="/priorities" />
-            <IonMenuButton />
-          </IonButtons>
-          <IonTitle>Sistema de Prioridades</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <Header />
       <IonContent>
         <div className="m-2 row justify-content-center align-items-center mt-6">
           <IonCard style={{ width: "90%", maxWidth: "45rem" }}>
@@ -154,6 +144,33 @@ const EditPriority: React.FC = () => {
                     />
                     {errors.name && (
                       <span className="text-danger">{errors.name}</span>
+                    )}
+                  </div>
+
+                  <div className="col-12">
+                    <IonInput
+                      color={"dark"}
+                      fill="outline"
+                      type="number"
+                      min={0}
+                      placeholder="Número da Prioridade"
+                      label="Número da Prioridade"
+                      labelPlacement="floating"
+                      mode="md"
+                      value={priorityInfo.numericalPriority}
+                      onIonInput={(e) => {
+                        setPriorityInfo({
+                          ...priorityInfo,
+                          numericalPriority: Number(e.target.value),
+                        });
+                        if (errors.numericalPriority)
+                          setErrors({ ...errors, numericalPriority: "" });
+                      }}
+                    />
+                    {errors.numericalPriority && (
+                      <span className="text-danger">
+                        {errors.numericalPriority}
+                      </span>
                     )}
                   </div>
 
