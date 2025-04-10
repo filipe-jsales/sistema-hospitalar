@@ -1,4 +1,54 @@
-export type PeriodType = 'Todos' | 'Último mês' | 'Últimos 3 meses' | 'Últimos 6 meses' | 'Último ano';
+import { NotificationData } from "../store/slices/notification/fetchNotificationsSlice";
+
+export type PeriodType =
+  | "Todos"
+  | "Último mês"
+  | "Últimos 3 meses"
+  | "Últimos 6 meses"
+  | "Último ano";
+
+export interface PeriodProps {
+  period: PeriodType;
+}
+
+export interface PeriodSelectorProps {
+  selectedPeriod: PeriodType;
+  onPeriodChange: (period: PeriodType) => void;
+}
+
+export const filterNotificationsByPeriod = (
+  notifications: NotificationData[],
+  period: PeriodType
+): NotificationData[] => {
+  if (period === "Todos") {
+    return notifications;
+  }
+
+  const now = new Date();
+  let dateLimit = new Date();
+
+  switch (period) {
+    case "Último mês":
+      dateLimit.setMonth(now.getMonth() - 1);
+      break;
+    case "Últimos 3 meses":
+      dateLimit.setMonth(now.getMonth() - 3);
+      break;
+    case "Últimos 6 meses":
+      dateLimit.setMonth(now.getMonth() - 6);
+      break;
+    case "Último ano":
+      dateLimit.setFullYear(now.getFullYear() - 1);
+      break;
+  }
+
+  return notifications.filter((notification) => {
+    const createdAt = notification.createdAt
+      ? new Date(notification.createdAt)
+      : null;
+    return createdAt && createdAt >= dateLimit;
+  });
+};
 
 export interface ChartData {
   name: string;
@@ -6,41 +56,14 @@ export interface ChartData {
   color?: string;
 }
 
-export interface PieChartData extends ChartData {
+export interface PieData extends ChartData {
   percentage: number;
 }
 
-export interface Incident {
-  description: string;
-  classification?: string;
-  theme?: string;
-  date?: string;
-  status?: string;
-}
-
-export interface Notification {
-  id: number;
-  date: string;
-  description: string;
-  status: string;
-  classification: string;
-}
-
-export const COLORS = {
-  primary: '#00B8D4',
-  secondary: '#00E5CF',
-  warning: '#FFC107',
-  danger: '#FF5722',
-  success: '#4CAF50',
-  gray: '#9E9E9E',
-  lightGray: '#E0E0E0',
-  darkGray: '#424242'
-};
-
 export const PERIODS: PeriodType[] = [
-  'Todos',
-  'Último mês',
-  'Últimos 3 meses',
-  'Últimos 6 meses',
-  'Último ano'
+  "Todos",
+  "Último mês",
+  "Últimos 3 meses",
+  "Últimos 6 meses",
+  "Último ano",
 ];

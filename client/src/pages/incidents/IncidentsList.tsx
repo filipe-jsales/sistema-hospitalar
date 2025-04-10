@@ -5,11 +5,6 @@ import {
   IonCardContent,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
   IonItem,
   IonLabel,
   IonList,
@@ -218,34 +213,40 @@ const IncidentsList: React.FC = () => {
                 </IonList>
               )}
 
-              {/* Informações de paginação e controles */}
               {!loading && !error && pagination && (
                 <div className="text-center mt-3">
                   <p>
-                    Exibindo {incidents.length} de {pagination.totalItems} incidentes
+                    Exibindo {incidents.length} de {pagination.totalItems}{" "}
+                    incidentes
                     {searchText && " (filtrados)"}
                   </p>
-                  
+
                   {pagination.totalPages > 1 && (
                     <div className="d-flex justify-content-center mt-3">
-                      <IonButton 
+                      <IonButton
                         fill="clear"
                         disabled={currentPage === 1}
-                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                        onClick={() =>
+                          handlePageChange(Math.max(1, currentPage - 1))
+                        }
                       >
                         Anterior
                       </IonButton>
-                      
+
                       <div className="d-flex align-items-center mx-2">
                         <span>
                           Página {currentPage} de {pagination.totalPages}
                         </span>
                       </div>
-                      
-                      <IonButton 
+
+                      <IonButton
                         fill="clear"
                         disabled={currentPage === pagination.totalPages}
-                        onClick={() => handlePageChange(Math.min(pagination.totalPages, currentPage + 1))}
+                        onClick={() =>
+                          handlePageChange(
+                            Math.min(pagination.totalPages, currentPage + 1)
+                          )
+                        }
                       >
                         Próxima
                       </IonButton>

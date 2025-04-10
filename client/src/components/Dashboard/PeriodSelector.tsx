@@ -1,22 +1,8 @@
-import React from "react";
-import { IonSelect, IonSelectOption, IonLabel } from "@ionic/react";
+import React from 'react';
+import { IonSelect, IonSelectOption, IonLabel } from '@ionic/react';
+import { PERIODS, PeriodSelectorProps } from '../../utils/types';
 
-interface PeriodSelectorProps {
-  selectedPeriod: string;
-  onPeriodChange: (period: string) => void;
-}
-
-const PeriodSelector: React.FC<PeriodSelectorProps> = ({
-  selectedPeriod,
-  onPeriodChange,
-}) => {
-  const periodOptions = [
-    "Todos",
-    "Último mês",
-    "Últimos 3 meses",
-    "Últimos 6 meses",
-    "Último ano",
-  ];
+const PeriodSelector: React.FC<PeriodSelectorProps> = ({ selectedPeriod, onPeriodChange }) => {
 
   return (
     <div>
@@ -28,7 +14,7 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
         placeholder="Selecione um período"
         className="period-selector"
       >
-        {periodOptions.map((period) => (
+        {PERIODS.map((period) => (
           <IonSelectOption key={period} value={period}>
             {period}
           </IonSelectOption>

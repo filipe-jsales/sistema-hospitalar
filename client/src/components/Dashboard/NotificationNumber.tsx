@@ -1,24 +1,37 @@
 import React, { useEffect, useState } from "react";
 import { IonCard, IonCardContent } from "@ionic/react";
+import { useAppSelector } from "../../hooks/useRedux";
 
 interface NotificationNumberProps {
   period: string;
 }
 
+const DEFAULT_NOTIFICATION_NUMBER = 455084;
+
 const NotificationNumber: React.FC<NotificationNumberProps> = ({ period }) => {
-  const [number, setNumber] = useState<number>(455084);
+  const { notifications } = useAppSelector((state) => state.notifications);
+  const [number, setNumber] = useState<number>(0);
 
   useEffect(() => {
-    const mockNumbers: Record<string, number> = {
-      Todos: 455084,
-      "Último mês": 455001,
-      "Últimos 3 meses": 454823,
-      "Últimos 6 meses": 453912,
-      "Último ano": 455084,
-    };
+    if (notifications && notifications.length > 0) {
+      const lastNotification = notifications[0];
 
-    setNumber(mockNumbers[period] || 455084);
-  }, [period]);
+      if (lastNotification && lastNotification.notificationNumber) {
+        const notificationNumber = parseInt(
+          lastNotification.notificationNumber,
+          10
+        );
+        if (!isNaN(notificationNumber)) {
+          setNumber(notificationNumber);
+          return;
+        }
+      }
+
+      setNumber(DEFAULT_NOTIFICATION_NUMBER);
+    } else {
+      setNumber(455084);
+    }
+  }, [notifications, period]);
 
   return (
     <IonCard>

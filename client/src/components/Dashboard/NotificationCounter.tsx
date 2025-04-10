@@ -1,32 +1,66 @@
-import React, { useEffect, useState } from "react";
-import { IonCard, IonCardContent } from "@ionic/react";
+import React, { useEffect, useState } from 'react';
+import { IonCard, IonCardContent, IonSpinner } from '@ionic/react';
+import { useAppSelector } from '../../hooks/useRedux';
 
 interface NotificationCounterProps {
   period: string;
 }
 
-const NotificationCounter: React.FC<NotificationCounterProps> = ({
-  period,
-}) => {
-  const [count, setCount] = useState<number>(7551);
+const NotificationCounter: React.FC<NotificationCounterProps> = ({ period }) => {
+  const { notifications, pagination, loading } = useAppSelector(
+    (state) => state.notifications
+  );
+  const [count, setCount] = useState<number>(0);
 
   useEffect(() => {
-    const mockCounts: Record<string, number> = {
-      Todos: 7551,
-      "Último mês": 623,
-      "Últimos 3 meses": 1856,
-      "Últimos 6 meses": 3720,
-      "Último ano": 7551,
-    };
-
-    setCount(mockCounts[period] || 7551);
-  }, [period]);
+    if (pagination) {
+      let totalCount = pagination.totalItems;
+      
+      if (period !== 'Todos' && notifications.length > 0) {
+        const now = new Date();
+        let dateLimit = new Date();
+        
+        switch (period) {
+          case 'Último mês':
+            dateLimit.setMonth(now.getMonth() - 1);
+            break;
+          case 'Últimos 3 meses':
+            dateLimit.setMonth(now.getMonth() - 3);
+            break;
+          case 'Últimos 6 meses':
+            dateLimit.setMonth(now.getMonth() - 6);
+            break;
+          case 'Último ano':
+            dateLimit.setFullYear(now.getFullYear() - 1);
+            break;
+        }
+        
+        if (period !== 'Todos') {
+          const filteredCount = notifications.filter(notification => {
+            const createdAt = notification.createdAt ? new Date(notification.createdAt) : null;
+            return createdAt && createdAt >= dateLimit;
+          }).length;
+          
+          const ratio = filteredCount / notifications.length;
+          totalCount = Math.round(totalCount * ratio);
+        }
+      }
+      
+      setCount(totalCount);
+    }
+  }, [notifications, pagination, period]);
 
   return (
     <IonCard>
       <IonCardContent className="notification-counter">
-        <h1>{count.toLocaleString()}</h1>
-        <p>Notificações</p>
+        {loading ? (
+          <IonSpinner name="crescent" />
+        ) : (
+          <>
+            <h1>{count.toLocaleString()}</h1>
+            <p>Notificações</p>
+          </>
+        )}
       </IonCardContent>
     </IonCard>
   );
