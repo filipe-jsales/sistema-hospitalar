@@ -23,35 +23,22 @@ interface ChartData {
 
 const ThemeChart: React.FC<ThemeChartProps> = ({ period }) => {
   const dispatch = useTypedDispatch();
-  const { themes, loading, error } = useAppSelector((state) => state.themes);
+  const { themes, loading, error, groupedData } = useAppSelector(
+    (state) => state.themes
+  );
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
-  const processThemeData = (themesList: any[], periodFilter: string) => {
-    if (!themesList || themesList.length === 0) return [];
+  const applyPeriodFactor = (value: number, periodFilter: string): number => {
+    const factor =
+      periodFilter === "Último mês"
+        ? 0.08
+        : periodFilter === "Últimos 3 meses"
+        ? 0.25
+        : periodFilter === "Últimos 6 meses"
+        ? 0.5
+        : 1;
 
-    const processedData = themesList.map((theme) => ({
-      name: theme.name,
-      value: calculateValueForPeriod(100, periodFilter),
-      color: "#00E5CF",
-    }));
-
-    return processedData.sort((a, b) => b.value - a.value);
-  };
-
-  const calculateValueForPeriod = (baseValue: number, periodFilter: string) => {
-    const random = Math.floor(Math.random() * 20) + 1;
-    const base = baseValue * random;
-
-    switch (periodFilter) {
-      case "Último mês":
-        return Math.round(base * 0.08);
-      case "Últimos 3 meses":
-        return Math.round(base * 0.25);
-      case "Últimos 6 meses":
-        return Math.round(base * 0.5);
-      default:
-        return base;
-    }
+    return Math.round(value * factor);
   };
 
   useEffect(() => {
@@ -59,11 +46,34 @@ const ThemeChart: React.FC<ThemeChartProps> = ({ period }) => {
   }, [dispatch]);
 
   useEffect(() => {
-    if (themes.length > 0) {
-      const data = processThemeData(themes, period);
-      setChartData(data);
+    if (groupedData) {
+      const data = Object.entries(groupedData).map(([name, count]) => ({
+        name,
+        value: applyPeriodFactor(count, period),
+        color: "#00E5CF",
+      }));
+
+      const sortedData = data.sort((a, b) => b.value - a.value);
+
+      setChartData(sortedData);
+    } else if (themes.length > 0) {
+      console.warn("groupedData não disponível, usando fallback");
+
+      const themeCounts: Record<string, number> = {};
+      themes.forEach((theme) => {
+        themeCounts[theme.name] = (themeCounts[theme.name] || 0) + 1;
+      });
+
+      const data = Object.entries(themeCounts).map(([name, count]) => ({
+        name,
+        value: applyPeriodFactor(count, period),
+        color: "#00E5CF",
+      }));
+
+      const sortedData = data.sort((a, b) => b.value - a.value);
+      setChartData(sortedData);
     }
-  }, [themes, period]);
+  }, [groupedData, themes, period]);
 
   if (loading) {
     return <div>Carregando dados dos temas...</div>;

@@ -21,6 +21,9 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   items: T[];
   meta: PaginationMeta;
+  groupedData?: {
+    [key: string]: number;
+  };
 }
 
 interface ThemesState {
@@ -28,6 +31,7 @@ interface ThemesState {
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
+  groupedData: { [key: string]: number } | null;
 }
 
 const initialState: ThemesState = {
@@ -35,6 +39,7 @@ const initialState: ThemesState = {
   loading: false,
   error: null,
   pagination: null,
+  groupedData: null,
 };
 
 export const fetchThemes = createAsyncThunk(
@@ -61,6 +66,7 @@ const fetchThemesSlice = createSlice({
     clearThemes(state) {
       state.themes = [];
       state.pagination = null;
+      state.groupedData = null;
     },
   },
   extraReducers: (builder) => {
@@ -74,6 +80,7 @@ const fetchThemesSlice = createSlice({
         (state, action: PayloadAction<PaginatedResponse<ThemeData>>) => {
           state.themes = action.payload.items;
           state.pagination = action.payload.meta;
+          state.groupedData = action.payload.groupedData || null;
           state.loading = false;
         }
       )

@@ -5,8 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Incident } from './entities/incident.entity';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
-import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
 import { PaginationService } from 'src/shared/services/pagination.service';
+
+interface GroupedResult {
+  name: string;
+  count: number;
+}
 
 @Injectable()
 export class IncidentsService {
@@ -25,14 +30,35 @@ export class IncidentsService {
 
   async findAllPaginated(
     paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Incident>> {
-    return this.paginationService.paginateRepository(
+  ): Promise<PaginatedResponseWithGrouping<Incident>> {
+    const paginatedData = await this.paginationService.paginateRepository(
       this.incidentRepository,
       paginationQuery,
       {
         order: { id: 'DESC' },
       },
     );
+
+    const groupedResults = await this.incidentRepository
+      .createQueryBuilder('incident')
+      .select('incident.name', 'name')
+      .addSelect('COUNT(incident.id)', 'count')
+      .where('incident.deletedAt IS NULL')
+      .groupBy('incident.name')
+      .getRawMany<GroupedResult>();
+
+    const groupedData = groupedResults.reduce(
+      (acc, item) => {
+        acc[item.name] = parseInt(item.count as unknown as string, 10);
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      ...paginatedData,
+      groupedData,
+    };
   }
 
   async findOne(id: number): Promise<Incident> {

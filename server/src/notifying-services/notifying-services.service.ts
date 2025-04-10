@@ -4,9 +4,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NotifyingService } from './entities/notifying-service.entity';
 import { Repository } from 'typeorm';
 import { UpdateNotifyingServiceDto } from './dto/update-notifying-service.dto';
-import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
-import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
 import { PaginationService } from 'src/shared/services/pagination.service';
+import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
+
+interface GroupedResult {
+  name: string;
+  count: number;
+}
 
 @Injectable()
 export class NotifyingServicesService {
@@ -14,9 +19,6 @@ export class NotifyingServicesService {
     @InjectRepository(NotifyingService)
     private readonly notifyingServicesRepository: Repository<NotifyingService>,
     private readonly paginationService: PaginationService,
-
-    // TODO: add CaslAbilityFactory?
-    // TODO: add nest logger
   ) {}
 
   create(
@@ -31,14 +33,35 @@ export class NotifyingServicesService {
 
   async findAllPaginated(
     paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<NotifyingService>> {
-    return this.paginationService.paginateRepository(
+  ): Promise<PaginatedResponseWithGrouping<NotifyingService>> {
+    const paginatedData = await this.paginationService.paginateRepository(
       this.notifyingServicesRepository,
       paginationQuery,
       {
         order: { id: 'DESC' },
       },
     );
+
+    const groupedResults = await this.notifyingServicesRepository
+      .createQueryBuilder('service')
+      .select('service.name', 'name')
+      .addSelect('COUNT(service.id)', 'count')
+      .where('service.deletedAt IS NULL')
+      .groupBy('service.name')
+      .getRawMany<GroupedResult>();
+
+    const groupedData = groupedResults.reduce(
+      (acc, item) => {
+        acc[item.name] = parseInt(item.count as unknown as string, 10);
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      ...paginatedData,
+      groupedData,
+    };
   }
 
   async findOne(id: number): Promise<NotifyingService> {

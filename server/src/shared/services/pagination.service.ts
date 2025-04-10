@@ -42,11 +42,7 @@ export class PaginationService {
     const { page = 1, limit = 10 } = paginationQuery;
     const { relations, where, order } = options;
     const skip = (page - 1) * limit;
-    const totalItems = await repository.count({
-      where,
-    });
-
-    const items = await repository.find({
+    const [items, totalItems] = await repository.findAndCount({
       relations,
       where,
       order,

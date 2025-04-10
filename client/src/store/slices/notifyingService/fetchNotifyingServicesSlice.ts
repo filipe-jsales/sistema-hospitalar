@@ -21,6 +21,9 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   items: T[];
   meta: PaginationMeta;
+  groupedData?: {
+    [key: string]: number;
+  };
 }
 
 interface NotifyingServicesState {
@@ -28,6 +31,7 @@ interface NotifyingServicesState {
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
+  groupedData: { [key: string]: number } | null;
 }
 
 const initialState: NotifyingServicesState = {
@@ -35,6 +39,7 @@ const initialState: NotifyingServicesState = {
   loading: false,
   error: null,
   pagination: null,
+  groupedData: null,
 };
 
 export const fetchNotifyingServices = createAsyncThunk(
@@ -62,6 +67,7 @@ const fetchNotifyingServicesSlice = createSlice({
     clearNotifyingServices(state) {
       state.notifyingServices = [];
       state.pagination = null;
+      state.groupedData = null;
     },
   },
   extraReducers: (builder) => {
@@ -73,6 +79,7 @@ const fetchNotifyingServicesSlice = createSlice({
       .addCase(fetchNotifyingServices.fulfilled, (state, action: PayloadAction<PaginatedResponse<NotifyingServiceData>>) => {
         state.notifyingServices = action.payload.items;
         state.pagination = action.payload.meta;
+        state.groupedData = action.payload.groupedData || null;
         state.loading = false;
       })
       .addCase(fetchNotifyingServices.rejected, (state, action) => {

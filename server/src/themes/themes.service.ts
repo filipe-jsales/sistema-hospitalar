@@ -6,7 +6,15 @@ import { Theme } from './entities/theme.entity';
 import { Repository } from 'typeorm';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
-import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import {
+  PaginatedResponse,
+  PaginatedResponseWithGrouping,
+} from 'src/shared/interfaces/paginated-response.dto';
+
+interface GroupedResult {
+  name: string;
+  count: number;
+}
 
 @Injectable()
 export class ThemesService {
@@ -24,20 +32,46 @@ export class ThemesService {
     return this.themesRepository.find();
   }
 
-  async findAllPaginated(paginationQuery: PaginationQueryDto): Promise<PaginatedResponse<Theme>> {
-    return this.paginationService.paginateRepository(
+  async findAllPaginated(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponseWithGrouping<Theme>> {
+    const paginatedData = await this.paginationService.paginateRepository(
       this.themesRepository,
       paginationQuery,
       {
         order: { id: 'DESC' },
       },
     );
+
+    const groupedResults = await this.themesRepository
+      .createQueryBuilder('theme')
+      .select('theme.name', 'name')
+      .addSelect('COUNT(theme.id)', 'count')
+      .where('theme.deletedAt IS NULL')
+      .groupBy('theme.name')
+      .getRawMany<GroupedResult>();
+
+    const groupedData = groupedResults.reduce(
+      (acc, item) => {
+        acc[item.name] = parseInt(item.count as unknown as string, 10);
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      ...paginatedData,
+      groupedData,
+    };
   }
 
-  async findAllWithQueryBuilder(paginationQuery: PaginationQueryDto): Promise<PaginatedResponse<Theme>> {
-    const queryBuilder = this.themesRepository.createQueryBuilder('theme')
+  async findAllWithQueryBuilder(
+    paginationQuery: PaginationQueryDto,
+  ): Promise<PaginatedResponse<Theme>> {
+    const queryBuilder = this.themesRepository
+      .createQueryBuilder('theme')
       .orderBy('theme.id', 'DESC');
-      
+
     return this.paginationService.paginate(queryBuilder, paginationQuery);
   }
 

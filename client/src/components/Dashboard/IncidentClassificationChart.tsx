@@ -9,6 +9,8 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { useAppSelector, useTypedDispatch } from "../../hooks/useRedux";
+import { fetchIncidents } from "../../store/slices/incident/fetchIncidentsSlice";
 
 interface IncidentClassificationProps {
   period: string;
@@ -20,86 +22,148 @@ interface ChartData {
   color: string;
 }
 
+const classificationColors: Record<string, string> = {
+  CIRCUNSTANCIAL: "#62B3E5",
+  LEVE: "#A5A5A5",
+  "SEM DANO": "#C5C5C5",
+  "NEAR MISS": "#F6C48A",
+  MODERADO: "#E7B95D",
+  "NEVER EVENT": "#D39E52",
+  GRAVE: "#C16D50",
+  ÓBITO: "#9D3F3F",
+  "(Em branco)": "#DEDEDE",
+  CATASTRÓFICO: "#7A1818",
+};
+
+const defaultColors = [
+  "#8884d8",
+  "#83a6ed",
+  "#8dd1e1",
+  "#82ca9d",
+  "#a4de6c",
+  "#d0ed57",
+  "#ffc658",
+  "#ff8c42",
+  "#ff6361",
+  "#bc5090",
+];
+
 const IncidentClassificationChart: React.FC<IncidentClassificationProps> = ({
   period,
 }) => {
+  const dispatch = useTypedDispatch();
+  const { incidents, loading, error, groupedData } = useAppSelector(
+    (state) => state.incidents
+  );
   const [data, setData] = useState<ChartData[]>([]);
 
+  const applyPeriodFactor = (value: number, periodFilter: string): number => {
+    const factor =
+      periodFilter === "Último mês"
+        ? 0.08
+        : periodFilter === "Últimos 3 meses"
+        ? 0.25
+        : periodFilter === "Últimos 6 meses"
+        ? 0.5
+        : 1;
+
+    return Math.round(value * factor);
+  };
+
   useEffect(() => {
-    const mockData: ChartData[] = [
-      { name: "CIRCUNSTANCIAL", value: 5010, color: "#62B3E5" },
-      { name: "LEVE", value: 874, color: "#A5A5A5" },
-      { name: "SEM DANO", value: 721, color: "#C5C5C5" },
-      { name: "NEAR MISS", value: 493, color: "#F6C48A" },
-      { name: "MODERADO", value: 284, color: "#E7B95D" },
-      { name: "NEVER EVENT", value: 82, color: "#D39E52" },
-      { name: "GRAVE", value: 35, color: "#C16D50" },
-      { name: "ÓBITO", value: 35, color: "#9D3F3F" },
-      { name: "(Em branco)", value: 13, color: "#DEDEDE" },
-      { name: "CATASTRÓFICO", value: 4, color: "#7A1818" },
-    ];
+    dispatch(fetchIncidents(1));
+  }, [dispatch]);
 
-    if (period !== "Todos") {
-      const factor =
-        period === "Último mês"
-          ? 0.08
-          : period === "Últimos 3 meses"
-          ? 0.25
-          : period === "Últimos 6 meses"
-          ? 0.5
-          : 1;
+  useEffect(() => {
+    if (groupedData) {
+      let chartData = Object.entries(groupedData).map(
+        ([name, count], index) => ({
+          name,
+          value: applyPeriodFactor(count, period),
+          color:
+            classificationColors[name] ||
+            defaultColors[index % defaultColors.length],
+        })
+      );
 
-      const filteredData = mockData.map((item) => ({
-        ...item,
-        value: Math.round(item.value * factor),
-      }));
+      chartData = chartData.sort((a, b) => b.value - a.value);
+      setData(chartData.slice(0, 10));
+    } else if (incidents && incidents.length > 0) {
+      console.warn("groupedData não disponível, usando fallback");
+      const classificationCounts: Record<string, number> = {};
 
-      setData(filteredData);
-    } else {
-      setData(mockData);
+      incidents.forEach((incident) => {
+        const name = incident.name || "(Em branco)";
+        classificationCounts[name] = (classificationCounts[name] || 0) + 1;
+      });
+
+      let chartData = Object.entries(classificationCounts).map(
+        ([name, count], index) => ({
+          name,
+          value: applyPeriodFactor(count, period),
+          color:
+            classificationColors[name] ||
+            defaultColors[index % defaultColors.length],
+        })
+      );
+
+      chartData = chartData.sort((a, b) => b.value - a.value);
+      setData(chartData.slice(0, 10));
     }
-  }, [period]);
+  }, [groupedData, incidents, period]);
+
+  if (loading) {
+    return <div>Carregando dados de classificação de incidentes...</div>;
+  }
+
+  if (error) {
+    return <div>Erro ao carregar classificações de incidentes: {error}</div>;
+  }
+
+  const maxValue =
+    data.length > 0 ? Math.max(...data.map((item) => item.value)) : 0;
+  const yAxisMax = Math.ceil(maxValue * 1.1);
+
+  const tickCount = 5;
+  const yAxisTicks = Array.from({ length: tickCount }, (_, i) =>
+    Math.round((yAxisMax * i) / (tickCount - 1))
+  );
 
   return (
     <div className="chart-container">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="name"
-            angle={-45}
-            textAnchor="end"
-            height={70}
-            tick={{ fontSize: 10 }}
-          />
-          <YAxis
-            label={{
-              value: "Mil",
-              angle: -90,
-              position: "insideLeft",
-              style: { textAnchor: "middle" },
-            }}
-            ticks={[0, 2000, 4000]}
-            tickFormatter={(value) => `${value / 1000} Mil`}
-          />
-          <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
-          <Bar
-            dataKey="value"
-            name="Quantidade"
-            radius={[5, 5, 0, 0]}
-            barSize={35}
-            fill="#8884d8"
-            fillOpacity={0.8}
+      {data.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="name"
+              angle={-45}
+              textAnchor="end"
+              height={70}
+              tick={{ fontSize: 10 }}
+            />
+            <YAxis ticks={yAxisTicks} />
+            <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
+            <Bar
+              dataKey="value"
+              name="Quantidade"
+              radius={[5, 5, 0, 0]}
+              barSize={35}
+              fill="#8884d8"
+              fillOpacity={0.8}
+            >
+              {data.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div>Nenhum dado de classificação de incidentes encontrado</div>
+      )}
     </div>
   );
 };

@@ -6,7 +6,7 @@ export class Incident {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true, length: 255 })
+  @Column()
   name: string;
 
   @Column()

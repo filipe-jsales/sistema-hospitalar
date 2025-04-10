@@ -24,6 +24,9 @@ export interface PaginationMeta {
 export interface PaginatedResponse<T> {
   items: T[];
   meta: PaginationMeta;
+  groupedData?: {
+    [key: string]: number;
+  };
 }
 
 interface IncidentsState {
@@ -31,6 +34,7 @@ interface IncidentsState {
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
+  groupedData: { [key: string]: number } | null;
 }
 
 const initialState: IncidentsState = {
@@ -38,6 +42,7 @@ const initialState: IncidentsState = {
   loading: false,
   error: null,
   pagination: null,
+  groupedData: null,
 };
 
 export const fetchIncidents = createAsyncThunk(
@@ -64,6 +69,7 @@ const fetchIncidentsSlice = createSlice({
     clearIncidents(state) {
       state.incidents = [];
       state.pagination = null;
+      state.groupedData = null;
     },
   },
   extraReducers: (builder) => {
@@ -72,11 +78,15 @@ const fetchIncidentsSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchIncidents.fulfilled, (state, action: PayloadAction<PaginatedResponse<IncidentData>>) => {
-        state.incidents = action.payload.items;
-        state.pagination = action.payload.meta;
-        state.loading = false;
-      })
+      .addCase(
+        fetchIncidents.fulfilled,
+        (state, action: PayloadAction<PaginatedResponse<IncidentData>>) => {
+          state.incidents = action.payload.items;
+          state.pagination = action.payload.meta;
+          state.groupedData = action.payload.groupedData || null;
+          state.loading = false;
+        }
+      )
       .addCase(fetchIncidents.rejected, (state, action) => {
         state.error = action.payload as string;
         state.loading = false;

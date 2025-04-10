@@ -8,12 +8,14 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { useAppSelector, useTypedDispatch } from "../../hooks/useRedux";
+import { fetchNotifyingServices } from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
 
 interface NotifyingServicesChartProps {
   period: string;
 }
 
-interface ServiceData {
+interface ChartData {
   name: string;
   value: number;
 }
@@ -21,70 +23,81 @@ interface ServiceData {
 const NotifyingServicesChart: React.FC<NotifyingServicesChartProps> = ({
   period,
 }) => {
-  const [data, setData] = useState<ServiceData[]>([]);
+  const dispatch = useTypedDispatch();
+  const { notifyingServices, loading, error, groupedData } = useAppSelector(
+    (state) => state.notifyingServices
+  );
+  const [data, setData] = useState<ChartData[]>([]);
+
+  const applyPeriodFactor = (value: number, periodFilter: string): number => {
+    const factor =
+      periodFilter === "Último mês"
+        ? 0.08
+        : periodFilter === "Últimos 3 meses"
+        ? 0.25
+        : periodFilter === "Últimos 6 meses"
+        ? 0.5
+        : 1;
+
+    return Math.round(value * factor);
+  };
 
   useEffect(() => {
-    const mockData: ServiceData[] = [
-      { name: "CENTRO CIRÚRGICO", value: 870 },
-      { name: "UTI GERAL", value: 695 },
-      { name: "UTI CORONARIANA", value: 532 },
-      { name: "PSIQUIATRIA", value: 402 },
-      { name: "UTI NEUROLÓGICA", value: 306 },
-      { name: "ENFERMARIA NEURO", value: 212 },
-      { name: "ENFERMARIA CLÍNICA", value: 199 },
-      { name: "ENFERMARIA CIRÚRGICA", value: 195 },
-      { name: "CENTRO DE DIAGNÓSTICO", value: 187 },
-      { name: "ENFERMARIA ORTOPEDIA", value: 179 },
-      { name: "PSIQUIATRÍA INFANTIL", value: 143 },
-    ];
+    dispatch(fetchNotifyingServices(1));
+  }, [dispatch]);
 
-    if (period !== "Todos") {
-      const factor =
-        period === "Último mês"
-          ? 0.08
-          : period === "Últimos 3 meses"
-          ? 0.25
-          : period === "Últimos 6 meses"
-          ? 0.5
-          : 1;
-
-      const filteredData = mockData.map((item) => ({
-        ...item,
-        value: Math.round(item.value * factor),
+  useEffect(() => {
+    if (groupedData) {
+      const chartData = Object.entries(groupedData).map(([name, count]) => ({
+        name,
+        value: applyPeriodFactor(count, period),
       }));
 
-      setData(filteredData);
-    } else {
-      setData(mockData);
+      const sortedData = chartData.sort((a, b) => b.value - a.value);
+
+      // Limiting the chart to display the top 11 entries for better readability
+      setData(sortedData.slice(0, 11));
     }
-  }, [period]);
+  }, [groupedData, period]);
+
+  if (loading) {
+    return <div>Carregando dados dos serviços de notificação...</div>;
+  }
+
+  if (error) {
+    return <div>Erro ao carregar serviços de notificação: {error}</div>;
+  }
 
   return (
     <div className="chart-container" style={{ height: 250 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" vertical={false} />
-          <XAxis
-            dataKey="name"
-            angle={-45}
-            textAnchor="end"
-            height={70}
-            tick={{ fontSize: 9 }}
-          />
-          <YAxis />
-          <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
-          <Bar
-            dataKey="value"
-            name="Quantidade"
-            fill="#00B8D4"
-            radius={[5, 5, 0, 0]}
-            barSize={20}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+      {data.length > 0 ? (
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart
+            data={data}
+            margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis
+              dataKey="name"
+              angle={-45}
+              textAnchor="end"
+              height={70}
+              tick={{ fontSize: 9 }}
+            />
+            <YAxis />
+            <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
+            <Bar
+              dataKey="value"
+              name="Quantidade"
+              fill="#00B8D4"
+              radius={[5, 5, 0, 0]}
+              barSize={20}
+            />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div>Nenhum serviço de notificação encontrado</div>
+      )}
     </div>
   );
 };
