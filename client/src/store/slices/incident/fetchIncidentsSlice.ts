@@ -78,13 +78,11 @@ export const fetchIncidents = createAsyncThunk(
       return response.data as PaginatedResponse<IncidentData>;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Falha ao buscar temas."
+        error.response?.data?.message || "Falha ao buscar incidentes."
       );
     }
   }
 );
-
-// TODO: finalizar demais slices e services
 
 const fetchIncidentsSlice = createSlice({
   name: "incidents",

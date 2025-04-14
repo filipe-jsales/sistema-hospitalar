@@ -78,7 +78,7 @@ export const fetchNotifyingServices = createAsyncThunk(
       return response.data as PaginatedResponse<NotifyingServiceData>;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Falha ao buscar temas."
+        error.response?.data?.message || "Falha ao buscar serviços de notificação."
       );
     }
   }

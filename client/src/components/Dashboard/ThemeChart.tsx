@@ -8,12 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useAppSelector, useTypedDispatch } from "../../hooks/useRedux";
-import { fetchThemes } from "../../store/slices/theme/fetchThemesSlice";
-
-interface ThemeChartProps {
-  period: string;
-}
+import { useAppSelector } from "../../hooks/useRedux";
 
 interface ChartData {
   name: string;
@@ -21,40 +16,21 @@ interface ChartData {
   color: string;
 }
 
-const ThemeChart: React.FC<ThemeChartProps> = ({ period }) => {
-  const dispatch = useTypedDispatch();
+const ThemeChart: React.FC = () => {
   const { themes, loading, error, groupedData } = useAppSelector(
     (state) => state.themes
   );
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
-  const applyPeriodFactor = (value: number, periodFilter: string): number => {
-    const factor =
-      periodFilter === "Último mês"
-        ? 0.08
-        : periodFilter === "Últimos 3 meses"
-        ? 0.25
-        : periodFilter === "Últimos 6 meses"
-        ? 0.5
-        : 1;
-
-    return Math.round(value * factor);
-  };
-
-  useEffect(() => {
-    dispatch(fetchThemes(1));
-  }, [dispatch]);
-
   useEffect(() => {
     if (groupedData) {
       const data = Object.entries(groupedData).map(([name, count]) => ({
         name,
-        value: applyPeriodFactor(count, period),
+        value: count,
         color: "#00E5CF",
       }));
 
       const sortedData = data.sort((a, b) => b.value - a.value);
-
       setChartData(sortedData);
     } else if (themes.length > 0) {
       console.warn("groupedData não disponível, usando fallback");
@@ -66,14 +42,14 @@ const ThemeChart: React.FC<ThemeChartProps> = ({ period }) => {
 
       const data = Object.entries(themeCounts).map(([name, count]) => ({
         name,
-        value: applyPeriodFactor(count, period),
+        value: count,
         color: "#00E5CF",
       }));
 
       const sortedData = data.sort((a, b) => b.value - a.value);
       setChartData(sortedData);
     }
-  }, [groupedData, themes, period]);
+  }, [groupedData, themes]);
 
   if (loading) {
     return <div>Carregando dados dos temas...</div>;
