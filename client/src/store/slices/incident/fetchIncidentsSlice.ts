@@ -29,12 +29,20 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export interface IncidentFilterParams {
+  page?: number;
+  limit?: number;
+  year?: number;
+  months?: number[];
+}
+
 interface IncidentsState {
   incidents: IncidentData[];
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
   groupedData: { [key: string]: number } | null;
+  activeFilters: IncidentFilterParams;
 }
 
 const initialState: IncidentsState = {
@@ -43,21 +51,40 @@ const initialState: IncidentsState = {
   error: null,
   pagination: null,
   groupedData: null,
+  activeFilters: {
+    page: 1,
+    limit: 10,
+  },
 };
 
 export const fetchIncidents = createAsyncThunk(
   "incidents/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: IncidentFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/incidents?page=${page}`);
+      const queryParams = new URLSearchParams();
+
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      if (params.year) queryParams.append("year", params.year.toString());
+
+      if (params.months && params.months.length > 0) {
+        params.months.forEach((month) => {
+          queryParams.append("months", month.toString());
+        });
+      }
+
+      const url = `/incidents?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<IncidentData>;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message || "Falha ao buscar incidentes."
+        error.response?.data?.message || "Falha ao buscar temas."
       );
     }
   }
 );
+
+// TODO: finalizar demais slices e services
 
 const fetchIncidentsSlice = createSlice({
   name: "incidents",
@@ -70,6 +97,18 @@ const fetchIncidentsSlice = createSlice({
       state.incidents = [];
       state.pagination = null;
       state.groupedData = null;
+    },
+    setFilters(state, action: PayloadAction<IncidentFilterParams>) {
+      state.activeFilters = {
+        ...state.activeFilters,
+        ...action.payload,
+      };
+    },
+    clearFilters(state) {
+      state.activeFilters = {
+        page: 1,
+        limit: 10,
+      };
     },
   },
   extraReducers: (builder) => {
@@ -103,6 +142,10 @@ const fetchIncidentsSlice = createSlice({
   },
 });
 
-export const { clearError: clearIncidentError, clearIncidents } =
-  fetchIncidentsSlice.actions;
+export const {
+  clearError: clearIncidentError,
+  clearIncidents,
+  setFilters,
+  clearFilters,
+} = fetchIncidentsSlice.actions;
 export default fetchIncidentsSlice.reducer;

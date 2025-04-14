@@ -26,12 +26,20 @@ export interface PaginatedResponse<T> {
   };
 }
 
+export interface ThemeFilterParams {
+  page?: number;
+  limit?: number;
+  year?: number;
+  months?: number[];
+}
+
 interface ThemesState {
   themes: ThemeData[];
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
   groupedData: { [key: string]: number } | null;
+  activeFilters: ThemeFilterParams;
 }
 
 const initialState: ThemesState = {
@@ -40,13 +48,30 @@ const initialState: ThemesState = {
   error: null,
   pagination: null,
   groupedData: null,
+  activeFilters: {
+    page: 1,
+    limit: 10,
+  },
 };
 
 export const fetchThemes = createAsyncThunk(
   "themes/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: ThemeFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/themes?page=${page}`);
+      const queryParams = new URLSearchParams();
+
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      if (params.year) queryParams.append("year", params.year.toString());
+
+      if (params.months && params.months.length > 0) {
+        params.months.forEach((month) => {
+          queryParams.append("months", month.toString());
+        });
+      }
+
+      const url = `/themes?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<ThemeData>;
     } catch (error: any) {
       return rejectWithValue(
@@ -68,7 +93,20 @@ const fetchThemesSlice = createSlice({
       state.pagination = null;
       state.groupedData = null;
     },
+    setThemesFilters(state, action: PayloadAction<ThemeFilterParams>) {
+      state.activeFilters = {
+        ...state.activeFilters,
+        ...action.payload,
+      };
+    },
+    clearThemesFilters(state) {
+      state.activeFilters = {
+        page: 1,
+        limit: 10,
+      };
+    },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchThemes.pending, (state) => {
@@ -98,6 +136,11 @@ const fetchThemesSlice = createSlice({
   },
 });
 
-export const { clearError: clearThemeError, clearThemes } =
-  fetchThemesSlice.actions;
+export const {
+  clearError: clearThemeError,
+  clearThemes,
+  setThemesFilters,
+  clearThemesFilters,
+} = fetchThemesSlice.actions;
+
 export default fetchThemesSlice.reducer;
