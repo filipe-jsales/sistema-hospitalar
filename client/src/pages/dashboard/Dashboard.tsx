@@ -12,36 +12,75 @@ import "./Dashboard.css";
 import { useAppSelector } from "../../store/hooks";
 import PeriodSelector from "../../components/Dashboard/PeriodSelector";
 import NotificationCounter from "../../components/Dashboard/NotificationCounter";
-import NotificationNumber from "../../components/Dashboard/NotificationNumber";
 import IncidentClassificationChart from "../../components/Dashboard/IncidentClassificationChart";
 import ThemeChart from "../../components/Dashboard/ThemeChart";
-import IncidentDescriptionTable from "../../components/Dashboard/IncidentDescriptionTable";
 import NotifyingServicesChart from "../../components/Dashboard/NotifyingServicesChart";
-import ExpiredTermsChart from "../../components/Dashboard/ExpiredTermsChart";
-import { PeriodType } from "../../utils/types";
+import { PeriodFilter } from "../../utils/types";
 import { useTypedDispatch } from "../../hooks/useRedux";
+import {
+  fetchThemes,
+  setThemesFilters,
+} from "../../store/slices/theme/fetchThemesSlice";
+import {
+  fetchIncidents,
+  setIncidentsFilters,
+} from "../../store/slices/incident/fetchIncidentsSlice";
+import {
+  fetchNotifyingServices,
+  setNotifyingFilters,
+} from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
 
+// TODO: ajustar os demais componentes para ficar de acordo com os novos slices
 const Dashboard: React.FC = () => {
   const dispatch = useTypedDispatch();
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("Todos");
-  const { loading, error } = useAppSelector((state) => state.notifications);
+  const [currentFilter, setCurrentFilter] = useState<PeriodFilter>({});
+
+  const { loading: notificationsLoading, error: notificationsError } =
+    useAppSelector((state) => state.notifications);
+  const { loading: themesLoading, error: themesError } = useAppSelector(
+    (state) => state.themes
+  );
 
   useEffect(() => {
-    dispatch(fetchNotifications(1));
+    dispatch(fetchNotifications({ page: 1, limit: 10 }));
+    dispatch(fetchThemes({ page: 1, limit: 10 }));
+    dispatch(fetchIncidents({ page: 1, limit: 10 }));
+    dispatch(fetchNotifyingServices({ page: 1, limit: 10 }));
   }, [dispatch]);
 
-  const handlePeriodChange = (period: PeriodType) => {
-    setSelectedPeriod(period);
+  const handleFilterChange = (filter: PeriodFilter) => {
+    setCurrentFilter(filter);
+
+    const apiFilters = {
+      page: 1,
+      limit: 10,
+      ...(filter.year && { year: filter.year }),
+      ...(filter.months &&
+        filter.months.length > 0 && { months: filter.months }),
+    };
+
+    dispatch(setThemesFilters(apiFilters));
+    dispatch(setIncidentsFilters(apiFilters));
+    dispatch(setNotifyingFilters(apiFilters));
+
+    dispatch(fetchThemes(apiFilters));
+    dispatch(fetchIncidents(apiFilters));
+    dispatch(fetchNotifyingServices(apiFilters));
+    dispatch(fetchNotifications(apiFilters));
   };
+
+  const hasError = notificationsError || themesError;
 
   return (
     <IonGrid className="dashboard-container">
-      {error && (
+      {hasError && (
         <IonRow>
           <IonCol>
             <IonCard color="danger">
               <IonCardContent>
-                <p className="ion-text-center">{error}</p>
+                <p className="ion-text-center">
+                  {notificationsError || themesError}
+                </p>
               </IonCardContent>
             </IonCard>
           </IonCol>
@@ -53,14 +92,14 @@ const Dashboard: React.FC = () => {
           <IonCard>
             <IonCardContent>
               <PeriodSelector
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={handlePeriodChange}
+                selectedFilter={currentFilter}
+                onFilterChange={handleFilterChange}
               />
             </IonCardContent>
           </IonCard>
         </IonCol>
         <IonCol size="12" size-md="4">
-          {loading && !error ? (
+          {notificationsLoading && !notificationsError ? (
             <IonCard>
               <IonCardContent className="ion-text-center">
                 <IonSpinner name="crescent" />
@@ -68,11 +107,11 @@ const Dashboard: React.FC = () => {
               </IonCardContent>
             </IonCard>
           ) : (
-            <NotificationCounter period={selectedPeriod} />
+            <NotificationCounter />
           )}
         </IonCol>
         <IonCol size="12" size-md="4">
-          {loading && !error ? (
+          {notificationsLoading && !notificationsError ? (
             <IonCard>
               <IonCardContent className="ion-text-center">
                 <IonSpinner name="crescent" />
@@ -80,7 +119,10 @@ const Dashboard: React.FC = () => {
               </IonCardContent>
             </IonCard>
           ) : (
-            <NotificationNumber period={selectedPeriod} />
+            // <VigihostNotificationCounter
+            //   period={convertFilterToLegacyPeriod(currentFilter)}
+            // />
+            <h1>TODO: VIGIHOST</h1>
           )}
         </IonCol>
       </IonRow>
@@ -90,7 +132,7 @@ const Dashboard: React.FC = () => {
           <IonCard>
             <IonCardContent>
               <h2>CLASSIFICAÇÃO DOS INCIDENTES</h2>
-              <IncidentClassificationChart period={selectedPeriod} />
+              <IncidentClassificationChart />
             </IonCardContent>
           </IonCard>
         </IonCol>
@@ -98,42 +140,54 @@ const Dashboard: React.FC = () => {
           <IonCard>
             <IonCardContent>
               <h2>TEMAS</h2>
-              <ThemeChart period={selectedPeriod} />
+              {themesLoading ? (
+                <div className="chart-loading">
+                  <IonSpinner name="crescent" />
+                  <p>Carregando dados dos temas...</p>
+                </div>
+              ) : (
+                <ThemeChart />
+              )}
             </IonCardContent>
           </IonCard>
         </IonCol>
       </IonRow>
 
       <IonRow>
-        <IonCol size="12" size-md="6">
+        {/* TODO: perguntar qual referencia dessa tabela */}
+        {/* <IonCol size="12" size-md="6">
           <IonCard>
             <IonCardContent>
               <h2>DESCRIÇÃO</h2>
-              <IncidentDescriptionTable period={selectedPeriod} />
+              <IncidentDescriptionTable
+                period={convertFilterToLegacyPeriod(currentFilter)}
+              />
             </IonCardContent>
           </IonCard>
-        </IonCol>
+        </IonCol> */}
         <IonCol size="12" size-md="6">
           <IonRow>
             <IonCol size="12">
               <IonCard>
                 <IonCardContent>
                   <h2>SERVIÇOS NOTIFICANTES</h2>
-                  <NotifyingServicesChart period={selectedPeriod} />
+                  <NotifyingServicesChart />
                 </IonCardContent>
               </IonCard>
             </IonCol>
           </IonRow>
-          <IonRow>
+          {/* <IonRow>
             <IonCol size="12">
               <IonCard>
                 <IonCardContent>
                   <h2>PRAZOS EXPIRADOS</h2>
-                  <ExpiredTermsChart period={selectedPeriod} />
+                  <ExpiredTermsChart
+                    period={convertFilterToLegacyPeriod(currentFilter)}
+                  />
                 </IonCardContent>
               </IonCard>
             </IonCol>
-          </IonRow>
+          </IonRow> */}
         </IonCol>
       </IonRow>
     </IonGrid>

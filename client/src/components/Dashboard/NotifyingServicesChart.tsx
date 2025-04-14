@@ -8,57 +8,30 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useAppSelector, useTypedDispatch } from "../../hooks/useRedux";
-import { fetchNotifyingServices } from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
-
-interface NotifyingServicesChartProps {
-  period: string;
-}
+import { useAppSelector } from "../../hooks/useRedux";
 
 interface ChartData {
   name: string;
   value: number;
 }
 
-const NotifyingServicesChart: React.FC<NotifyingServicesChartProps> = ({
-  period,
-}) => {
-  const dispatch = useTypedDispatch();
-  const { notifyingServices, loading, error, groupedData } = useAppSelector(
+const NotifyingServicesChart: React.FC = () => {
+  const { loading, error, groupedData } = useAppSelector(
     (state) => state.notifyingServices
   );
   const [data, setData] = useState<ChartData[]>([]);
-
-  const applyPeriodFactor = (value: number, periodFilter: string): number => {
-    const factor =
-      periodFilter === "Último mês"
-        ? 0.08
-        : periodFilter === "Últimos 3 meses"
-        ? 0.25
-        : periodFilter === "Últimos 6 meses"
-        ? 0.5
-        : 1;
-
-    return Math.round(value * factor);
-  };
-
-  useEffect(() => {
-    dispatch(fetchNotifyingServices(1));
-  }, [dispatch]);
 
   useEffect(() => {
     if (groupedData) {
       const chartData = Object.entries(groupedData).map(([name, count]) => ({
         name,
-        value: applyPeriodFactor(count, period),
+        value: count,
       }));
 
       const sortedData = chartData.sort((a, b) => b.value - a.value);
-
-      // Limiting the chart to display the top 11 entries for better readability
       setData(sortedData.slice(0, 11));
     }
-  }, [groupedData, period]);
+  }, [groupedData]);
 
   if (loading) {
     return <div>Carregando dados dos serviços de notificação...</div>;

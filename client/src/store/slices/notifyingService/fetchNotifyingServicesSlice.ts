@@ -96,13 +96,13 @@ const fetchNotifyingServicesSlice = createSlice({
       state.pagination = null;
       state.groupedData = null;
     },
-    setFilters(state, action: PayloadAction<NotifyingServiceFilterParams>) {
+    setNotifyingFilters(state, action: PayloadAction<NotifyingServiceFilterParams>) {
       state.activeFilters = {
         ...state.activeFilters,
         ...action.payload,
       };
     },
-    clearFilters(state) {
+    clearNotifyingFilters(state) {
       state.activeFilters = {
         page: 1,
         limit: 10,
@@ -146,7 +146,7 @@ const fetchNotifyingServicesSlice = createSlice({
 export const {
   clearError: clearNotifyingServiceError,
   clearNotifyingServices,
-  setFilters,
-  clearFilters,
+  setNotifyingFilters,
+  clearNotifyingFilters,
 } = fetchNotifyingServicesSlice.actions;
 export default fetchNotifyingServicesSlice.reducer;

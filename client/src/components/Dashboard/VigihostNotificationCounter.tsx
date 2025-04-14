@@ -8,7 +8,7 @@ interface NotificationNumberProps {
 
 const DEFAULT_NOTIFICATION_NUMBER = 455084;
 
-const NotificationNumber: React.FC<NotificationNumberProps> = ({ period }) => {
+const VigihostNotificationCounter: React.FC<NotificationNumberProps> = ({ period }) => {
   const { notifications } = useAppSelector((state) => state.notifications);
   const [number, setNumber] = useState<number>(0);
 
@@ -43,4 +43,4 @@ const NotificationNumber: React.FC<NotificationNumberProps> = ({ period }) => {
   );
 };
 
-export default NotificationNumber;
+export default VigihostNotificationCounter;
