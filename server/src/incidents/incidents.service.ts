@@ -36,14 +36,34 @@ export class IncidentsService {
       paginationQuery,
       {
         order: { id: 'DESC' },
+        dateField: 'createdAt',
       },
     );
 
-    const groupedResults = await this.incidentRepository
+    let groupedQueryBuilder = this.incidentRepository
       .createQueryBuilder('incident')
       .select('incident.name', 'name')
       .addSelect('COUNT(incident.id)', 'count')
-      .where('incident.deletedAt IS NULL')
+      .where('incident.deletedAt IS NULL');
+
+    if (paginationQuery.year) {
+      if (paginationQuery.months && paginationQuery.months.length > 0) {
+        const dateConditions = paginationQuery.months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM incident.createdAt) = ${paginationQuery.year} AND EXTRACT(MONTH FROM incident.createdAt) = ${month}`;
+          })
+          .join(' OR ');
+
+        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        groupedQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM incident.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+      }
+    }
+
+    const groupedResults = await groupedQueryBuilder
       .groupBy('incident.name')
       .getRawMany<GroupedResult>();
 

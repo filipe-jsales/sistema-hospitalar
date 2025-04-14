@@ -6,10 +6,7 @@ import { Theme } from './entities/theme.entity';
 import { Repository } from 'typeorm';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
-import {
-  PaginatedResponse,
-  PaginatedResponseWithGrouping,
-} from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
 
 interface GroupedResult {
   name: string;
@@ -40,14 +37,34 @@ export class ThemesService {
       paginationQuery,
       {
         order: { id: 'DESC' },
+        dateField: 'createdAt',
       },
     );
 
-    const groupedResults = await this.themesRepository
+    let groupedQueryBuilder = this.themesRepository
       .createQueryBuilder('theme')
       .select('theme.name', 'name')
       .addSelect('COUNT(theme.id)', 'count')
-      .where('theme.deletedAt IS NULL')
+      .where('theme.deletedAt IS NULL');
+
+    if (paginationQuery.year) {
+      if (paginationQuery.months && paginationQuery.months.length > 0) {
+        const dateConditions = paginationQuery.months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM theme.createdAt) = ${paginationQuery.year} AND EXTRACT(MONTH FROM theme.createdAt) = ${month}`;
+          })
+          .join(' OR ');
+
+        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        groupedQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM theme.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+      }
+    }
+
+    const groupedResults = await groupedQueryBuilder
       .groupBy('theme.name')
       .getRawMany<GroupedResult>();
 
@@ -63,16 +80,6 @@ export class ThemesService {
       ...paginatedData,
       groupedData,
     };
-  }
-
-  async findAllWithQueryBuilder(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Theme>> {
-    const queryBuilder = this.themesRepository
-      .createQueryBuilder('theme')
-      .orderBy('theme.id', 'DESC');
-
-    return this.paginationService.paginate(queryBuilder, paginationQuery);
   }
 
   async findOne(id: number): Promise<Theme> {

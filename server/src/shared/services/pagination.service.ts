@@ -1,5 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { FindOptionsOrder, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  FindOptionsOrder,
+  Repository,
+  SelectQueryBuilder,
+  Raw,
+  FindOptionsWhere,
+} from 'typeorm';
 import { PaginationQueryDto } from '../dto/pagination-query.dto';
 import { PaginatedResponse } from '../interfaces/paginated-response.dto';
 
@@ -9,7 +15,23 @@ export class PaginationService {
     queryBuilder: SelectQueryBuilder<T>,
     paginationQuery: PaginationQueryDto,
   ): Promise<PaginatedResponse<T>> {
-    const { page = 1, limit = 10 } = paginationQuery;
+    const { page = 1, limit = 10, year, months } = paginationQuery;
+
+    if (year) {
+      if (months && months.length > 0) {
+        const dateConditions = months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM "createdAt") = ${year} AND EXTRACT(MONTH FROM "createdAt") = ${month}`;
+          })
+          .join(' OR ');
+
+        queryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        queryBuilder.andWhere(`EXTRACT(YEAR FROM "createdAt") = :year`, {
+          year,
+        });
+      }
+    }
 
     const skip = (page - 1) * limit;
     const countQueryBuilder = queryBuilder.clone();
@@ -35,16 +57,36 @@ export class PaginationService {
     paginationQuery: PaginationQueryDto,
     options: {
       relations?: string[];
-      where?: Record<string, any>;
+      where?: FindOptionsWhere<T>;
       order?: FindOptionsOrder<T>;
+      dateField?: string;
     } = {},
   ): Promise<PaginatedResponse<T>> {
-    const { page = 1, limit = 10 } = paginationQuery;
-    const { relations, where, order } = options;
+    const { page = 1, limit = 10, year, months } = paginationQuery;
+    const { relations, where = {}, order, dateField = 'createdAt' } = options;
     const skip = (page - 1) * limit;
+    const whereConditions = { ...where };
+
+    if (year) {
+      if (months && months.length > 0) {
+        whereConditions[dateField] = Raw((alias) => {
+          const conditions = months
+            .map((month) => {
+              return `EXTRACT(YEAR FROM ${alias}) = ${year} AND EXTRACT(MONTH FROM ${alias}) = ${month}`;
+            })
+            .join(' OR ');
+          return `(${conditions})`;
+        });
+      } else {
+        whereConditions[dateField] = Raw(
+          (alias) => `EXTRACT(YEAR FROM ${alias}) = ${year}`,
+        );
+      }
+    }
+
     const [items, totalItems] = await repository.findAndCount({
       relations,
-      where,
+      where: whereConditions,
       order,
       skip,
       take: limit,

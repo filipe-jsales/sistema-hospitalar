@@ -39,14 +39,34 @@ export class NotifyingServicesService {
       paginationQuery,
       {
         order: { id: 'DESC' },
+        dateField: 'createdAt',
       },
     );
 
-    const groupedResults = await this.notifyingServicesRepository
+    let groupedQueryBuilder = await this.notifyingServicesRepository
       .createQueryBuilder('service')
       .select('service.name', 'name')
       .addSelect('COUNT(service.id)', 'count')
-      .where('service.deletedAt IS NULL')
+      .where('service.deletedAt IS NULL');
+
+    if (paginationQuery.year) {
+      if (paginationQuery.months && paginationQuery.months.length > 0) {
+        const dateConditions = paginationQuery.months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM service.createdAt) = ${paginationQuery.year} AND EXTRACT(MONTH FROM service.createdAt) = ${month}`;
+          })
+          .join(' OR ');
+
+        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        groupedQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM service.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+      }
+    }
+
+    const groupedResults = await groupedQueryBuilder
       .groupBy('service.name')
       .getRawMany<GroupedResult>();
 

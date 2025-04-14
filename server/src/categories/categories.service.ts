@@ -5,8 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
-import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
 import { PaginationService } from 'src/shared/services/pagination.service';
+
+interface GroupedResult {
+  name: string;
+  count: number;
+}
 
 @Injectable()
 export class CategoriesService {
@@ -25,14 +30,55 @@ export class CategoriesService {
 
   async findAllPaginated(
     paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Category>> {
-    return this.paginationService.paginateRepository(
+  ): Promise<PaginatedResponseWithGrouping<Category>> {
+    const paginatedData = await this.paginationService.paginateRepository(
       this.categoriesRepository,
       paginationQuery,
       {
         order: { id: 'DESC' },
+        dateField: 'createdAt',
       },
     );
+
+    let groupedQueryBuilder = this.categoriesRepository
+      .createQueryBuilder('category')
+      .select('category.name', 'name')
+      .addSelect('COUNT(category.id)', 'count')
+      .where('category.deletedAt IS NULL');
+
+    if (paginationQuery.year) {
+      if (paginationQuery.months && paginationQuery.months.length > 0) {
+        const dateConditions = paginationQuery.months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM category.createdAt) = ${paginationQuery.year} AND EXTRACT(MONTH FROM category.createdAt) = ${month}`;
+          })
+          .join(' OR ');
+
+        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        groupedQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM category.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+      }
+    }
+
+    const groupedResults = await groupedQueryBuilder
+      .groupBy('category.name')
+      .getRawMany<GroupedResult>();
+
+    const groupedData = groupedResults.reduce(
+      (acc, item) => {
+        acc[item.name] = parseInt(item.count as unknown as string, 10);
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      ...paginatedData,
+      groupedData,
+    };
   }
 
   async findOne(id: number): Promise<Category> {

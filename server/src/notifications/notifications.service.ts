@@ -13,9 +13,13 @@ import { ResponsiblesService } from 'src/responsibles/responsibles.service';
 import { OrganizationalUnitiesService } from 'src/organizational-unities/organizational-unities.service';
 import { NotifyingServicesService } from 'src/notifying-services/notifying-services.service';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
-import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
 import { PaginationService } from 'src/shared/services/pagination.service';
 
+interface GroupedResult {
+  description: string;
+  count: number;
+}
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -81,14 +85,55 @@ export class NotificationsService {
 
   async findAllPaginated(
     paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponse<Notification>> {
-    return this.paginationService.paginateRepository(
+  ): Promise<PaginatedResponseWithGrouping<Notification>> {
+    const paginatedData = await this.paginationService.paginateRepository(
       this.notificationRepository,
       paginationQuery,
       {
         order: { id: 'DESC' },
+        dateField: 'createdAt',
       },
     );
+
+    let groupedQueryBuilder = this.notificationRepository
+      .createQueryBuilder('notification')
+      .select('notification.description', 'description')
+      .addSelect('COUNT(notification.id)', 'count')
+      .where('notification.deletedAt IS NULL');
+
+    if (paginationQuery.year) {
+      if (paginationQuery.months && paginationQuery.months.length > 0) {
+        const dateConditions = paginationQuery.months
+          .map((month) => {
+            return `EXTRACT(YEAR FROM notification.createdAt) = ${paginationQuery.year} AND EXTRACT(MONTH FROM notification.createdAt) = ${month}`;
+          })
+          .join(' OR ');
+
+        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+      } else {
+        groupedQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM notification.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+      }
+    }
+
+    const groupedResults = await groupedQueryBuilder
+      .groupBy('notification.description')
+      .getRawMany<GroupedResult>();
+
+    const groupedData = groupedResults.reduce(
+      (acc, item) => {
+        acc[item.description] = parseInt(item.count as unknown as string, 10);
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      ...paginatedData,
+      groupedData,
+    };
   }
 
   async findOne(id: number): Promise<Notification> {
