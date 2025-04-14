@@ -96,13 +96,13 @@ const fetchIncidentsSlice = createSlice({
       state.pagination = null;
       state.groupedData = null;
     },
-    setFilters(state, action: PayloadAction<IncidentFilterParams>) {
+    setIncidentsFilters(state, action: PayloadAction<IncidentFilterParams>) {
       state.activeFilters = {
         ...state.activeFilters,
         ...action.payload,
       };
     },
-    clearFilters(state) {
+    clearIncidentsFilters(state) {
       state.activeFilters = {
         page: 1,
         limit: 10,
@@ -143,7 +143,7 @@ const fetchIncidentsSlice = createSlice({
 export const {
   clearError: clearIncidentError,
   clearIncidents,
-  setFilters,
-  clearFilters,
+  setIncidentsFilters,
+  clearIncidentsFilters,
 } = fetchIncidentsSlice.actions;
 export default fetchIncidentsSlice.reducer;

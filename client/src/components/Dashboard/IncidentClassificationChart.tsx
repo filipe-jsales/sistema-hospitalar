@@ -9,12 +9,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import { useAppSelector, useTypedDispatch } from "../../hooks/useRedux";
-import { fetchIncidents } from "../../store/slices/incident/fetchIncidentsSlice";
-
-interface IncidentClassificationProps {
-  period: string;
-}
+import { useAppSelector } from "../../hooks/useRedux";
 
 interface ChartData {
   name: string;
@@ -48,38 +43,18 @@ const defaultColors = [
   "#bc5090",
 ];
 
-const IncidentClassificationChart: React.FC<IncidentClassificationProps> = ({
-  period,
-}) => {
-  const dispatch = useTypedDispatch();
+const IncidentClassificationChart: React.FC = () => {
   const { incidents, loading, error, groupedData } = useAppSelector(
     (state) => state.incidents
   );
   const [data, setData] = useState<ChartData[]>([]);
-
-  const applyPeriodFactor = (value: number, periodFilter: string): number => {
-    const factor =
-      periodFilter === "Último mês"
-        ? 0.08
-        : periodFilter === "Últimos 3 meses"
-        ? 0.25
-        : periodFilter === "Últimos 6 meses"
-        ? 0.5
-        : 1;
-
-    return Math.round(value * factor);
-  };
-
-  useEffect(() => {
-    dispatch(fetchIncidents(1));
-  }, [dispatch]);
 
   useEffect(() => {
     if (groupedData) {
       let chartData = Object.entries(groupedData).map(
         ([name, count], index) => ({
           name,
-          value: applyPeriodFactor(count, period),
+          value: count,
           color:
             classificationColors[name] ||
             defaultColors[index % defaultColors.length],
@@ -100,7 +75,7 @@ const IncidentClassificationChart: React.FC<IncidentClassificationProps> = ({
       let chartData = Object.entries(classificationCounts).map(
         ([name, count], index) => ({
           name,
-          value: applyPeriodFactor(count, period),
+          value: count,
           color:
             classificationColors[name] ||
             defaultColors[index % defaultColors.length],
@@ -110,7 +85,7 @@ const IncidentClassificationChart: React.FC<IncidentClassificationProps> = ({
       chartData = chartData.sort((a, b) => b.value - a.value);
       setData(chartData.slice(0, 10));
     }
-  }, [groupedData, incidents, period]);
+  }, [groupedData, incidents]);
 
   if (loading) {
     return <div>Carregando dados de classificação de incidentes...</div>;
