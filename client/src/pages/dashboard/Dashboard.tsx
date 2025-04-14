@@ -29,6 +29,7 @@ import {
   fetchNotifyingServices,
   setNotifyingFilters,
 } from "../../store/slices/notifyingService/fetchNotifyingServicesSlice";
+import IncidentDescriptionTable from "../../components/Dashboard/IncidentDescriptionTable";
 
 // TODO: ajustar os demais componentes para ficar de acordo com os novos slices
 const Dashboard: React.FC = () => {
@@ -154,17 +155,14 @@ const Dashboard: React.FC = () => {
       </IonRow>
 
       <IonRow>
-        {/* TODO: perguntar qual referencia dessa tabela */}
-        {/* <IonCol size="12" size-md="6">
+        <IonCol size="12" size-md="6">
           <IonCard>
             <IonCardContent>
               <h2>DESCRIÇÃO</h2>
-              <IncidentDescriptionTable
-                period={convertFilterToLegacyPeriod(currentFilter)}
-              />
+              <IncidentDescriptionTable />
             </IonCardContent>
           </IonCard>
-        </IonCol> */}
+        </IonCol>
         <IonCol size="12" size-md="6">
           <IonRow>
             <IonCol size="12">
