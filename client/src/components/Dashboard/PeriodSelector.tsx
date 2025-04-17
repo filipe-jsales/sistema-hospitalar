@@ -12,7 +12,6 @@ import {
   MONTHS,
   PeriodSelectorProps,
 } from "../../utils/types";
-import "./PeriodSelector.css";
 
 const PeriodSelector: React.FC<PeriodSelectorProps> = ({
   selectedFilter,
@@ -79,22 +78,31 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
     (!selectedFilter.months || selectedFilter.months.length === 0);
 
   return (
-    <div className="period-selector-container">
-      <div className="card-title">PERÍODO AVALIADO</div>
+    <div>
+      <div className="fw-bold mb-2 text-center">PERÍODO AVALIADO</div>
 
-      <IonList className="period-selector-list">
-        <IonItem lines="full">
+      <IonList
+        style={{ maxHeight: "200px", overflowY: "auto" }}
+        className="ion-no-padding ion-no-margin"
+      >
+        <IonItem lines="full" className="p-0">
           <IonCheckbox
             checked={isAllSelected}
             onIonChange={() => handleAllSelection()}
+            className="me-2"
+            style={{ "--border-radius": "4px", "--size": "18px" }}
           />
-          <IonLabel className="ion-padding-start">Todos</IonLabel>
+          <IonLabel className="ps-2">Todos</IonLabel>
         </IonItem>
 
         <IonAccordionGroup>
           {AVAILABLE_YEARS.map((year) => (
-            <IonAccordion key={year} value={year.toString()}>
-              <IonItem slot="header">
+            <IonAccordion
+              key={year}
+              value={year.toString()}
+              className="border-bottom border-light"
+            >
+              <IonItem slot="header" className="p-0">
                 <IonCheckbox
                   checked={
                     selectedFilter.year === year &&
@@ -103,13 +111,19 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                   }
                   onIonChange={() => handleYearSelection(year)}
                   onClick={(e) => e.stopPropagation()}
+                  className="me-2"
+                  style={{ "--border-radius": "4px", "--size": "18px" }}
                 />
-                <IonLabel className="ion-padding-start">{year}</IonLabel>
+                <IonLabel className="ps-2">{year}</IonLabel>
               </IonItem>
 
-              <div slot="content" className="month-list">
+              <div slot="content" className="ps-4">
                 {MONTHS.map((month) => (
-                  <IonItem key={`${year}-${month.value}`} lines="full">
+                  <IonItem
+                    key={`${year}-${month.value}`}
+                    lines="full"
+                    className="p-0"
+                  >
                     <IonCheckbox
                       checked={
                         selectedFilter.year === year &&
@@ -118,10 +132,10 @@ const PeriodSelector: React.FC<PeriodSelectorProps> = ({
                       onIonChange={() =>
                         handleMonthSelection(year, month.value)
                       }
+                      className="me-2"
+                      style={{ "--border-radius": "4px", "--size": "18px" }}
                     />
-                    <IonLabel className="ion-padding-start">
-                      {month.label}
-                    </IonLabel>
+                    <IonLabel className="ps-2">{month.label}</IonLabel>
                   </IonItem>
                 ))}
               </div>

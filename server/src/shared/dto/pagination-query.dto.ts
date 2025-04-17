@@ -45,4 +45,13 @@ export class PaginationQueryDto {
   @Type(() => Number)
   @IsInt({ each: true })
   months?: number[];
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID do responsável',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  responsibleId?: number;
 }

@@ -13,3 +13,18 @@ export interface PaginatedResponseWithGrouping<T> extends PaginatedResponse<T> {
     [key: string]: number;
   };
 }
+
+export interface PaginatedResponseWithGroupings<T> extends PaginatedResponse<T> {
+  groupedByDescription?: {
+    [key: string]: number;
+  };
+  groupedByTheme?: {
+    [key: string]: number;
+  };
+  groupedByIncident?: {
+    [key: string]: number;
+  };
+  groupedByNotifyingService?: {
+    [key: string]: number;
+  };
+}

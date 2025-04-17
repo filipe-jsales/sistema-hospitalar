@@ -25,6 +25,13 @@ export interface NotificationData {
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
+
+  responsible?: {
+    id: number;
+    name: string;
+    cpf?: string;
+    email?: string;
+  };
 }
 
 export interface PaginationMeta {
@@ -34,9 +41,13 @@ export interface PaginationMeta {
   currentPage: number;
 }
 
-export interface PaginatedResponse<T> {
+export interface PaginatedResponseWithGroupings<T> {
   items: T[];
   meta: PaginationMeta;
+  groupedByDescription?: { [key: string]: number };
+  groupedByTheme?: { [key: string]: number };
+  groupedByIncident?: { [key: string]: number };
+  groupedByNotifyingService?: { [key: string]: number };
 }
 
 export interface NotificationFilterParams {
@@ -44,6 +55,7 @@ export interface NotificationFilterParams {
   limit?: number;
   year?: number;
   months?: number[];
+  responsibleId?: number;
 }
 
 interface NotificationsState {
@@ -51,6 +63,10 @@ interface NotificationsState {
   loading: boolean;
   error: string | null;
   pagination: PaginationMeta | null;
+  groupedByDescription: { [key: string]: number } | null;
+  groupedByTheme: { [key: string]: number } | null;
+  groupedByIncident: { [key: string]: number } | null;
+  groupedByNotifyingService: { [key: string]: number } | null;
   activeFilters: NotificationFilterParams;
 }
 
@@ -59,6 +75,10 @@ const initialState: NotificationsState = {
   loading: false,
   error: null,
   pagination: null,
+  groupedByDescription: null,
+  groupedByTheme: null,
+  groupedByIncident: null,
+  groupedByNotifyingService: null,
   activeFilters: {
     page: 1,
     limit: 10,
@@ -84,9 +104,13 @@ export const fetchNotifications = createAsyncThunk(
         });
       }
 
+      if (params.responsibleId) {
+        queryParams.append("responsibleId", params.responsibleId.toString());
+      }
+
       const url = `/notifications?${queryParams.toString()}`;
       const response = await apiService.get(url);
-      return response.data as PaginatedResponse<NotificationData>;
+      return response.data as PaginatedResponseWithGroupings<NotificationData>;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data?.message || "Falha ao buscar notificações."
@@ -105,8 +129,15 @@ const fetchNotificationsSlice = createSlice({
     clearNotifications(state) {
       state.notifications = [];
       state.pagination = null;
+      state.groupedByDescription = null;
+      state.groupedByTheme = null;
+      state.groupedByIncident = null;
+      state.groupedByNotifyingService = null;
     },
-    setNotificationFilters(state, action: PayloadAction<NotificationFilterParams>) {
+    setNotificationFilters(
+      state,
+      action: PayloadAction<NotificationFilterParams>
+    ) {
       state.activeFilters = {
         ...state.activeFilters,
         ...action.payload,
@@ -127,9 +158,20 @@ const fetchNotificationsSlice = createSlice({
       })
       .addCase(
         fetchNotifications.fulfilled,
-        (state, action: PayloadAction<PaginatedResponse<NotificationData>>) => {
+        (
+          state,
+          action: PayloadAction<
+            PaginatedResponseWithGroupings<NotificationData>
+          >
+        ) => {
           state.notifications = action.payload.items;
           state.pagination = action.payload.meta;
+          state.groupedByDescription =
+            action.payload.groupedByDescription || null;
+          state.groupedByTheme = action.payload.groupedByTheme || null;
+          state.groupedByIncident = action.payload.groupedByIncident || null;
+          state.groupedByNotifyingService =
+            action.payload.groupedByNotifyingService || null;
           state.loading = false;
         }
       )

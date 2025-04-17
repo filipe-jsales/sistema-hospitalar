@@ -62,7 +62,13 @@ export class PaginationService {
       dateField?: string;
     } = {},
   ): Promise<PaginatedResponse<T>> {
-    const { page = 1, limit = 10, year, months } = paginationQuery;
+    const {
+      page = 1,
+      limit = 10,
+      year,
+      months,
+      responsibleId,
+    } = paginationQuery;
     const { relations, where = {}, order, dateField = 'createdAt' } = options;
     const skip = (page - 1) * limit;
     const whereConditions = { ...where };
@@ -82,6 +88,10 @@ export class PaginationService {
           (alias) => `EXTRACT(YEAR FROM ${alias}) = ${year}`,
         );
       }
+    }
+
+    if (responsibleId) {
+      whereConditions['responsibleId'] = responsibleId;
     }
 
     const [items, totalItems] = await repository.findAndCount({

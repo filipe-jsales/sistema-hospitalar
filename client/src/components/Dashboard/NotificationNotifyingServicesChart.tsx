@@ -15,23 +15,24 @@ interface ChartData {
   value: number;
 }
 
-const NotifyingServicesChart: React.FC = () => {
-  const { loading, error, groupedData } = useAppSelector(
-    (state) => state.notifyingServices
+const NotificationNotifyingServiceChart: React.FC = () => {
+  const { loading, error, groupedByNotifyingService } = useAppSelector(
+    (state) => state.notifications
   );
   const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    if (groupedData) {
-      const chartData = Object.entries(groupedData).map(([name, count]) => ({
+    if (groupedByNotifyingService) {
+      const chartData = Object.entries(groupedByNotifyingService).map(([name, count]) => ({
         name,
         value: count,
       }));
 
+      // Ordena por valor decrescente e limita aos 10 maiores
       const sortedData = chartData.sort((a, b) => b.value - a.value);
       setData(sortedData.slice(0, 11));
     }
-  }, [groupedData]);
+  }, [groupedByNotifyingService]);
 
   if (loading) {
     return <div>Carregando dados dos serviços de notificação...</div>;
@@ -75,4 +76,4 @@ const NotifyingServicesChart: React.FC = () => {
   );
 };
 
-export default NotifyingServicesChart;
+export default NotificationNotifyingServiceChart;

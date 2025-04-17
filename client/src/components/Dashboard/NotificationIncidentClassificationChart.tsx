@@ -43,36 +43,15 @@ const defaultColors = [
   "#bc5090",
 ];
 
-const IncidentClassificationChart: React.FC = () => {
-  const { incidents, loading, error, groupedData } = useAppSelector(
-    (state) => state.incidents
+const NotificationIncidentClassificationChart: React.FC = () => {
+  const { loading, error, groupedByIncident } = useAppSelector(
+    (state) => state.notifications
   );
   const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    if (groupedData) {
-      let chartData = Object.entries(groupedData).map(
-        ([name, count], index) => ({
-          name,
-          value: count,
-          color:
-            classificationColors[name] ||
-            defaultColors[index % defaultColors.length],
-        })
-      );
-
-      chartData = chartData.sort((a, b) => b.value - a.value);
-      setData(chartData.slice(0, 10));
-    } else if (incidents && incidents.length > 0) {
-      console.warn("groupedData não disponível, usando fallback");
-      const classificationCounts: Record<string, number> = {};
-
-      incidents.forEach((incident) => {
-        const name = incident.name || "(Em branco)";
-        classificationCounts[name] = (classificationCounts[name] || 0) + 1;
-      });
-
-      let chartData = Object.entries(classificationCounts).map(
+    if (groupedByIncident) {
+      let chartData = Object.entries(groupedByIncident).map(
         ([name, count], index) => ({
           name,
           value: count,
@@ -85,7 +64,7 @@ const IncidentClassificationChart: React.FC = () => {
       chartData = chartData.sort((a, b) => b.value - a.value);
       setData(chartData.slice(0, 10));
     }
-  }, [groupedData, incidents]);
+  }, [groupedByIncident]);
 
   if (loading) {
     return <div>Carregando dados de classificação de incidentes...</div>;
@@ -143,4 +122,4 @@ const IncidentClassificationChart: React.FC = () => {
   );
 };
 
-export default IncidentClassificationChart;
+export default NotificationIncidentClassificationChart;

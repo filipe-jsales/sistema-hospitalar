@@ -16,31 +16,15 @@ interface ChartData {
   color: string;
 }
 
-const ThemeChart: React.FC = () => {
-  const { themes, loading, error, groupedData } = useAppSelector(
-    (state) => state.themes
+const NotificationThemeChart: React.FC = () => {
+  const { loading, error, groupedByTheme } = useAppSelector(
+    (state) => state.notifications
   );
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    if (groupedData) {
-      const data = Object.entries(groupedData).map(([name, count]) => ({
-        name,
-        value: count,
-        color: "#00E5CF",
-      }));
-
-      const sortedData = data.sort((a, b) => b.value - a.value);
-      setChartData(sortedData);
-    } else if (themes.length > 0) {
-      console.warn("groupedData não disponível, usando fallback");
-
-      const themeCounts: Record<string, number> = {};
-      themes.forEach((theme) => {
-        themeCounts[theme.name] = (themeCounts[theme.name] || 0) + 1;
-      });
-
-      const data = Object.entries(themeCounts).map(([name, count]) => ({
+    if (groupedByTheme) {
+      const data = Object.entries(groupedByTheme).map(([name, count]) => ({
         name,
         value: count,
         color: "#00E5CF",
@@ -49,7 +33,7 @@ const ThemeChart: React.FC = () => {
       const sortedData = data.sort((a, b) => b.value - a.value);
       setChartData(sortedData);
     }
-  }, [groupedData, themes]);
+  }, [groupedByTheme]);
 
   if (loading) {
     return <div>Carregando dados dos temas...</div>;
@@ -103,4 +87,4 @@ const ThemeChart: React.FC = () => {
   );
 };
 
-export default ThemeChart;
+export default NotificationThemeChart;
