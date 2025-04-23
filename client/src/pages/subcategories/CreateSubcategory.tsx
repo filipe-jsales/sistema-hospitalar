@@ -58,7 +58,7 @@ const CreateSubcategory: React.FC = () => {
   } = useAppSelector((state) => state.subcategories);
 
   useEffect(() => {
-    dispatch(fetchCategories(1))
+    dispatch(fetchCategories({ page: 1 }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar categorias:", error);
@@ -68,7 +68,7 @@ const CreateSubcategory: React.FC = () => {
   }, [dispatch]);
 
   const loadSubcategories = (page: number) => {
-    dispatch(fetchSubcategories(page))
+    dispatch(fetchSubcategories({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar subcategorias:", error);

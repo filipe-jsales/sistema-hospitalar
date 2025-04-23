@@ -132,24 +132,28 @@ const CreateNotification: React.FC = () => {
   } = useAppSelector((state) => state.priorities || { priorities: [] });
 
   const fetchActions = [
-    { action: () => fetchCategories(1), name: "categorias" },
-    { action: () => fetchThemes(1), name: "temas" },
-    { action: () => fetchSubcategories(1), name: "subcategorias" },
-    { action: () => fetchNotifyingServices(1), name: "serviços notificantes" },
+    { action: () => fetchCategories({ page: 1 }), name: "categorias" },
+    { action: () => fetchThemes({ page: 1 }), name: "temas" },
+    { action: () => fetchSubcategories({ page: 1 }), name: "subcategorias" },
     {
-      action: () => fetchOrganizationalUnities(1),
+      action: () => fetchNotifyingServices({ page: 1 }),
+      name: "serviços notificantes",
+    },
+    {
+      action: () => fetchOrganizationalUnities({ page: 1 }),
       name: "unidades organizacionais",
     },
-    { action: () => fetchResponsibles(1), name: "responsáveis" },
-    { action: () => fetchIncidents(1), name: "incidentes" },
-    { action: () => fetchPriorities(1), name: "prioridades" },
+    { action: () => fetchResponsibles({ page: 1 }), name: "responsáveis" },
+    { action: () => fetchIncidents({ page: 1 }), name: "incidentes" },
+    { action: () => fetchPriorities({ page: 1 }), name: "prioridades" },
   ];
 
   useEffect(() => {
     fetchActions.forEach(({ action, name }) => {
-      dispatch(action())
+      const actionResult = action();
+      dispatch(actionResult as ReturnType<typeof action>)
         .unwrap()
-        .catch((error) => {
+        .catch((error: unknown) => {
           console.error(`Falha ao carregar ${name}:`, error);
         });
     });
@@ -470,8 +474,7 @@ const CreateNotification: React.FC = () => {
                         ...notificationInfos,
                         endDate: String(e.target.value),
                       });
-                      if (errors.endDate)
-                        setErrors({ ...errors, endDate: "" });
+                      if (errors.endDate) setErrors({ ...errors, endDate: "" });
                     }}
                   />
                   {errors.endDate && (

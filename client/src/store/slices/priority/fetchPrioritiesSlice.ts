@@ -38,11 +38,21 @@ const initialState: PrioritiesState = {
   pagination: null,
 };
 
+export interface PriorityFilterParams {
+  page?: number;
+  limit?: number;
+}
+
 export const fetchPriorities = createAsyncThunk(
   "priorities/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: PriorityFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/priorities?page=${page}`);
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      
+      const url = `/priorities?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<PriorityData>;
     } catch (error: any) {
       return rejectWithValue(
@@ -51,7 +61,6 @@ export const fetchPriorities = createAsyncThunk(
     }
   }
 );
-
 const fetchPrioritiesSlice = createSlice({
   name: "priorities",
   initialState,

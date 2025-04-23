@@ -78,7 +78,7 @@ const SubcategoriesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch]);
 
   const loadSubcategories = () => {
-    dispatch(fetchSubcategories(1))
+    dispatch(fetchSubcategories({ page: 1 }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar subcategorias:", error);
@@ -86,7 +86,7 @@ const SubcategoriesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchSubcategories(1))
+    dispatch(fetchSubcategories({ page: 1 }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

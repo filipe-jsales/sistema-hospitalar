@@ -37,18 +37,25 @@ const initialState: OrganizationalUnitiesState = {
   pagination: null,
 };
 
+export interface OrganizationalUnityFilterParams {
+  page?: number;
+  limit?: number;
+}
+
 export const fetchOrganizationalUnities = createAsyncThunk(
   "organizational-unities/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: OrganizationalUnityFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(
-        `/organizational-unities?page=${page}`
-      );
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      
+      const url = `/organizational-unities?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<OrganizationalUnityData>;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          "Falha ao buscar unidades organizacionais."
+        error.response?.data?.message || "Falha ao buscar unidades organizacionais."
       );
     }
   }

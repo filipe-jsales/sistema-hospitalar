@@ -79,7 +79,7 @@ const OrganizationalUnitiesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadOrganizationalUnities = (page: number) => {
-    dispatch(fetchOrganizationalUnities(page))
+    dispatch(fetchOrganizationalUnities({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar unidades organizacionais:", error);
@@ -87,7 +87,7 @@ const OrganizationalUnitiesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchOrganizationalUnities(currentPage))
+    dispatch(fetchOrganizationalUnities({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

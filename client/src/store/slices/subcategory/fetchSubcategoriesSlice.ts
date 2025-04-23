@@ -38,11 +38,21 @@ const initialState: SubcategoriesState = {
   pagination: null,
 };
 
+export interface SubcategoryFilterParams {
+  page?: number;
+  limit?: number;
+}
+
 export const fetchSubcategories = createAsyncThunk(
   "subcategories/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: SubcategoryFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/subcategories?page=${page}`);
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      
+      const url = `/subcategories?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<SubcategoryData>;
     } catch (error: any) {
       return rejectWithValue(

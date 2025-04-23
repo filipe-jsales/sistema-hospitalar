@@ -80,7 +80,7 @@ const PrioritiesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadPriorities = (page: number) => {
-    dispatch(fetchPriorities(page))
+    dispatch(fetchPriorities({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar prioridades:", error);
@@ -88,7 +88,7 @@ const PrioritiesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchPriorities(currentPage))
+    dispatch(fetchPriorities({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

@@ -78,7 +78,7 @@ const ThemesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadThemes = (page: number) => {
-    dispatch(fetchThemes(page))
+    dispatch(fetchThemes({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar temas:", error);
@@ -86,7 +86,7 @@ const ThemesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchThemes(currentPage))
+    dispatch(fetchThemes({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

@@ -81,7 +81,7 @@ const IncidentsList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadIncidents = (page: number) => {
-    dispatch(fetchIncidents(page))
+    dispatch(fetchIncidents({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar incidentes:", error);
@@ -89,7 +89,7 @@ const IncidentsList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchIncidents(currentPage))
+    dispatch(fetchIncidents({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

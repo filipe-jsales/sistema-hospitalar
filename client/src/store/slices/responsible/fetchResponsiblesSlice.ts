@@ -8,6 +8,8 @@ export interface ResponsibleData {
   name: string;
   email?: string;
   cpf?: string;
+  phone?: string;
+  department?: string;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -39,11 +41,21 @@ const initialState: ResponsiblesState = {
   pagination: null,
 };
 
+export interface ResponsibleFilterParams {
+  page?: number;
+  limit?: number;
+}
+
 export const fetchResponsibles = createAsyncThunk(
   "responsibles/fetchAll",
-  async (page: number = 1, { rejectWithValue }) => {
+  async (params: ResponsibleFilterParams = { page: 1 }, { rejectWithValue }) => {
     try {
-      const response = await apiService.get(`/responsibles?page=${page}`);
+      const queryParams = new URLSearchParams();
+      if (params.page) queryParams.append("page", params.page.toString());
+      if (params.limit) queryParams.append("limit", params.limit.toString());
+      
+      const url = `/responsibles?${queryParams.toString()}`;
+      const response = await apiService.get(url);
       return response.data as PaginatedResponse<ResponsibleData>;
     } catch (error: any) {
       return rejectWithValue(

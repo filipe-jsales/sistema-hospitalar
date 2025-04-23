@@ -43,7 +43,7 @@ const EditOrganizationalUnity: React.FC = () => {
     error: responsiblesError,
   } = useAppSelector((state) => state.responsibles);
   useEffect(() => {
-    dispatch(fetchResponsibles(1))
+    dispatch(fetchResponsibles({ page: 1 }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar chefes:", error);

@@ -79,7 +79,7 @@ const NotifyingServicesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadNotifyingServices = (page: number) => {
-    dispatch(fetchNotifyingServices(page))
+    dispatch(fetchNotifyingServices({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar serviços de notificação:", error);
@@ -87,7 +87,7 @@ const NotifyingServicesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchNotifyingServices(currentPage))
+    dispatch(fetchNotifyingServices({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

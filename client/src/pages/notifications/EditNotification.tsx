@@ -47,14 +47,14 @@ const EditNotification: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(fetchCategories(1));
-    dispatch(fetchThemes(1));
-    dispatch(fetchSubcategories(1));
-    dispatch(fetchNotifyingServices(1));
-    dispatch(fetchOrganizationalUnities(1));
-    dispatch(fetchResponsibles(1));
-    dispatch(fetchIncidents(1));
-    dispatch(fetchPriorities(1));
+    dispatch(fetchCategories({ page: 1 }));
+    dispatch(fetchThemes({ page: 1 }));
+    dispatch(fetchSubcategories({ page: 1 }));
+    dispatch(fetchNotifyingServices({ page: 1 }));
+    dispatch(fetchOrganizationalUnities({ page: 1 }));
+    dispatch(fetchResponsibles({ page: 1 }));
+    dispatch(fetchIncidents({ page: 1 }));
+    dispatch(fetchPriorities({ page: 1 }));
   }, [dispatch]);
 
   const {

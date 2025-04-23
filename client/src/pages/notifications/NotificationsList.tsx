@@ -83,7 +83,7 @@ const NotificationsList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadNotifications = (page: number) => {
-    dispatch(fetchNotifications(page))
+    dispatch(fetchNotifications({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar notificações:", error);
@@ -91,7 +91,7 @@ const NotificationsList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchNotifications(currentPage))
+    dispatch(fetchNotifications({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();
@@ -123,7 +123,7 @@ const NotificationsList: React.FC = () => {
   };
 
   const notificationsArray = Array.isArray(notifications) ? notifications : [];
-  
+
   const filteredNotifications = notificationsArray.filter((notification) => {
     if (!notification || !notification.description) return false;
     const description = notification.description.toLowerCase();
@@ -224,8 +224,8 @@ const NotificationsList: React.FC = () => {
               {!loading && !error && pagination && (
                 <div className="text-center mt-3">
                   <p>
-                    Exibindo {filteredNotifications.length} de {pagination.totalItems}{" "}
-                    notificações
+                    Exibindo {filteredNotifications.length} de{" "}
+                    {pagination.totalItems} notificações
                     {searchText && " (filtradas)"}
                   </p>
 

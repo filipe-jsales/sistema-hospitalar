@@ -83,7 +83,7 @@ const ResponsiblesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch, currentPage]);
 
   const loadResponsibles = (page: number) => {
-    dispatch(fetchResponsibles(page))
+    dispatch(fetchResponsibles({ page }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar responsáveis:", error);
@@ -91,7 +91,7 @@ const ResponsiblesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchResponsibles(currentPage))
+    dispatch(fetchResponsibles({ page: currentPage }))
       .unwrap()
       .finally(() => {
         event.detail.complete();

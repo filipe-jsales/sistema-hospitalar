@@ -79,7 +79,7 @@ const CategoriesList: React.FC = () => {
   }, [deleteSuccess, deleteError, dispatch]);
 
   const loadCategories = () => {
-    dispatch(fetchCategories(1))
+    dispatch(fetchCategories({ page: 1 }))
       .unwrap()
       .catch((error) => {
         console.error("Falha ao carregar categorias:", error);
@@ -87,7 +87,7 @@ const CategoriesList: React.FC = () => {
   };
 
   const handleRefresh = (event: CustomEvent<RefresherEventDetail>) => {
-    dispatch(fetchCategories(1))
+    dispatch(fetchCategories({ page: 1 }))
       .unwrap()
       .finally(() => {
         event.detail.complete();
