@@ -9,31 +9,70 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useAppSelector } from "../../hooks/useRedux";
+import { useTypedDispatch } from "../../hooks/useRedux";
+import {
+  setNotificationFilters,
+  fetchNotifications,
+} from "../../store/slices/notification/fetchNotificationsSlice";
 
 interface ChartData {
   name: string;
   value: number;
   color: string;
+  themeId?: number;
 }
 
 const NotificationThemeChart: React.FC = () => {
-  const { loading, error, groupedByTheme } = useAppSelector(
-    (state) => state.notifications
-  );
+  const dispatch = useTypedDispatch();
+  const { loading, error, groupedByTheme, activeFilters, notifications } =
+    useAppSelector((state) => state.notifications);
+
   const [chartData, setChartData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    if (groupedByTheme) {
+    if (groupedByTheme && notifications.length > 0) {
+      const themeNameToIdMap = new Map();
+
+      notifications.forEach((notification) => {
+        if (notification.theme) {
+          themeNameToIdMap.set(notification.theme.name, notification.theme.id);
+        }
+      });
+
       const data = Object.entries(groupedByTheme).map(([name, count]) => ({
         name,
         value: count,
         color: "#00E5CF",
+        themeId: themeNameToIdMap.get(name),
       }));
 
       const sortedData = data.sort((a, b) => b.value - a.value);
       setChartData(sortedData);
     }
-  }, [groupedByTheme]);
+  }, [groupedByTheme, notifications]);
+
+  const handleBarClick = (data: any, index: number) => {
+    const clickedTheme = chartData[index];
+
+    if (clickedTheme.themeId) {
+      if (activeFilters.themeId === clickedTheme.themeId) {
+        const newFilters = { ...activeFilters };
+        delete newFilters.themeId;
+
+        dispatch(setNotificationFilters(newFilters));
+        dispatch(fetchNotifications(newFilters));
+      } else {
+        const newFilters = {
+          ...activeFilters,
+          themeId: clickedTheme.themeId,
+          page: 1,
+        };
+
+        dispatch(setNotificationFilters(newFilters));
+        dispatch(fetchNotifications(newFilters));
+      }
+    }
+  };
 
   if (loading) {
     return <div>Carregando dados dos temas...</div>;
@@ -44,42 +83,75 @@ const NotificationThemeChart: React.FC = () => {
   }
 
   return (
-    <div className="chart-container">
+    <div>
       {chartData.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
-          >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              horizontal={true}
-              vertical={false}
-            />
-            <XAxis
-              type="number"
-              domain={[0, "dataMax"]}
-              tickFormatter={(value) =>
-                value >= 1000 ? `${value / 1000}k` : value
-              }
-            />
-            <YAxis
-              type="category"
-              dataKey="name"
-              tick={{ fontSize: 10 }}
-              width={120}
-            />
-            <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
-            <Bar
-              dataKey="value"
-              name="Quantidade"
-              barSize={16}
-              radius={[0, 4, 4, 0]}
-              fill="#00E5CF"
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        <>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis
+                tickFormatter={(value) =>
+                  value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value
+                }
+              />
+              <Tooltip
+                formatter={(value, name) => [`${value}`, "Quantidade"]}
+              />
+              <Bar
+                dataKey="value"
+                fill="#00E5CF"
+                onClick={handleBarClick}
+                cursor="pointer"
+                fillOpacity={0.7}
+                isAnimationActive={false}
+                shape={(props: any) => {
+                  const { x, y, width, height, payload } = props;
+                  const opacity = activeFilters.themeId === payload.themeId ? 1 : 0.7;
+                  return (
+                    <rect 
+                      x={x} 
+                      y={y} 
+                      width={width} 
+                      height={height} 
+                      fill="#00E5CF" 
+                      fillOpacity={opacity}
+                      onClick={() => handleBarClick(null, props.index)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  );
+                }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+
+          {activeFilters.themeId && (
+            <div className="filter-indicator">
+              <small>
+                Filtrando por tema:{" "}
+                {
+                  chartData.find(
+                    (item) => item.themeId === activeFilters.themeId
+                  )?.name
+                }
+                <button
+                  className="clear-filter-btn"
+                  onClick={() => {
+                    const newFilters = { ...activeFilters };
+                    delete newFilters.themeId;
+                    dispatch(setNotificationFilters(newFilters));
+                    dispatch(fetchNotifications(newFilters));
+                  }}
+                >
+                  Limpar filtro
+                </button>
+              </small>
+            </div>
+          )}
+        </>
       ) : (
         <div>Nenhum tema encontrado</div>
       )}

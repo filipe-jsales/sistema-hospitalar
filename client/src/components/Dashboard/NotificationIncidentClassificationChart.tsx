@@ -7,14 +7,19 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
 import { useAppSelector } from "../../hooks/useRedux";
+import { useTypedDispatch } from "../../hooks/useRedux";
+import {
+  setNotificationFilters,
+  fetchNotifications,
+} from "../../store/slices/notification/fetchNotificationsSlice";
 
 interface ChartData {
   name: string;
   value: number;
   color: string;
+  incidentId?: number;
 }
 
 const classificationColors: Record<string, string> = {
@@ -44,17 +49,30 @@ const defaultColors = [
 ];
 
 const NotificationIncidentClassificationChart: React.FC = () => {
-  const { loading, error, groupedByIncident } = useAppSelector(
-    (state) => state.notifications
-  );
+  const dispatch = useTypedDispatch();
+  const { loading, error, groupedByIncident, activeFilters, notifications } =
+    useAppSelector((state) => state.notifications);
+
   const [data, setData] = useState<ChartData[]>([]);
 
   useEffect(() => {
-    if (groupedByIncident) {
+    if (groupedByIncident && notifications.length > 0) {
+      const incidentNameToIdMap = new Map();
+
+      notifications.forEach((notification) => {
+        if (notification.incident) {
+          incidentNameToIdMap.set(
+            notification.incident.name,
+            notification.incident.id
+          );
+        }
+      });
+
       let chartData = Object.entries(groupedByIncident).map(
         ([name, count], index) => ({
           name,
           value: count,
+          incidentId: incidentNameToIdMap.get(name),
           color:
             classificationColors[name] ||
             defaultColors[index % defaultColors.length],
@@ -64,7 +82,30 @@ const NotificationIncidentClassificationChart: React.FC = () => {
       chartData = chartData.sort((a, b) => b.value - a.value);
       setData(chartData.slice(0, 10));
     }
-  }, [groupedByIncident]);
+  }, [groupedByIncident, notifications]);
+
+  const handleBarClick = (entry: any, index: number) => {
+    const clickedIncident = data[index];
+
+    if (clickedIncident && clickedIncident.incidentId) {
+      if (activeFilters.incidentId === clickedIncident.incidentId) {
+        const newFilters = { ...activeFilters };
+        delete newFilters.incidentId;
+
+        dispatch(setNotificationFilters(newFilters));
+        dispatch(fetchNotifications(newFilters));
+      } else {
+        const newFilters = {
+          ...activeFilters,
+          incidentId: clickedIncident.incidentId,
+          page: 1,
+        };
+
+        dispatch(setNotificationFilters(newFilters));
+        dispatch(fetchNotifications(newFilters));
+      }
+    }
+  };
 
   if (loading) {
     return <div>Carregando dados de classificação de incidentes...</div>;
@@ -83,38 +124,86 @@ const NotificationIncidentClassificationChart: React.FC = () => {
     Math.round((yAxisMax * i) / (tickCount - 1))
   );
 
+  const activeIncidentName = data.find(
+    (item) => item.incidentId === activeFilters.incidentId
+  )?.name;
+
   return (
     <div className="chart-container">
       {data.length > 0 ? (
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis
-              dataKey="name"
-              angle={-45}
-              textAnchor="end"
-              height={70}
-              tick={{ fontSize: 10 }}
-            />
-            <YAxis ticks={yAxisTicks} />
-            <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
-            <Bar
-              dataKey="value"
-              name="Quantidade"
-              radius={[5, 5, 0, 0]}
-              barSize={35}
-              fill="#8884d8"
-              fillOpacity={0.8}
+        <>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={data}
+              margin={{ top: 5, right: 30, left: 20, bottom: 50 }}
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ResponsiveContainer>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis
+                dataKey="name"
+                angle={-45}
+                textAnchor="end"
+                height={70}
+                tick={{ fontSize: 10 }}
+              />
+              <YAxis ticks={yAxisTicks} />
+              <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
+              <Bar
+                dataKey="value"
+                name="Quantidade"
+                barSize={35}
+                isAnimationActive={false}
+                shape={(props: any) => {
+                  const { x, y, width, height, payload, index } = props;
+                  const radius = [5, 5, 0, 0];
+                  const entry = data[index];
+
+                  const isActive =
+                    activeFilters.incidentId === entry.incidentId;
+                  const opacity = isActive ? 1 : 0.8;
+
+                  const path = `
+                    M ${x},${y + radius[0]} 
+                    Q ${x},${y} ${x + radius[0]},${y}
+                    L ${x + width - radius[1]},${y}
+                    Q ${x + width},${y} ${x + width},${y + radius[1]}
+                    L ${x + width},${y + height}
+                    L ${x},${y + height}
+                    Z
+                  `;
+
+                  return (
+                    <path
+                      d={path}
+                      fill={entry.color}
+                      fillOpacity={opacity}
+                      onClick={() => handleBarClick(null, index)}
+                      style={{ cursor: "pointer" }}
+                    />
+                  );
+                }}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+
+          {activeFilters.incidentId && (
+            <div className="filter-indicator">
+              <small>
+                Filtrando por incidente: {activeIncidentName}
+                <button
+                  className="clear-filter-btn"
+                  onClick={() => {
+                    const newFilters = { ...activeFilters };
+                    delete newFilters.incidentId;
+                    dispatch(setNotificationFilters(newFilters));
+                    dispatch(fetchNotifications(newFilters));
+                  }}
+                >
+                  Limpar filtro
+                </button>
+              </small>
+            </div>
+          )}
+        </>
       ) : (
         <div>Nenhum dado de classificação de incidentes encontrado</div>
       )}

@@ -25,12 +25,23 @@ export interface NotificationData {
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
-
   responsible?: {
     id: number;
     name: string;
     cpf?: string;
     email?: string;
+  };
+  notifyingService?: {
+    id: number;
+    name: string;
+  };
+  theme?: {
+    id: number;
+    name: string;
+  };
+  incident?: {
+    id: number;
+    name: string;
   };
 }
 
@@ -56,6 +67,10 @@ export interface NotificationFilterParams {
   year?: number;
   months?: number[];
   responsibleId?: number;
+  notificationId?: number;
+  incidentId?: number;
+  notifyingServiceId?: number;
+  themeId?: number;
 }
 
 interface NotificationsState {
@@ -106,6 +121,22 @@ export const fetchNotifications = createAsyncThunk(
 
       if (params.responsibleId) {
         queryParams.append("responsibleId", params.responsibleId.toString());
+      }
+
+      if (params.notificationId) {
+        queryParams.append("notificationId", params.notificationId.toString());
+      }
+      if (params.incidentId) {
+        queryParams.append("incidentId", params.incidentId.toString());
+      }
+      if (params.notifyingServiceId) {
+        queryParams.append(
+          "notifyingServiceId",
+          params.notifyingServiceId.toString()
+        );
+      }
+      if (params.themeId) {
+        queryParams.append("themeId", params.themeId.toString());
       }
 
       const url = `/notifications?${queryParams.toString()}`;

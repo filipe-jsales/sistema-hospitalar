@@ -121,6 +121,45 @@ export class NotificationsService {
       return queryBuilder;
     };
 
+    const applyNotificationIdFilter = (queryBuilder) => {
+      if (paginationQuery.notificationId) {
+        queryBuilder.andWhere('notification.id = :notificationId', {
+          notificationId: paginationQuery.notificationId,
+        });
+      }
+      return queryBuilder;
+    };
+
+    const applyThemeIdFilter = (queryBuilder) => {
+      if (paginationQuery.themeId) {
+        queryBuilder.andWhere('notification.themeId = :themeId', {
+          themeId: paginationQuery.themeId,
+        });
+      }
+      return queryBuilder;
+    };
+
+    const applyIncidentIdFilter = (queryBuilder) => {
+      if (paginationQuery.incidentId) {
+        queryBuilder.andWhere('notification.incidentId = :incidentId', {
+          incidentId: paginationQuery.incidentId,
+        });
+      }
+      return queryBuilder;
+    };
+
+    const applyNotifyingServiceIdFilter = (queryBuilder) => {
+      if (paginationQuery.notifyingServiceId) {
+        queryBuilder.andWhere(
+          'notification.notifyingServiceId = :notifyingServiceId',
+          {
+            notifyingServiceId: paginationQuery.notifyingServiceId,
+          },
+        );
+      }
+      return queryBuilder;
+    };
+
     let descriptionQueryBuilder = this.notificationRepository
       .createQueryBuilder('notification')
       .select('notification.description', 'name')
@@ -128,6 +167,14 @@ export class NotificationsService {
       .where('notification.deletedAt IS NULL');
 
     descriptionQueryBuilder = applyResponsibleFilter(descriptionQueryBuilder);
+    descriptionQueryBuilder = applyNotificationIdFilter(
+      descriptionQueryBuilder,
+    );
+    descriptionQueryBuilder = applyThemeIdFilter(descriptionQueryBuilder);
+    descriptionQueryBuilder = applyIncidentIdFilter(descriptionQueryBuilder);
+    descriptionQueryBuilder = applyNotifyingServiceIdFilter(
+      descriptionQueryBuilder,
+    );
 
     const descriptionDateConditions = getDateConditions('notification');
     if (descriptionDateConditions) {
@@ -146,6 +193,10 @@ export class NotificationsService {
       .where('notification.deletedAt IS NULL');
 
     themeQueryBuilder = applyResponsibleFilter(themeQueryBuilder);
+    themeQueryBuilder = applyNotificationIdFilter(themeQueryBuilder);
+    themeQueryBuilder = applyThemeIdFilter(themeQueryBuilder);
+    themeQueryBuilder = applyIncidentIdFilter(themeQueryBuilder);
+    themeQueryBuilder = applyNotifyingServiceIdFilter(themeQueryBuilder);
 
     const themeDateConditions = getDateConditions('notification');
     if (themeDateConditions) {
@@ -164,6 +215,10 @@ export class NotificationsService {
       .where('notification.deletedAt IS NULL');
 
     incidentQueryBuilder = applyResponsibleFilter(incidentQueryBuilder);
+    incidentQueryBuilder = applyNotificationIdFilter(incidentQueryBuilder);
+    incidentQueryBuilder = applyThemeIdFilter(incidentQueryBuilder);
+    incidentQueryBuilder = applyIncidentIdFilter(incidentQueryBuilder);
+    incidentQueryBuilder = applyNotifyingServiceIdFilter(incidentQueryBuilder);
 
     const incidentDateConditions = getDateConditions('notification');
     if (incidentDateConditions) {
@@ -184,6 +239,18 @@ export class NotificationsService {
     notifyingServiceQueryBuilder = applyResponsibleFilter(
       notifyingServiceQueryBuilder,
     );
+    notifyingServiceQueryBuilder = applyNotificationIdFilter(
+      notifyingServiceQueryBuilder,
+    );
+    notifyingServiceQueryBuilder = applyThemeIdFilter(
+      notifyingServiceQueryBuilder,
+    );
+    notifyingServiceQueryBuilder = applyIncidentIdFilter(
+      notifyingServiceQueryBuilder,
+    );
+    notifyingServiceQueryBuilder = applyNotifyingServiceIdFilter(
+      notifyingServiceQueryBuilder,
+    );
 
     const notifyingServiceDateConditions = getDateConditions('notification');
     if (notifyingServiceDateConditions) {
@@ -202,6 +269,16 @@ export class NotificationsService {
       .select('responsible.name', 'name')
       .addSelect('COUNT(notification.id)', 'count')
       .where('notification.deletedAt IS NULL');
+
+    responsibleQueryBuilder = applyResponsibleFilter(responsibleQueryBuilder);
+    responsibleQueryBuilder = applyNotificationIdFilter(
+      responsibleQueryBuilder,
+    );
+    responsibleQueryBuilder = applyThemeIdFilter(responsibleQueryBuilder);
+    responsibleQueryBuilder = applyIncidentIdFilter(responsibleQueryBuilder);
+    responsibleQueryBuilder = applyNotifyingServiceIdFilter(
+      responsibleQueryBuilder,
+    );
 
     const responsibleDateConditions = getDateConditions('notification');
     if (responsibleDateConditions) {

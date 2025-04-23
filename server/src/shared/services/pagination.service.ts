@@ -32,13 +32,10 @@ export class PaginationService {
         });
       }
     }
-
     const skip = (page - 1) * limit;
     const countQueryBuilder = queryBuilder.clone();
     const totalItems = await countQueryBuilder.getCount();
-
     const items = await queryBuilder.skip(skip).take(limit).getMany();
-
     const totalPages = Math.ceil(totalItems / limit);
 
     return {
@@ -68,6 +65,10 @@ export class PaginationService {
       year,
       months,
       responsibleId,
+      notificationId,
+      incidentId,
+      notifyingServiceId,
+      themeId,
     } = paginationQuery;
     const { relations, where = {}, order, dateField = 'createdAt' } = options;
     const skip = (page - 1) * limit;
@@ -92,6 +93,22 @@ export class PaginationService {
 
     if (responsibleId) {
       whereConditions['responsibleId'] = responsibleId;
+    }
+
+    if (notificationId) {
+      whereConditions['id'] = notificationId;
+    }
+
+    if (incidentId) {
+      whereConditions['incidentId'] = incidentId;
+    }
+
+    if (notifyingServiceId) {
+      whereConditions['notifyingServiceId'] = notifyingServiceId;
+    }
+
+    if (themeId) {
+      whereConditions['themeId'] = themeId;
     }
 
     const [items, totalItems] = await repository.findAndCount({

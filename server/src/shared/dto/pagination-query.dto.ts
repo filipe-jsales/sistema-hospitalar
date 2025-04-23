@@ -54,4 +54,40 @@ export class PaginationQueryDto {
   @Type(() => Number)
   @IsInt()
   responsibleId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID da notificação',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  notificationId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID do incidente',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  incidentId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID do serviço notificante',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  notifyingServiceId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filtrar por ID do tema',
+    example: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  themeId?: number;
 }
