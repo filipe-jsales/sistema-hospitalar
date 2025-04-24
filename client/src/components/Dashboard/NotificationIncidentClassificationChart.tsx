@@ -153,7 +153,7 @@ const NotificationIncidentClassificationChart: React.FC = () => {
                 barSize={35}
                 isAnimationActive={false}
                 shape={(props: any) => {
-                  const { x, y, width, height, payload, index } = props;
+                  const { x, y, width, height, index } = props;
                   const radius = [5, 5, 0, 0];
                   const entry = data[index];
 

@@ -98,29 +98,29 @@ const NotificationThemeChart: React.FC = () => {
                   value >= 1000 ? `${(value / 1000).toFixed(1)}k` : value
                 }
               />
-              <Tooltip
-                formatter={(value, name) => [`${value}`, "Quantidade"]}
-              />
+              <Tooltip formatter={(value) => [`${value}`, "Quantidade"]} />
               <Bar
                 dataKey="value"
                 fill="#00E5CF"
+                barSize={35}
                 onClick={handleBarClick}
                 cursor="pointer"
                 fillOpacity={0.7}
                 isAnimationActive={false}
                 shape={(props: any) => {
                   const { x, y, width, height, payload } = props;
-                  const opacity = activeFilters.themeId === payload.themeId ? 1 : 0.7;
+                  const opacity =
+                    activeFilters.themeId === payload.themeId ? 1 : 0.7;
                   return (
-                    <rect 
-                      x={x} 
-                      y={y} 
-                      width={width} 
-                      height={height} 
-                      fill="#00E5CF" 
+                    <rect
+                      x={x}
+                      y={y}
+                      width={width}
+                      height={height}
+                      fill="#00E5CF"
                       fillOpacity={opacity}
                       onClick={() => handleBarClick(null, props.index)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ cursor: "pointer" }}
                     />
                   );
                 }}
