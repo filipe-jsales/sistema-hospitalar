@@ -6,6 +6,6 @@ export class CreateSubcategoryDto {
   name: string;
 
   @IsNumber()
-  @IsNotEmpty({message: 'categoryId is required'})
+  @IsNotEmpty({ message: 'categoryId is required' })
   categoryId: number;
 }

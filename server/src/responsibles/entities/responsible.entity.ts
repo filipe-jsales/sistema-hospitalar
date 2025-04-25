@@ -36,6 +36,9 @@ export class Responsible {
   @OneToMany(() => Notification, (notification) => notification.priority)
   notifications: Notification[];
 
-  @OneToMany(() => OrganizationalUnity, (organizationalUnity) => organizationalUnity.responsible)
+  @OneToMany(
+    () => OrganizationalUnity,
+    (organizationalUnity) => organizationalUnity.responsible,
+  )
   organizationalUnities: OrganizationalUnity[];
 }

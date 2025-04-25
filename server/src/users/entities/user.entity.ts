@@ -57,6 +57,6 @@ export class User {
   @JoinTable()
   roles: Role[];
 
-  @ManyToOne(() => Hospital, hospital => hospital.users, { eager: true })
+  @ManyToOne(() => Hospital, (hospital) => hospital.users, { eager: true })
   hospital: Hospital;
 }

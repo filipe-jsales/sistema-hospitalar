@@ -32,7 +32,9 @@ export class OrganizationalUnitiesController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos as unidades organizacionais (paginado)' })
+  @ApiOperation({
+    summary: 'Listar todos as unidades organizacionais (paginado)',
+  })
   findAll(@Query() paginationQuery: PaginationQueryDto) {
     return this.organizationalUnitiesService.findAllPaginated(paginationQuery);
   }

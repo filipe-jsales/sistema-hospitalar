@@ -38,9 +38,13 @@ export class AuthService {
 
     if (!isPasswordValid) {
       user.failedLoginAttempts += 1;
-      await this.usersService.update(user.id, {
-        failedLoginAttempts: user.failedLoginAttempts,
-      }, user);
+      await this.usersService.update(
+        user.id,
+        {
+          failedLoginAttempts: user.failedLoginAttempts,
+        },
+        user,
+      );
       return null;
     }
 
@@ -69,7 +73,10 @@ export class AuthService {
     };
   }
 
-  async register(createUserDto: CreateUserDto, currentUser: User): Promise<User> {
+  async register(
+    createUserDto: CreateUserDto,
+    currentUser: User,
+  ): Promise<User> {
     const { password, email } = createUserDto;
 
     const existingUser = await this.usersService.findByEmail(email);
@@ -214,7 +221,11 @@ export class AuthService {
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
-      await this.usersService.update(user.id, { password: hashedPassword }, user);
+      await this.usersService.update(
+        user.id,
+        { password: hashedPassword },
+        user,
+      );
     } catch (err) {
       console.error('Reset Password error:', err);
       if (

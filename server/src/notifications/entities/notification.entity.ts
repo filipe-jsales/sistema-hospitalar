@@ -6,7 +6,15 @@ import { Priority } from 'src/priorities/entities/priority.entity';
 import { Responsible } from 'src/responsibles/entities/responsible.entity';
 import { Subcategory } from 'src/subcategories/entities/subcategory.entity';
 import { Theme } from 'src/themes/entities/theme.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Notification {

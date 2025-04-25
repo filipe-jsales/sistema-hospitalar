@@ -1,4 +1,14 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { Category } from 'src/categories/entities/category.entity';
 
@@ -21,7 +31,7 @@ export class Subcategory {
 
   @DeleteDateColumn()
   deletedAt: Date;
-  
+
   @OneToMany(() => Notification, (notification) => notification.priority)
   notifications: Notification[];
 

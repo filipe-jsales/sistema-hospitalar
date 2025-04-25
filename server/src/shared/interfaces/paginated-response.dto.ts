@@ -14,7 +14,8 @@ export interface PaginatedResponseWithGrouping<T> extends PaginatedResponse<T> {
   };
 }
 
-export interface PaginatedResponseWithGroupings<T> extends PaginatedResponse<T> {
+export interface PaginatedResponseWithGroupings<T>
+  extends PaginatedResponse<T> {
   groupedByDescription?: {
     [key: string]: number;
   };

@@ -11,7 +11,10 @@ import {
 import { RolesService } from './roles.service';
 import { RoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { CheckPolicies, Public } from '../casl/casl-ability.factory/policies.decorator';
+import {
+  CheckPolicies,
+  Public,
+} from '../casl/casl-ability.factory/policies.decorator';
 import { Role } from './entities/role.entity';
 import { AuthGuard } from '@nestjs/passport';
 import { PoliciesGuard } from 'src/casl/casl-ability.factory/policies.guard';

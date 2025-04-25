@@ -17,7 +17,7 @@ export class PermissionSeedService implements OnModuleInit {
   async createDefaultPermissions() {
     const userRole = await this.rolesService.findByName('user');
     const adminRole = await this.rolesService.findByName('admin');
-    
+
     const defaultPermissions = [
       {
         name: 'read:profile',
@@ -45,7 +45,8 @@ export class PermissionSeedService implements OnModuleInit {
       },
       {
         name: 'create:user',
-        description: 'Permite ao admin criar novos usuários no hospital vinculado',
+        description:
+          'Permite ao admin criar novos usuários no hospital vinculado',
         userDescription: 'Criar usuários',
         action: Action.Create,
         subject: 'User',
@@ -69,7 +70,8 @@ export class PermissionSeedService implements OnModuleInit {
       },
       {
         name: 'manage:hospital',
-        description: 'Permite ao admin gerenciar o hospital ao qual está vinculado',
+        description:
+          'Permite ao admin gerenciar o hospital ao qual está vinculado',
         userDescription: 'Gerenciar hospital',
         action: Action.Manage,
         subject: 'Hospital',
@@ -80,14 +82,19 @@ export class PermissionSeedService implements OnModuleInit {
     for (const permissionData of defaultPermissions) {
       try {
         const existingPermissions = await this.permissionsService.findAll();
-        const exists = existingPermissions.some(p => p.name === permissionData.name);
-        
+        const exists = existingPermissions.some(
+          (p) => p.name === permissionData.name,
+        );
+
         if (!exists) {
           await this.permissionsService.create(permissionData);
           console.log(`Permissão "${permissionData.name}" criada com sucesso.`);
         }
       } catch (error) {
-        console.error(`Erro ao criar permissão "${permissionData.name}":`, error.message);
+        console.error(
+          `Erro ao criar permissão "${permissionData.name}":`,
+          error.message,
+        );
       }
     }
   }

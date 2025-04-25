@@ -30,11 +30,10 @@ export class CaslAbilityFactory {
       MongoAbility<[Action, Subjects]>
     >(createMongoAbility);
 
-    const isSuperAdmin = user.roles?.some(role => role.name === 'superadmin');
+    const isSuperAdmin = user.roles?.some((role) => role.name === 'superadmin');
     if (isSuperAdmin) {
       can(Action.Manage, 'all');
-    } 
-    else if (user.hospital) {
+    } else if (user.hospital) {
       can(Action.Read, Hospital, { id: user.hospital.id });
     }
     user.roles?.forEach((role: Role) => {
