@@ -44,11 +44,9 @@ const ResponsiblesList: React.FC = () => {
     (state) => state.responsibles
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteResponsible);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteResponsible
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

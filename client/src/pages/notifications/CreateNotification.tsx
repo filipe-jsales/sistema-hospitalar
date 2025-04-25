@@ -72,64 +72,44 @@ const CreateNotification: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user } = useAppSelector((state) => state.auth);
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createNotification
   );
 
-  const {
-    categories = [],
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useAppSelector((state) => state.categories || { categories: [] });
-
-  const {
-    themes = [],
-    loading: themesLoading,
-    error: themesError,
-  } = useAppSelector((state) => state.themes || { themes: [] });
-
-  const {
-    subcategories = [],
-    loading: subcategoriesLoading,
-    error: subcategoriesError,
-  } = useAppSelector((state) => state.subcategories || { subcategories: [] });
-
-  const {
-    notifyingServices = [],
-    loading: notifyingServicesLoading,
-    error: notifyingServicesError,
-  } = useAppSelector(
-    (state) => state.notifyingServices || { notifyingServices: [] }
+  const { categories = [], loading: categoriesLoading } = useAppSelector(
+    (state) => state.categories || { categories: [] }
   );
 
-  const {
-    organizationalUnities = [],
-    loading: organizationalUnitiesLoading,
-    error: organizationalUnitiesError,
-  } = useAppSelector(
-    (state) => state.organizationalUnities || { organizationalUnities: [] }
+  const { themes = [], loading: themesLoading } = useAppSelector(
+    (state) => state.themes || { themes: [] }
   );
 
-  const {
-    responsibles = [],
-    loading: responsiblesLoading,
-    error: responsiblesError,
-  } = useAppSelector((state) => state.responsibles || { responsibles: [] });
+  const { subcategories = [], loading: subcategoriesLoading } = useAppSelector(
+    (state) => state.subcategories || { subcategories: [] }
+  );
 
-  const {
-    incidents = [],
-    loading: incidentsLoading,
-    error: incidentsError,
-  } = useAppSelector((state) => state.incidents || { incidents: [] });
+  const { notifyingServices = [], loading: notifyingServicesLoading } =
+    useAppSelector(
+      (state) => state.notifyingServices || { notifyingServices: [] }
+    );
 
-  const {
-    priorities = [],
-    loading: prioritiesLoading,
-    error: prioritiesError,
-  } = useAppSelector((state) => state.priorities || { priorities: [] });
+  const { organizationalUnities = [], loading: organizationalUnitiesLoading } =
+    useAppSelector(
+      (state) => state.organizationalUnities || { organizationalUnities: [] }
+    );
+
+  const { responsibles = [], loading: responsiblesLoading } = useAppSelector(
+    (state) => state.responsibles || { responsibles: [] }
+  );
+
+  const { incidents = [], loading: incidentsLoading } = useAppSelector(
+    (state) => state.incidents || { incidents: [] }
+  );
+
+  const { priorities = [], loading: prioritiesLoading } = useAppSelector(
+    (state) => state.priorities || { priorities: [] }
+  );
 
   const fetchActions = [
     { action: () => fetchCategories({ page: 1 }), name: "categorias" },

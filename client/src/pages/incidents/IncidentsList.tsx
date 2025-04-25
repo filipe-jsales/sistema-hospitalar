@@ -41,11 +41,9 @@ const IncidentsList: React.FC = () => {
     (state) => state.incidents
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteIncident);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteIncident
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

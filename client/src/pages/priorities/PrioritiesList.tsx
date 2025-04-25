@@ -40,11 +40,9 @@ const PrioritiesList: React.FC = () => {
     (state) => state.priorities
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deletePriority);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deletePriority
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

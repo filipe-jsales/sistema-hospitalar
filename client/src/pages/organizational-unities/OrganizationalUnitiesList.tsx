@@ -40,11 +40,9 @@ const OrganizationalUnitiesList: React.FC = () => {
     (state) => state.organizationalUnities
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteOrganizationalUnity);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteOrganizationalUnity
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

@@ -45,11 +45,9 @@ const UsersList: React.FC = () => {
   const { users, loading, error, pagination } = useAppSelector(
     (state) => state.users
   );
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteUser);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteUser
+  );
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);

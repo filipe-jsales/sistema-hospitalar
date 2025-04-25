@@ -45,7 +45,6 @@ const NotificationsList: React.FC = () => {
   );
 
   const {
-    loading: deleteLoading,
     error: deleteError,
     success: deleteSuccess,
   } = useAppSelector((state) => state.deleteNotification);

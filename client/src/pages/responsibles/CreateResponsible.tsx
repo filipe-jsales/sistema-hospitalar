@@ -6,11 +6,6 @@ import {
   IonInput,
   IonButton,
   IonSpinner,
-  IonHeader,
-  IonToolbar,
-  IonButtons,
-  IonMenuButton,
-  IonTitle,
 } from "@ionic/react";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -36,9 +31,7 @@ const CreateResponsible: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user } = useAppSelector((state) => state.auth);
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createResponsible
   );

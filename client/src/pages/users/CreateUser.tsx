@@ -42,19 +42,13 @@ const CreateUser: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user } = useAppSelector((state) => state.auth);
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createUser
   );
 
-  const {
-    hospitals: hospitalItems,
-    loading: hospitalsLoading,
-    error: hospitalsError,
-    pagination: hospitalsPagination,
-  } = useAppSelector((state) => state.hospitals);
+  const { hospitals: hospitalItems, loading: hospitalsLoading } =
+    useAppSelector((state) => state.hospitals);
 
   useEffect(() => {
     dispatch(fetchHospitals(1))

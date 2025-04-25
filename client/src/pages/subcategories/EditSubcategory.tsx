@@ -47,11 +47,9 @@ const EditSubcategory: React.FC = () => {
     categoryId: "",
   });
 
-  const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useAppSelector((state) => state.categories);
+  const { categories, loading: categoriesLoading } = useAppSelector(
+    (state) => state.categories
+  );
 
   useEffect(() => {
     dispatch(fetchSubcategoryById(subcategoryId))

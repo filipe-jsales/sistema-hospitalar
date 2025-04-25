@@ -40,11 +40,9 @@ const SubcategoriesList: React.FC = () => {
     (state) => state.subcategories
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteSubcategory);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteSubcategory
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

@@ -40,11 +40,9 @@ const ThemesList: React.FC = () => {
     (state) => state.themes
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteTheme);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteTheme
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

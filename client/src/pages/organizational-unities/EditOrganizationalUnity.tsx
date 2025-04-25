@@ -37,11 +37,9 @@ const EditOrganizationalUnity: React.FC = () => {
   const { organizationalUnity, loading, error, successMessage } =
     useAppSelector((state) => state.organizationalUnityDetails);
 
-  const {
-    responsibles,
-    loading: responsiblesLoading,
-    error: responsiblesError,
-  } = useAppSelector((state) => state.responsibles);
+  const { responsibles, loading: responsiblesLoading } = useAppSelector(
+    (state) => state.responsibles
+  );
   useEffect(() => {
     dispatch(fetchResponsibles({ page: 1 }))
       .unwrap()

@@ -38,11 +38,8 @@ const EditUser: React.FC = () => {
   const { user, loading, error, successMessage } = useAppSelector(
     (state) => state.userDetails
   );
-  const { 
-    hospitals: hospitalItems, 
-    loading: hospitalsLoading,
-    pagination: hospitalsPagination
-  } = useAppSelector((state) => state.hospitals);
+  const { hospitals: hospitalItems, loading: hospitalsLoading } =
+    useAppSelector((state) => state.hospitals);
 
   const [userInfo, setUserInfo] = useState({
     firstName: "",
@@ -67,7 +64,7 @@ const EditUser: React.FC = () => {
       .catch((error) => {
         console.error("Falha ao carregar usuário:", error);
       });
-    
+
     dispatch(fetchHospitals(1))
       .unwrap()
       .catch((error) => {

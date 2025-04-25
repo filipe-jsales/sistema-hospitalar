@@ -43,11 +43,9 @@ const HospitalsList: React.FC = () => {
     pagination,
   } = useAppSelector((state) => state.hospitals);
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteHospital);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteHospital
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

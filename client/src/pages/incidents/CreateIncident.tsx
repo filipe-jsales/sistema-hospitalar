@@ -33,9 +33,7 @@ const CreateIncident: React.FC = () => {
   });
 
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user } = useAppSelector((state) => state.auth);
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createIncident
   );

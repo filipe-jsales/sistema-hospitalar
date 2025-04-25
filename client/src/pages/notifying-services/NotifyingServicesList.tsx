@@ -40,11 +40,9 @@ const NotifyingServicesList: React.FC = () => {
     (state) => state.notifyingServices
   );
 
-  const {
-    loading: deleteLoading,
-    error: deleteError,
-    success: deleteSuccess,
-  } = useAppSelector((state) => state.deleteNotifyingService);
+  const { error: deleteError, success: deleteSuccess } = useAppSelector(
+    (state) => state.deleteNotifyingService
+  );
 
   const [searchText, setSearchText] = useState("");
   const [showAlert, setShowAlert] = useState(false);

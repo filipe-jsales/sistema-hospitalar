@@ -60,25 +60,21 @@ const EditNotification: React.FC = () => {
   const {
     categories = [],
     loading: categoriesLoading,
-    error: categoriesError,
   } = useAppSelector((state) => state.categories || { categories: [] });
 
   const {
     themes = [],
     loading: themesLoading,
-    error: themesError,
   } = useAppSelector((state) => state.themes || { themes: [] });
 
   const {
     subcategories = [],
     loading: subcategoriesLoading,
-    error: subcategoriesError,
   } = useAppSelector((state) => state.subcategories || { subcategories: [] });
 
   const {
     notifyingServices = [],
     loading: notifyingServicesLoading,
-    error: notifyingServicesError,
   } = useAppSelector(
     (state) => state.notifyingServices || { notifyingServices: [] }
   );
@@ -86,7 +82,6 @@ const EditNotification: React.FC = () => {
   const {
     organizationalUnities = [],
     loading: organizationalUnitiesLoading,
-    error: organizationalUnitiesError,
   } = useAppSelector(
     (state) => state.organizationalUnities || { organizationalUnities: [] }
   );
@@ -94,19 +89,16 @@ const EditNotification: React.FC = () => {
   const {
     responsibles = [],
     loading: responsiblesLoading,
-    error: responsiblesError,
   } = useAppSelector((state) => state.responsibles || { responsibles: [] });
 
   const {
     incidents = [],
     loading: incidentsLoading,
-    error: incidentsError,
   } = useAppSelector((state) => state.incidents || { incidents: [] });
 
   const {
     priorities = [],
     loading: prioritiesLoading,
-    error: prioritiesError,
   } = useAppSelector((state) => state.priorities || { priorities: [] });
 
   const [notificationInfo, setNotificationInfo] = useState({

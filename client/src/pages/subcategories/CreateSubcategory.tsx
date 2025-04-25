@@ -38,17 +38,13 @@ const CreateSubcategory: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user, token } = useAppSelector(
-    (state) => state.auth
-  );
+  const { user } = useAppSelector((state) => state.auth);
   const { loading, error, successMessage } = useAppSelector(
     (state) => state.createSubcategory
   );
-  const {
-    categories,
-    loading: categoriesLoading,
-    error: categoriesError,
-  } = useAppSelector((state) => state.categories);
+  const { categories, loading: categoriesLoading } = useAppSelector(
+    (state) => state.categories
+  );
 
   const {
     subcategories,
