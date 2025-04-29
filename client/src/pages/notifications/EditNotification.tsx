@@ -31,6 +31,7 @@ import { fetchResponsibles } from "../../store/slices/responsible/fetchResponsib
 import { fetchIncidents } from "../../store/slices/incident/fetchIncidentsSlice";
 import { fetchPriorities } from "../../store/slices/priority/fetchPrioritiesSlice";
 import { fetchSubcategories } from "../../store/slices/subcategory/fetchSubcategoriesSlice";
+import { DeadlineStatus } from "../../types/deadlineStatus.enum";
 
 interface NotificationParams {
   id: string;
@@ -57,49 +58,39 @@ const EditNotification: React.FC = () => {
     dispatch(fetchPriorities({ page: 1 }));
   }, [dispatch]);
 
-  const {
-    categories = [],
-    loading: categoriesLoading,
-  } = useAppSelector((state) => state.categories || { categories: [] });
-
-  const {
-    themes = [],
-    loading: themesLoading,
-  } = useAppSelector((state) => state.themes || { themes: [] });
-
-  const {
-    subcategories = [],
-    loading: subcategoriesLoading,
-  } = useAppSelector((state) => state.subcategories || { subcategories: [] });
-
-  const {
-    notifyingServices = [],
-    loading: notifyingServicesLoading,
-  } = useAppSelector(
-    (state) => state.notifyingServices || { notifyingServices: [] }
+  const { categories = [], loading: categoriesLoading } = useAppSelector(
+    (state) => state.categories || { categories: [] }
   );
 
-  const {
-    organizationalUnities = [],
-    loading: organizationalUnitiesLoading,
-  } = useAppSelector(
-    (state) => state.organizationalUnities || { organizationalUnities: [] }
+  const { themes = [], loading: themesLoading } = useAppSelector(
+    (state) => state.themes || { themes: [] }
   );
 
-  const {
-    responsibles = [],
-    loading: responsiblesLoading,
-  } = useAppSelector((state) => state.responsibles || { responsibles: [] });
+  const { subcategories = [], loading: subcategoriesLoading } = useAppSelector(
+    (state) => state.subcategories || { subcategories: [] }
+  );
 
-  const {
-    incidents = [],
-    loading: incidentsLoading,
-  } = useAppSelector((state) => state.incidents || { incidents: [] });
+  const { notifyingServices = [], loading: notifyingServicesLoading } =
+    useAppSelector(
+      (state) => state.notifyingServices || { notifyingServices: [] }
+    );
 
-  const {
-    priorities = [],
-    loading: prioritiesLoading,
-  } = useAppSelector((state) => state.priorities || { priorities: [] });
+  const { organizationalUnities = [], loading: organizationalUnitiesLoading } =
+    useAppSelector(
+      (state) => state.organizationalUnities || { organizationalUnities: [] }
+    );
+
+  const { responsibles = [], loading: responsiblesLoading } = useAppSelector(
+    (state) => state.responsibles || { responsibles: [] }
+  );
+
+  const { incidents = [], loading: incidentsLoading } = useAppSelector(
+    (state) => state.incidents || { incidents: [] }
+  );
+
+  const { priorities = [], loading: prioritiesLoading } = useAppSelector(
+    (state) => state.priorities || { priorities: [] }
+  );
 
   const [notificationInfo, setNotificationInfo] = useState({
     description: "",
@@ -119,6 +110,7 @@ const EditNotification: React.FC = () => {
     incidentId: null as number | null,
     responsibleId: null as number | null,
     priorityId: null as number | null,
+    deadlineStatus: "" as DeadlineStatus | "",
   });
 
   const [errors, setErrors] = useState({
@@ -139,6 +131,7 @@ const EditNotification: React.FC = () => {
     incidentId: "",
     responsibleId: "",
     priorityId: "",
+    deadlineStatus: "",
   });
 
   useEffect(() => {
@@ -175,6 +168,7 @@ const EditNotification: React.FC = () => {
         incidentId: notification.incidentId || null,
         responsibleId: notification.responsibleId || null,
         priorityId: notification.priorityId || null,
+        deadlineStatus: notification.deadlineStatus || "",
       });
     }
   }, [notification]);
@@ -743,6 +737,35 @@ const EditNotification: React.FC = () => {
                     </IonItem>
                     {errors.priorityId && (
                       <span className="text-danger">{errors.priorityId}</span>
+                    )}
+                  </div>
+
+                  <div className="col-12">
+                    <IonItem>
+                      <IonLabel position="stacked">Status do Prazo</IonLabel>
+                      <IonSelect
+                        value={notificationInfo.deadlineStatus}
+                        placeholder="Selecione um status de prazo"
+                        onIonChange={(e) => {
+                          setNotificationInfo({
+                            ...notificationInfo,
+                            deadlineStatus: e.detail.value,
+                          });
+                          if (errors.deadlineStatus)
+                            setErrors({ ...errors, deadlineStatus: "" });
+                        }}
+                      >
+                        {Object.values(DeadlineStatus).map((status) => (
+                          <IonSelectOption key={status} value={status}>
+                            {status}
+                          </IonSelectOption>
+                        ))}
+                      </IonSelect>
+                    </IonItem>
+                    {errors.deadlineStatus && (
+                      <span className="text-danger">
+                        {errors.deadlineStatus}
+                      </span>
                     )}
                   </div>
 

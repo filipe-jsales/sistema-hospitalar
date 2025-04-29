@@ -90,4 +90,8 @@ export class PaginationQueryDto {
   @Type(() => Number)
   @IsInt()
   themeId?: number;
+
+  @IsOptional()
+  @Type(() => String)
+  deadlineStatus?: string;
 }

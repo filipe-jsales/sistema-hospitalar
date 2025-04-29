@@ -28,4 +28,7 @@ export interface PaginatedResponseWithGroupings<T>
   groupedByNotifyingService?: {
     [key: string]: number;
   };
+  groupedByDeadlineStatus?: {
+    [key: string]: number;
+  };
 }

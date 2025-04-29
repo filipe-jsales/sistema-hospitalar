@@ -1,10 +1,12 @@
 import {
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { DeadlineStatus } from '../enums/deadline.enum';
 
 export class CreateNotificationDto {
   @IsNotEmpty()
@@ -73,4 +75,11 @@ export class CreateNotificationDto {
 
   @IsString()
   actionPlan: string;
+
+  @IsOptional()
+  @IsEnum(DeadlineStatus, {
+    message:
+      'deadlineStatus must be one of: GRAVE EXPIRADO, NEAR MISS EXPIRADO, NEVER EVENT EXPIRADO, ÓBITO EXPIRADO',
+  })
+  deadlineStatus: DeadlineStatus;
 }

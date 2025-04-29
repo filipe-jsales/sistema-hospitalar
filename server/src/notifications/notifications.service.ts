@@ -160,6 +160,15 @@ export class NotificationsService {
       return queryBuilder;
     };
 
+    const applyDeadlineStatusFilter = (queryBuilder) => {
+      if (paginationQuery.deadlineStatus) {
+        queryBuilder.andWhere('notification.deadlineStatus = :deadlineStatus', {
+          deadlineStatus: paginationQuery.deadlineStatus,
+        });
+      }
+      return queryBuilder;
+    };
+
     let descriptionQueryBuilder = this.notificationRepository
       .createQueryBuilder('notification')
       .select('notification.description', 'name')
@@ -173,6 +182,9 @@ export class NotificationsService {
     descriptionQueryBuilder = applyThemeIdFilter(descriptionQueryBuilder);
     descriptionQueryBuilder = applyIncidentIdFilter(descriptionQueryBuilder);
     descriptionQueryBuilder = applyNotifyingServiceIdFilter(
+      descriptionQueryBuilder,
+    );
+    descriptionQueryBuilder = applyDeadlineStatusFilter(
       descriptionQueryBuilder,
     );
 
@@ -197,6 +209,7 @@ export class NotificationsService {
     themeQueryBuilder = applyThemeIdFilter(themeQueryBuilder);
     themeQueryBuilder = applyIncidentIdFilter(themeQueryBuilder);
     themeQueryBuilder = applyNotifyingServiceIdFilter(themeQueryBuilder);
+    themeQueryBuilder = applyDeadlineStatusFilter(themeQueryBuilder);
 
     const themeDateConditions = getDateConditions('notification');
     if (themeDateConditions) {
@@ -219,6 +232,7 @@ export class NotificationsService {
     incidentQueryBuilder = applyThemeIdFilter(incidentQueryBuilder);
     incidentQueryBuilder = applyIncidentIdFilter(incidentQueryBuilder);
     incidentQueryBuilder = applyNotifyingServiceIdFilter(incidentQueryBuilder);
+    incidentQueryBuilder = applyDeadlineStatusFilter(incidentQueryBuilder);
 
     const incidentDateConditions = getDateConditions('notification');
     if (incidentDateConditions) {
@@ -251,7 +265,9 @@ export class NotificationsService {
     notifyingServiceQueryBuilder = applyNotifyingServiceIdFilter(
       notifyingServiceQueryBuilder,
     );
-
+    notifyingServiceQueryBuilder = applyDeadlineStatusFilter(
+      notifyingServiceQueryBuilder,
+    );
     const notifyingServiceDateConditions = getDateConditions('notification');
     if (notifyingServiceDateConditions) {
       notifyingServiceQueryBuilder.andWhere(
@@ -279,11 +295,53 @@ export class NotificationsService {
     responsibleQueryBuilder = applyNotifyingServiceIdFilter(
       responsibleQueryBuilder,
     );
+    responsibleQueryBuilder = applyDeadlineStatusFilter(
+      responsibleQueryBuilder,
+    );
 
     const responsibleDateConditions = getDateConditions('notification');
     if (responsibleDateConditions) {
       responsibleQueryBuilder.andWhere(`(${responsibleDateConditions})`);
     }
+
+    let deadlineStatusQueryBuilder = this.notificationRepository
+      .createQueryBuilder('notification')
+      .select('notification.deadlineStatus', 'name')
+      .addSelect('COUNT(notification.id)', 'count')
+      .where('notification.deletedAt IS NULL')
+      .andWhere('notification.deadlineStatus IS NOT NULL');
+
+    deadlineStatusQueryBuilder = applyResponsibleFilter(
+      deadlineStatusQueryBuilder,
+    );
+    deadlineStatusQueryBuilder = applyNotificationIdFilter(
+      deadlineStatusQueryBuilder,
+    );
+    deadlineStatusQueryBuilder = applyThemeIdFilter(deadlineStatusQueryBuilder);
+    deadlineStatusQueryBuilder = applyIncidentIdFilter(
+      deadlineStatusQueryBuilder,
+    );
+    deadlineStatusQueryBuilder = applyNotifyingServiceIdFilter(
+      deadlineStatusQueryBuilder,
+    );
+
+    const deadlineStatusDateConditions = getDateConditions('notification');
+    if (deadlineStatusDateConditions) {
+      deadlineStatusQueryBuilder.andWhere(`(${deadlineStatusDateConditions})`);
+    }
+
+    if (paginationQuery.deadlineStatus) {
+      deadlineStatusQueryBuilder.andWhere(
+        'notification.deadlineStatus = :deadlineStatus',
+        {
+          deadlineStatus: paginationQuery.deadlineStatus,
+        },
+      );
+    }
+
+    const deadlineStatusResults = await deadlineStatusQueryBuilder
+      .groupBy('notification.deadlineStatus')
+      .getRawMany<GroupedResult>();
 
     const processDictionary = (results: GroupedResult[]) => {
       return results.reduce(
@@ -301,6 +359,7 @@ export class NotificationsService {
       groupedByTheme: processDictionary(themeResults),
       groupedByIncident: processDictionary(incidentResults),
       groupedByNotifyingService: processDictionary(notifyingServiceResults),
+      groupedByDeadlineStatus: processDictionary(deadlineStatusResults),
     };
   }
 

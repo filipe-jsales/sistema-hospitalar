@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
   DeleteDateColumn,
 } from 'typeorm';
+import { DeadlineStatus } from '../enums/deadline.enum';
 
 @Entity()
 export class Notification {
@@ -74,6 +75,14 @@ export class Notification {
 
   @Column({ nullable: true })
   actionPlan: string;
+
+  @Column({
+    type: 'enum',
+    enum: DeadlineStatus,
+    nullable: true,
+    default: null,
+  })
+  deadlineStatus: DeadlineStatus;
 
   @CreateDateColumn()
   createdAt: Date;

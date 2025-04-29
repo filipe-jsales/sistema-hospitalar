@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import apiService from "../../../utils/apiService";
 import { updateNotification } from "./fetchNotificationByIdSlice";
+import { DeadlineStatus } from "../../../types/deadlineStatus.enum";
 
 export interface NotificationData {
   id: number;
@@ -22,6 +23,7 @@ export interface NotificationData {
   incidentId: number | null;
   responsibleId: number | null;
   priorityId: number | null;
+  deadlineStatus: DeadlineStatus | "";
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
@@ -59,6 +61,7 @@ export interface PaginatedResponseWithGroupings<T> {
   groupedByTheme?: { [key: string]: number };
   groupedByIncident?: { [key: string]: number };
   groupedByNotifyingService?: { [key: string]: number };
+  groupedByDeadlineStatus?: { [key: string]: number };
 }
 
 export interface NotificationFilterParams {
@@ -71,6 +74,7 @@ export interface NotificationFilterParams {
   incidentId?: number;
   notifyingServiceId?: number;
   themeId?: number;
+  deadlineStatus?: string;
 }
 
 interface NotificationsState {
@@ -82,6 +86,7 @@ interface NotificationsState {
   groupedByTheme: { [key: string]: number } | null;
   groupedByIncident: { [key: string]: number } | null;
   groupedByNotifyingService: { [key: string]: number } | null;
+  groupedByDeadlineStatus: { [key: string]: number } | null;
   activeFilters: NotificationFilterParams;
 }
 
@@ -94,6 +99,7 @@ const initialState: NotificationsState = {
   groupedByTheme: null,
   groupedByIncident: null,
   groupedByNotifyingService: null,
+  groupedByDeadlineStatus: null,
   activeFilters: {
     page: 1,
     limit: 10,
@@ -112,17 +118,14 @@ export const fetchNotifications = createAsyncThunk(
       if (params.page) queryParams.append("page", params.page.toString());
       if (params.limit) queryParams.append("limit", params.limit.toString());
       if (params.year) queryParams.append("year", params.year.toString());
-
       if (params.months && params.months.length > 0) {
         params.months.forEach((month) => {
           queryParams.append("months", month.toString());
         });
       }
-
       if (params.responsibleId) {
         queryParams.append("responsibleId", params.responsibleId.toString());
       }
-
       if (params.notificationId) {
         queryParams.append("notificationId", params.notificationId.toString());
       }
@@ -137,6 +140,9 @@ export const fetchNotifications = createAsyncThunk(
       }
       if (params.themeId) {
         queryParams.append("themeId", params.themeId.toString());
+      }
+      if (params.deadlineStatus) {
+        queryParams.append("deadlineStatus", params.deadlineStatus);
       }
 
       const url = `/notifications?${queryParams.toString()}`;
@@ -203,6 +209,8 @@ const fetchNotificationsSlice = createSlice({
           state.groupedByIncident = action.payload.groupedByIncident || null;
           state.groupedByNotifyingService =
             action.payload.groupedByNotifyingService || null;
+          state.groupedByDeadlineStatus =
+            action.payload.groupedByDeadlineStatus || null;
           state.loading = false;
         }
       )

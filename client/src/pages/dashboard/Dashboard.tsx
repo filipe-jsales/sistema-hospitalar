@@ -7,9 +7,9 @@ import {
   IonCardContent,
   IonSpinner,
 } from "@ionic/react";
-import { 
+import {
   fetchNotifications,
-  setNotificationFilters 
+  setNotificationFilters,
 } from "../../store/slices/notification/fetchNotificationsSlice";
 import "./Dashboard.css";
 import { useAppSelector } from "../../store/hooks";
@@ -20,27 +20,34 @@ import NotificationIncidentClassificationChart from "../../components/Dashboard/
 import NotificationThemeChart from "../../components/Dashboard/NotificationThemeChart";
 import IncidentDescriptionTable from "../../components/Dashboard/IncidentDescriptionTable";
 import NotificationNotifyingServicesChart from "../../components/Dashboard/NotificationNotifyingServicesChart";
-import ExpiredTermsChart from "../../components/Dashboard/ExpiredTermsChart";
+import NotificationExpiredDeadlineChart from "../../components/Dashboard/NotificationExpiredDeadlineChart";
 import { PeriodFilter } from "../../utils/types";
 import { useTypedDispatch } from "../../hooks/useRedux";
 
 const Dashboard: React.FC = () => {
   const dispatch = useTypedDispatch();
   const [currentFilter, setCurrentFilter] = useState<PeriodFilter>({});
-  const [selectedResponsibleId, setSelectedResponsibleId] = useState<number | null>(null);
-  
-  const { loading: notificationsLoading, error: notificationsError } = useAppSelector((state) => state.notifications);
+  const [selectedResponsibleId, setSelectedResponsibleId] = useState<
+    number | null
+  >(null);
+
+  const { loading: notificationsLoading, error: notificationsError } =
+    useAppSelector((state) => state.notifications);
 
   useEffect(() => {
     dispatch(fetchNotifications({ page: 1, limit: 10 }));
   }, [dispatch]);
 
-  const applyFilters = (periodFilter: PeriodFilter, responsibleId: number | null) => {
+  const applyFilters = (
+    periodFilter: PeriodFilter,
+    responsibleId: number | null
+  ) => {
     const apiFilters = {
       page: 1,
       limit: 10,
       ...(periodFilter.year && { year: periodFilter.year }),
-      ...(periodFilter.months && periodFilter.months.length > 0 && { months: periodFilter.months }),
+      ...(periodFilter.months &&
+        periodFilter.months.length > 0 && { months: periodFilter.months }),
       ...(responsibleId !== null && { responsibleId }),
     };
     dispatch(setNotificationFilters(apiFilters));
@@ -178,7 +185,7 @@ const Dashboard: React.FC = () => {
               <IonCard>
                 <IonCardContent>
                   <h2>PRAZOS EXPIRADOS</h2>
-                  <ExpiredTermsChart period="Todos" /> {/* Temporário até atualizar este componente */}
+                  <NotificationExpiredDeadlineChart />
                 </IonCardContent>
               </IonCard>
             </IonCol>
