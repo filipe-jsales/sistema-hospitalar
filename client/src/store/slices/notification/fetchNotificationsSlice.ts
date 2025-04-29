@@ -24,6 +24,7 @@ export interface NotificationData {
   responsibleId: number | null;
   priorityId: number | null;
   deadlineStatus: DeadlineStatus | "";
+  vigihosp: number;
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;

@@ -84,6 +84,9 @@ export class Notification {
   })
   deadlineStatus: DeadlineStatus;
 
+  @Column({ unique: true })
+  vigihosp: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

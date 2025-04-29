@@ -65,6 +65,14 @@ export class NotificationsService {
       createNotificationDto.notifyingServiceId,
     );
 
+    const maxResult = await this.notificationRepository
+      .createQueryBuilder('notification')
+      .select('MAX(notification.vigihosp)', 'max')
+      .getRawOne();
+
+    const nextVigihosp =
+      maxResult && maxResult.max ? Number(maxResult.max) + 1 : 1;
+
     const notification = this.notificationRepository.create({
       ...createNotificationDto,
       category,
@@ -75,6 +83,7 @@ export class NotificationsService {
       responsible,
       organizationalUnity,
       notifyingService,
+      vigihosp: nextVigihosp,
     });
 
     return this.notificationRepository.save(notification);

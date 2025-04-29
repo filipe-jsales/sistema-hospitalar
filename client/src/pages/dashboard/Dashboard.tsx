@@ -23,6 +23,7 @@ import NotificationNotifyingServicesChart from "../../components/Dashboard/Notif
 import NotificationExpiredDeadlineChart from "../../components/Dashboard/NotificationExpiredDeadlineChart";
 import { PeriodFilter } from "../../utils/types";
 import { useTypedDispatch } from "../../hooks/useRedux";
+import VigihospNotificationNumber from "../../components/Dashboard/VigihospNotificationNumber";
 
 const Dashboard: React.FC = () => {
   const dispatch = useTypedDispatch();
@@ -79,7 +80,7 @@ const Dashboard: React.FC = () => {
       )}
 
       <IonRow>
-        <IonCol size="12" size-md="4">
+        <IonCol size="12" size-md="3">
           <IonCard>
             <IonCardContent>
               <PeriodSelector
@@ -89,7 +90,7 @@ const Dashboard: React.FC = () => {
             </IonCardContent>
           </IonCard>
         </IonCol>
-        <IonCol size="12" size-md="4">
+        <IonCol size="12" size-md="3">
           <IonCard>
             <IonCardContent>
               <NotificationResponsibleSelector
@@ -99,7 +100,7 @@ const Dashboard: React.FC = () => {
             </IonCardContent>
           </IonCard>
         </IonCol>
-        <IonCol size="12" size-md="4">
+        <IonCol size="6" size-md="3">
           {notificationsLoading ? (
             <IonCard>
               <IonCardContent className="ion-text-center">
@@ -109,6 +110,18 @@ const Dashboard: React.FC = () => {
             </IonCard>
           ) : (
             <NotificationCounter />
+          )}
+        </IonCol>
+        <IonCol size="6" size-md="3">
+          {notificationsLoading ? (
+            <IonCard>
+              <IonCardContent className="ion-text-center">
+                <IonSpinner name="crescent" />
+                <p>Carregando...</p>
+              </IonCardContent>
+            </IonCard>
+          ) : (
+            <VigihospNotificationNumber />
           )}
         </IonCol>
       </IonRow>
