@@ -21,6 +21,7 @@ import { NotifyingServicesModule } from './notifying-services/notifying-services
 import { OrganizationalUnitiesModule } from './organizational-unities/organizational-unities.module';
 import { ResponsiblesModule } from './responsibles/responsibles.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { MedicationErrorsModule } from './medication-errors/medication-errors.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     OrganizationalUnitiesModule,
     ResponsiblesModule,
     NotificationsModule,
+    MedicationErrorsModule,
   ],
   providers: [
     {

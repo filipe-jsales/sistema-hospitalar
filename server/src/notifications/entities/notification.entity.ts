@@ -14,8 +14,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { DeadlineStatus } from '../enums/deadline.enum';
+import { MedicationError } from 'src/medication-errors/entities/medication-error.entity';
 
 @Entity()
 export class Notification {
@@ -125,4 +127,10 @@ export class Notification {
 
   @ManyToOne(() => Subcategory, (subcategory) => subcategory.notifications)
   subcategory: Subcategory;
+
+  @OneToMany(
+    () => MedicationError,
+    (medicationError) => medicationError.notification,
+  )
+  medicationErrors: MedicationError[];
 }
