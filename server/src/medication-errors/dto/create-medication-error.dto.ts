@@ -30,7 +30,6 @@ export class CreateMedicationErrorDto {
     description: 'Error description',
     enum: ErrorDescription,
     enumName: 'ErrorDescription',
-    required: false,
   })
   @IsEnum(ErrorDescription)
   errorDescription: ErrorDescription;

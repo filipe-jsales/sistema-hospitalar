@@ -40,7 +40,7 @@ export class IncidentsService {
       },
     );
 
-    let groupedQueryBuilder = this.incidentRepository
+    const groupedQueryBuilder = this.incidentRepository
       .createQueryBuilder('incident')
       .select('incident.name', 'name')
       .addSelect('COUNT(incident.id)', 'count')

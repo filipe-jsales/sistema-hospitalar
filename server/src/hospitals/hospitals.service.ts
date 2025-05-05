@@ -24,8 +24,7 @@ export class HospitalsService {
     private readonly paginationService: PaginationService,
   ) {}
 
-  // FIXME: use the user: User here
-  create(createHospitalDto: CreateHospitalDto, user: User) {
+  create(createHospitalDto: CreateHospitalDto) {
     return this.hospitalsRepository.save(createHospitalDto);
   }
 

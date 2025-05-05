@@ -30,8 +30,8 @@ export class HospitalsController {
   @Post()
   @ApiOperation({ summary: 'Criar um novo hospital' })
   @CheckPolicies((ability) => ability.can(Action.Create, Hospital))
-  create(@Body() createHospitalDto: CreateHospitalDto, @Request() req) {
-    return this.hospitalsService.create(createHospitalDto, req.user);
+  create(@Body() createHospitalDto: CreateHospitalDto) {
+    return this.hospitalsService.create(createHospitalDto);
   }
 
   @Get()
