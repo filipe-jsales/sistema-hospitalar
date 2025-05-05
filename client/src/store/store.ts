@@ -46,6 +46,10 @@ import createNotifyingServiceReducer from "./slices/notifyingService/createNotif
 import fetchNotifyingServicesReducer from "./slices/notifyingService/fetchNotifyingServicesSlice";
 import fetchNotifyingServiceByIdReducer from "./slices/notifyingService/fetchNotifyingServiceByIdSlice";
 import deleteNotifyingServiceReducer from "./slices/notifyingService/deleteNotifyingServiceSlice";
+import fetchMedicationErrorsReducer from "./slices/medicationError/fetchMedicationErrorsSlice";
+import fetchMedicationErrorByIdReducer from "./slices/medicationError/fetchMedicationErrorByIdSlice";
+import deleteMedicationErrorReducer from "./slices/medicationError/deleteMedicationErrorSlice";
+import createMedicationErrorReducer from "./slices/medicationError/createMedicationErrorSlice";
 
 const store = configureStore({
   reducer: {
@@ -96,6 +100,10 @@ const store = configureStore({
     notifyingServices: fetchNotifyingServicesReducer,
     notifyingServiceDetails: fetchNotifyingServiceByIdReducer,
     deleteNotifyingService: deleteNotifyingServiceReducer,
+    medicationErrors: fetchMedicationErrorsReducer,
+    medicationErrorDetails: fetchMedicationErrorByIdReducer,
+    deleteMedicationError: deleteMedicationErrorReducer,
+    createMedicationError: createMedicationErrorReducer,
   },
 });
 
