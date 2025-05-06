@@ -14,6 +14,16 @@ export interface PaginatedResponseWithGrouping<T> extends PaginatedResponse<T> {
   };
 }
 
+export interface PaginatedResponseWithGroupingNested<T>
+  extends PaginatedResponse<T> {
+  groupedData: {
+    [key: string]: {
+      total: number;
+      descriptions: { [description: string]: number };
+    };
+  };
+}
+
 export interface PaginatedResponseWithGroupings<T>
   extends PaginatedResponse<T> {
   groupedByDescription?: {

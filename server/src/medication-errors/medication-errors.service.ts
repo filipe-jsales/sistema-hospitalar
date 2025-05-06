@@ -8,7 +8,7 @@ import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 import { ErrorCategory } from './enums/error-category.enum';
 import { ErrorDescription } from './enums/error-description.enum';
 import { PaginationService } from 'src/shared/services/pagination.service';
-import { PaginatedResponseWithGrouping } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponseWithGroupingNested } from 'src/shared/interfaces/paginated-response.dto';
 
 interface GroupedResult {
   errorCategory: string;
@@ -32,7 +32,7 @@ export class MedicationErrorsService {
 
   async findAllPaginated(
     paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponseWithGrouping<MedicationError>> {
+  ): Promise<PaginatedResponseWithGroupingNested<MedicationError>> {
     const paginatedData = await this.paginationService.paginateRepository(
       this.medicationErrorRepository,
       paginationQuery,
@@ -43,12 +43,22 @@ export class MedicationErrorsService {
       },
     );
 
-    const groupedQueryBuilder = this.medicationErrorRepository
+    // Primeiro agrupamento: contar por categoria
+    const groupedCategoryQueryBuilder = this.medicationErrorRepository
       .createQueryBuilder('medicationError')
       .select('medicationError.errorCategory', 'errorCategory')
       .addSelect('COUNT(medicationError.id)', 'count')
       .where('medicationError.deletedAt IS NULL');
 
+    // Segundo agrupamento: contar por categoria e descrição
+    const groupedSubcategoryQueryBuilder = this.medicationErrorRepository
+      .createQueryBuilder('medicationError')
+      .select('medicationError.errorCategory', 'errorCategory')
+      .addSelect('medicationError.errorDescription', 'errorDescription')
+      .addSelect('COUNT(medicationError.id)', 'count')
+      .where('medicationError.deletedAt IS NULL');
+
+    // Aplicar filtros de data para ambas as consultas
     if (paginationQuery.year) {
       if (paginationQuery.months && paginationQuery.months.length > 0) {
         const dateConditions = paginationQuery.months
@@ -57,25 +67,60 @@ export class MedicationErrorsService {
           })
           .join(' OR ');
 
-        groupedQueryBuilder.andWhere(`(${dateConditions})`);
+        groupedCategoryQueryBuilder.andWhere(`(${dateConditions})`);
+        groupedSubcategoryQueryBuilder.andWhere(`(${dateConditions})`);
       } else {
-        groupedQueryBuilder.andWhere(
+        groupedCategoryQueryBuilder.andWhere(
+          `EXTRACT(YEAR FROM medicationError.createdAt) = :year`,
+          { year: paginationQuery.year },
+        );
+        groupedSubcategoryQueryBuilder.andWhere(
           `EXTRACT(YEAR FROM medicationError.createdAt) = :year`,
           { year: paginationQuery.year },
         );
       }
     }
 
-    const groupedResults = await groupedQueryBuilder
+    const categoryResults = await groupedCategoryQueryBuilder
       .groupBy('medicationError.errorCategory')
       .getRawMany<GroupedResult>();
 
-    const groupedData = groupedResults.reduce(
+    const subcategoryResults = await groupedSubcategoryQueryBuilder
+      .groupBy('medicationError.errorCategory')
+      .addGroupBy('medicationError.errorDescription')
+      .getRawMany<{
+        errorCategory: string;
+        errorDescription: string;
+        count: number;
+      }>();
+
+    // Organizar dados por categoria e subcategoria
+    const groupedData = categoryResults.reduce(
       (acc, item) => {
-        acc[item.errorCategory] = parseInt(item.count as unknown as string, 10);
+        // Inicializar a categoria com o total
+        acc[item.errorCategory] = {
+          total: parseInt(item.count as unknown as string, 10),
+          descriptions: {},
+        };
+
+        // Adicionar subcategorias (descrições) a cada categoria
+        subcategoryResults
+          .filter((sub) => sub.errorCategory === item.errorCategory)
+          .forEach((sub) => {
+            if (sub.errorDescription) {
+              acc[item.errorCategory].descriptions[sub.errorDescription] =
+                parseInt(sub.count as unknown as string, 10);
+            }
+          });
+
         return acc;
       },
-      {} as { [key: string]: number },
+      {} as {
+        [category: string]: {
+          total: number;
+          descriptions: { [description: string]: number };
+        };
+      },
     );
 
     return {

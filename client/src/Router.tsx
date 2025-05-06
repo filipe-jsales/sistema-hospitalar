@@ -40,6 +40,7 @@ import CreateTheme from "./pages/themes/CreateTheme";
 import NotifyingServicesList from "./pages/notifying-services/NotifyingServicesList";
 import CreateNotifyingService from "./pages/notifying-services/CreateNotifyingService";
 import EditNotifyingService from "./pages/notifying-services/EditNotifyingService";
+import MedicineDashboard from "./pages/medicine/MedicineDashboard";
 
 const Router: React.FC = () => (
   <IonReactRouter>
@@ -133,6 +134,8 @@ const Router: React.FC = () => (
         path="/notifying-services/edit/:id"
         component={EditNotifyingService}
       />
+
+      <Route exact path="/medicine" component={MedicineDashboard} />
     </IonRouterOutlet>
   </IonReactRouter>
 );

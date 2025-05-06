@@ -40,7 +40,7 @@ export class CategoriesService {
       },
     );
 
-    let groupedQueryBuilder = this.categoriesRepository
+    const groupedQueryBuilder = this.categoriesRepository
       .createQueryBuilder('category')
       .select('category.name', 'name')
       .addSelect('COUNT(category.id)', 'count')
