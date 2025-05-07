@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -16,6 +17,10 @@ export class CreateMedicationErrorDto {
   @IsNumber()
   @IsNotEmpty()
   notificationId: number;
+
+  @IsOptional()
+  @IsInt()
+  notifyingServiceId?: number;
 
   @ApiProperty({
     description: 'Error category',

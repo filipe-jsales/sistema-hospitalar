@@ -11,6 +11,7 @@ import {
 import { ErrorCategory } from '../enums/error-category.enum';
 import { ErrorDescription } from '../enums/error-description.enum';
 import { Notification } from 'src/notifications/entities/notification.entity';
+import { NotifyingService } from 'src/notifying-services/entities/notifying-service.entity';
 
 @Entity()
 export class MedicationError {
@@ -19,6 +20,9 @@ export class MedicationError {
 
   @Column()
   notificationId: number;
+
+  @Column({ nullable: true })
+  notifyingServiceId: number;
 
   @Column({
     type: 'enum',
@@ -51,4 +55,11 @@ export class MedicationError {
   )
   @JoinColumn({ name: 'notificationId' })
   notification: Notification;
+
+  @ManyToOne(
+    () => NotifyingService,
+    (notifyingService) => notifyingService.medicationErrors,
+  )
+  @JoinColumn({ name: 'notifyingServiceId' })
+  notifyingService: NotifyingService;
 }

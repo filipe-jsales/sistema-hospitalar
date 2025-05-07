@@ -43,14 +43,12 @@ export class MedicationErrorsService {
       },
     );
 
-    // Primeiro agrupamento: contar por categoria
     const groupedCategoryQueryBuilder = this.medicationErrorRepository
       .createQueryBuilder('medicationError')
       .select('medicationError.errorCategory', 'errorCategory')
       .addSelect('COUNT(medicationError.id)', 'count')
       .where('medicationError.deletedAt IS NULL');
 
-    // Segundo agrupamento: contar por categoria e descrição
     const groupedSubcategoryQueryBuilder = this.medicationErrorRepository
       .createQueryBuilder('medicationError')
       .select('medicationError.errorCategory', 'errorCategory')
@@ -58,7 +56,6 @@ export class MedicationErrorsService {
       .addSelect('COUNT(medicationError.id)', 'count')
       .where('medicationError.deletedAt IS NULL');
 
-    // Aplicar filtros de data para ambas as consultas
     if (paginationQuery.year) {
       if (paginationQuery.months && paginationQuery.months.length > 0) {
         const dateConditions = paginationQuery.months
@@ -81,6 +78,17 @@ export class MedicationErrorsService {
       }
     }
 
+    if (paginationQuery.notifyingServiceId) {
+      groupedCategoryQueryBuilder.andWhere(
+        'medicationError.notifyingServiceId = :notifyingServiceId',
+        { notifyingServiceId: paginationQuery.notifyingServiceId },
+      );
+      groupedSubcategoryQueryBuilder.andWhere(
+        'medicationError.notifyingServiceId = :notifyingServiceId',
+        { notifyingServiceId: paginationQuery.notifyingServiceId },
+      );
+    }
+
     const categoryResults = await groupedCategoryQueryBuilder
       .groupBy('medicationError.errorCategory')
       .getRawMany<GroupedResult>();
@@ -94,16 +102,13 @@ export class MedicationErrorsService {
         count: number;
       }>();
 
-    // Organizar dados por categoria e subcategoria
     const groupedData = categoryResults.reduce(
       (acc, item) => {
-        // Inicializar a categoria com o total
         acc[item.errorCategory] = {
           total: parseInt(item.count as unknown as string, 10),
           descriptions: {},
         };
 
-        // Adicionar subcategorias (descrições) a cada categoria
         subcategoryResults
           .filter((sub) => sub.errorCategory === item.errorCategory)
           .forEach((sub) => {
