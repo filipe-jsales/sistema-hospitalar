@@ -18,6 +18,7 @@ import {
 } from 'typeorm';
 import { DeadlineStatus } from '../enums/deadline.enum';
 import { MedicationError } from 'src/medication-errors/entities/medication-error.entity';
+import { NutritionalTherapy } from 'src/nutritional-therapy/entities/nutritional-therapy.entity';
 
 @Entity()
 export class Notification {
@@ -133,4 +134,10 @@ export class Notification {
     (medicationError) => medicationError.notification,
   )
   medicationErrors: MedicationError[];
+
+  @OneToMany(
+    () => NutritionalTherapy,
+    (nutritionalTherapy) => nutritionalTherapy.notification,
+  )
+  nutritionalTherapy: NutritionalTherapy[];
 }

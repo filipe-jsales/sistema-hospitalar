@@ -9,13 +9,14 @@ import {
 } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { MedicationError } from 'src/medication-errors/entities/medication-error.entity';
+import { NutritionalTherapy } from 'src/nutritional-therapy/entities/nutritional-therapy.entity';
 
 @Entity()
 export class NotifyingService {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ length: 255 })
+  @Column()
   name: string;
 
   @CreateDateColumn()
@@ -34,4 +35,10 @@ export class NotifyingService {
     (medicationError) => medicationError.notifyingService,
   )
   medicationErrors: MedicationError[];
+
+  @OneToMany(
+    () => NutritionalTherapy,
+    (nutritionalTherapy) => nutritionalTherapy.notifyingService,
+  )
+  nutritionalTherapyErrors: NutritionalTherapy[];
 }

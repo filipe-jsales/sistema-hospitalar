@@ -22,6 +22,7 @@ import { OrganizationalUnitiesModule } from './organizational-unities/organizati
 import { ResponsiblesModule } from './responsibles/responsibles.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { MedicationErrorsModule } from './medication-errors/medication-errors.module';
+import { NutritionalTherapyModule } from './nutritional-therapy/nutritional-therapy.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { MedicationErrorsModule } from './medication-errors/medication-errors.mo
     ResponsiblesModule,
     NotificationsModule,
     MedicationErrorsModule,
+    NutritionalTherapyModule,
   ],
   providers: [
     {
