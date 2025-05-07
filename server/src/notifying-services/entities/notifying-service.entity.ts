@@ -10,6 +10,7 @@ import {
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { MedicationError } from 'src/medication-errors/entities/medication-error.entity';
 import { NutritionalTherapy } from 'src/nutritional-therapy/entities/nutritional-therapy.entity';
+import { Flebite } from 'src/flebite/entities/flebite.entity';
 
 @Entity()
 export class NotifyingService {
@@ -41,4 +42,7 @@ export class NotifyingService {
     (nutritionalTherapy) => nutritionalTherapy.notifyingService,
   )
   nutritionalTherapyErrors: NutritionalTherapy[];
+
+  @OneToMany(() => Flebite, (flebite) => flebite.notifyingService)
+  flebiteErrors: Flebite[];
 }
