@@ -3,17 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationQueryDto } from 'src/shared/dto/pagination-query.dto';
 import { PaginationService } from 'src/shared/services/pagination.service';
-import { PaginatedResponseWithGroupingNested } from 'src/shared/interfaces/paginated-response.dto';
+import { PaginatedResponse } from 'src/shared/interfaces/paginated-response.dto';
 import { Flebite } from './entities/flebite.entity';
 import { CreateFlebiteDto } from './dto/create-flebite.dto';
 import { ErrorDescription } from 'src/medication-errors/enums/error-description.enum';
 import { ErrorCategory } from 'src/medication-errors/enums/error-category.enum';
 import { UpdateFlebiteDto } from './dto/update-flebite.dto';
 
-interface GroupedResult {
-  errorCategory: string;
-  count: number;
-}
 @Injectable()
 export class FlebiteService {
   constructor(
@@ -27,9 +23,14 @@ export class FlebiteService {
     return this.flebiteRepository.save(flebite);
   }
 
-  async findAllPaginated(
-    paginationQuery: PaginationQueryDto,
-  ): Promise<PaginatedResponseWithGroupingNested<Flebite>> {
+  async findAllPaginated(paginationQuery: PaginationQueryDto): Promise<
+    PaginatedResponse<Flebite> & {
+      groupedData: {
+        riskLevel: { [key: string]: { total: number } };
+        classification: { [key: string]: { total: number } };
+      };
+    }
+  > {
     const paginatedData = await this.paginationService.paginateRepository(
       this.flebiteRepository,
       paginationQuery,
@@ -40,19 +41,21 @@ export class FlebiteService {
       },
     );
 
-    const groupedCategoryQueryBuilder = this.flebiteRepository
+    // Consulta para agrupar por nível de risco
+    const groupedRiskLevelQueryBuilder = this.flebiteRepository
       .createQueryBuilder('flebite')
-      .select('flebite.errorCategory', 'errorCategory')
+      .select('flebite.riskLevel', 'riskLevel')
       .addSelect('COUNT(flebite.id)', 'count')
       .where('flebite.deletedAt IS NULL');
 
-    const groupedSubcategoryQueryBuilder = this.flebiteRepository
+    // Consulta para agrupar por classificação
+    const groupedClassificationQueryBuilder = this.flebiteRepository
       .createQueryBuilder('flebite')
-      .select('flebite.errorCategory', 'errorCategory')
-      .addSelect('flebite.errorDescription', 'errorDescription')
+      .select('flebite.classification', 'classification')
       .addSelect('COUNT(flebite.id)', 'count')
       .where('flebite.deletedAt IS NULL');
 
+    // Aplicar filtros de data para ambas as consultas
     if (paginationQuery.year) {
       if (paginationQuery.months && paginationQuery.months.length > 0) {
         const dateConditions = paginationQuery.months
@@ -69,72 +72,72 @@ export class FlebiteService {
           { year: paginationQuery.year },
         );
 
-        groupedCategoryQueryBuilder.andWhere(`(${dateConditions})`, parameters);
-        groupedSubcategoryQueryBuilder.andWhere(
+        groupedRiskLevelQueryBuilder.andWhere(
+          `(${dateConditions})`,
+          parameters,
+        );
+        groupedClassificationQueryBuilder.andWhere(
           `(${dateConditions})`,
           parameters,
         );
       } else {
-        groupedCategoryQueryBuilder.andWhere(
+        groupedRiskLevelQueryBuilder.andWhere(
           `EXTRACT(YEAR FROM flebite.createdAt) = :year`,
           { year: paginationQuery.year },
         );
-        groupedSubcategoryQueryBuilder.andWhere(
+        groupedClassificationQueryBuilder.andWhere(
           `EXTRACT(YEAR FROM flebite.createdAt) = :year`,
           { year: paginationQuery.year },
         );
       }
     }
 
+    // Aplicar filtro por serviço notificante para ambas as consultas
     if (paginationQuery.notifyingServiceId) {
-      groupedCategoryQueryBuilder.andWhere(
+      groupedRiskLevelQueryBuilder.andWhere(
         'flebite.notifyingServiceId = :notifyingServiceId',
         { notifyingServiceId: paginationQuery.notifyingServiceId },
       );
-      groupedSubcategoryQueryBuilder.andWhere(
+      groupedClassificationQueryBuilder.andWhere(
         'flebite.notifyingServiceId = :notifyingServiceId',
         { notifyingServiceId: paginationQuery.notifyingServiceId },
       );
     }
 
-    const categoryResults = await groupedCategoryQueryBuilder
-      .groupBy('flebite.errorCategory')
-      .getRawMany<GroupedResult>();
+    // Executar as consultas agrupadas
+    const riskLevelResults = await groupedRiskLevelQueryBuilder
+      .groupBy('flebite.riskLevel')
+      .getRawMany<{ riskLevel: string; count: number }>();
 
-    const subcategoryResults = await groupedSubcategoryQueryBuilder
-      .groupBy('flebite.errorCategory')
-      .addGroupBy('flebite.errorDescription')
-      .getRawMany<{
-        errorCategory: string;
-        errorDescription: string;
-        count: number;
-      }>();
+    const classificationResults = await groupedClassificationQueryBuilder
+      .groupBy('flebite.classification')
+      .getRawMany<{ classification: string; count: number }>();
 
-    const groupedData = categoryResults.reduce(
-      (acc, item) => {
-        acc[item.errorCategory] = {
-          total: parseInt(item.count as unknown as string, 10),
-          descriptions: {},
-        };
-
-        subcategoryResults
-          .filter((sub) => sub.errorCategory === item.errorCategory)
-          .forEach((sub) => {
-            if (sub.errorDescription) {
-              acc[item.errorCategory].descriptions[sub.errorDescription] =
-                parseInt(sub.count as unknown as string, 10);
-            }
-          });
-
-        return acc;
-      },
-      {} as {
-        [category: string]: {
-          total: number;
-          descriptions: { [description: string]: number };
-        };
-      },
-    );
+    // Estruturar os dados agrupados no formato desejado
+    const groupedData = {
+      riskLevel: riskLevelResults.reduce(
+        (acc, item) => {
+          if (item.riskLevel) {
+            acc[item.riskLevel] = {
+              total: parseInt(item.count as unknown as string, 10),
+            };
+          }
+          return acc;
+        },
+        {} as { [key: string]: { total: number } },
+      ),
+      classification: classificationResults.reduce(
+        (acc, item) => {
+          if (item.classification) {
+            acc[item.classification] = {
+              total: parseInt(item.count as unknown as string, 10),
+            };
+          }
+          return acc;
+        },
+        {} as { [key: string]: { total: number } },
+      ),
+    };
 
     return {
       ...paginatedData,

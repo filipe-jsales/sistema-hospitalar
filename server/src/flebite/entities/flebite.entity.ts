@@ -10,8 +10,7 @@ import {
 } from 'typeorm';
 import { Notification } from 'src/notifications/entities/notification.entity';
 import { NotifyingService } from 'src/notifying-services/entities/notifying-service.entity';
-import { ErrorCategory } from 'src/medication-errors/enums/error-category.enum';
-import { ErrorDescription } from 'src/medication-errors/enums/error-description.enum';
+import { FlebiteClassification, FlebiteRiskLevel } from '../enums/flebite.enum';
 
 @Entity()
 export class Flebite {
@@ -26,16 +25,16 @@ export class Flebite {
 
   @Column({
     type: 'enum',
-    enum: ErrorCategory,
+    enum: FlebiteClassification,
   })
-  errorCategory: ErrorCategory;
+  classification: FlebiteClassification;
 
   @Column({
     type: 'enum',
-    enum: ErrorDescription,
+    enum: FlebiteRiskLevel,
     nullable: true,
   })
-  errorDescription: ErrorDescription;
+  riskLevel: FlebiteRiskLevel;
 
   @Column({ type: 'text', nullable: true })
   description: string;

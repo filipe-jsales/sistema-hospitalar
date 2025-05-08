@@ -7,8 +7,7 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ErrorCategory } from 'src/medication-errors/enums/error-category.enum';
-import { ErrorDescription } from 'src/medication-errors/enums/error-description.enum';
+import { FlebiteClassification, FlebiteRiskLevel } from '../enums/flebite.enum';
 
 export class CreateFlebiteDto {
   @ApiProperty({
@@ -23,21 +22,21 @@ export class CreateFlebiteDto {
   notifyingServiceId?: number;
 
   @ApiProperty({
-    description: 'Error category',
-    enum: ErrorCategory,
-    enumName: 'ErrorCategory',
+    description: 'Flebite Classification',
+    enum: FlebiteClassification,
+    enumName: 'FlebiteClassification',
   })
-  @IsEnum(ErrorCategory)
+  @IsEnum(FlebiteClassification)
   @IsNotEmpty()
-  errorCategory: ErrorCategory;
+  classification: FlebiteClassification;
 
   @ApiProperty({
-    description: 'Error description',
-    enum: ErrorDescription,
-    enumName: 'ErrorDescription',
+    description: 'Flebite Risk Level',
+    enum: FlebiteRiskLevel,
+    enumName: 'FlebiteRiskLevel',
   })
-  @IsEnum(ErrorDescription)
-  errorDescription: ErrorDescription;
+  @IsEnum(FlebiteRiskLevel)
+  riskLevel: FlebiteRiskLevel;
 
   @ApiProperty({ description: 'Additional description text', required: false })
   @IsString()
