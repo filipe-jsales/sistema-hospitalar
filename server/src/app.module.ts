@@ -24,6 +24,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { MedicationErrorsModule } from './medication-errors/medication-errors.module';
 import { NutritionalTherapyModule } from './nutritional-therapy/nutritional-therapy.module';
 import { FlebiteModule } from './flebite/flebite.module';
+import { BloodComponentsModule } from './blood-components/blood-components.module';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { FlebiteModule } from './flebite/flebite.module';
     MedicationErrorsModule,
     NutritionalTherapyModule,
     FlebiteModule,
+    BloodComponentsModule,
   ],
   providers: [
     {

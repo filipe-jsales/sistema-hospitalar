@@ -41,21 +41,18 @@ export class FlebiteService {
       },
     );
 
-    // Consulta para agrupar por nível de risco
     const groupedRiskLevelQueryBuilder = this.flebiteRepository
       .createQueryBuilder('flebite')
       .select('flebite.riskLevel', 'riskLevel')
       .addSelect('COUNT(flebite.id)', 'count')
       .where('flebite.deletedAt IS NULL');
 
-    // Consulta para agrupar por classificação
     const groupedClassificationQueryBuilder = this.flebiteRepository
       .createQueryBuilder('flebite')
       .select('flebite.classification', 'classification')
       .addSelect('COUNT(flebite.id)', 'count')
       .where('flebite.deletedAt IS NULL');
 
-    // Aplicar filtros de data para ambas as consultas
     if (paginationQuery.year) {
       if (paginationQuery.months && paginationQuery.months.length > 0) {
         const dateConditions = paginationQuery.months
@@ -92,7 +89,6 @@ export class FlebiteService {
       }
     }
 
-    // Aplicar filtro por serviço notificante para ambas as consultas
     if (paginationQuery.notifyingServiceId) {
       groupedRiskLevelQueryBuilder.andWhere(
         'flebite.notifyingServiceId = :notifyingServiceId',
@@ -104,7 +100,6 @@ export class FlebiteService {
       );
     }
 
-    // Executar as consultas agrupadas
     const riskLevelResults = await groupedRiskLevelQueryBuilder
       .groupBy('flebite.riskLevel')
       .getRawMany<{ riskLevel: string; count: number }>();
@@ -113,7 +108,6 @@ export class FlebiteService {
       .groupBy('flebite.classification')
       .getRawMany<{ classification: string; count: number }>();
 
-    // Estruturar os dados agrupados no formato desejado
     const groupedData = {
       riskLevel: riskLevelResults.reduce(
         (acc, item) => {

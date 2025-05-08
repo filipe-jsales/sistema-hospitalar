@@ -20,6 +20,7 @@ import { DeadlineStatus } from '../enums/deadline.enum';
 import { MedicationError } from 'src/medication-errors/entities/medication-error.entity';
 import { NutritionalTherapy } from 'src/nutritional-therapy/entities/nutritional-therapy.entity';
 import { Flebite } from 'src/flebite/entities/flebite.entity';
+import { BloodComponent } from 'src/blood-components/entities/blood-component.entity';
 
 @Entity()
 export class Notification {
@@ -144,4 +145,10 @@ export class Notification {
 
   @OneToMany(() => Flebite, (flebite) => flebite.notification)
   flebite: Flebite[];
+
+  @OneToMany(
+    () => BloodComponent,
+    (bloodComponent) => bloodComponent.notification,
+  )
+  bloodComponent: BloodComponent[];
 }
